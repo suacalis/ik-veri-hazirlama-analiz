@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bölüm 3 · Pandas — İK Verisiyle Etkileşimli Python</title>
+<style>
+:root{
+  --bg:#f6f7fb; --kart:#ffffff; --yazi:#1d2433; --soluk:#5b6476; --cizgi:#e3e6ee;
+  --ana:#1f5fbf; --ana2:#e8f0fc; --vurgu:#d9480f; --yesil:#2b8a3e; --kod:#0f1729; --kodyazi:#e6edf7;
+  --isaret:#ffe066;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:84px}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--yazi);line-height:1.65;font-size:16px}
+a{color:var(--ana)}
+/* Üst çubuk */
+header.ust{position:sticky;top:0;z-index:50;background:#14213d;color:#fff;box-shadow:0 2px 10px rgba(0,0,0,.15)}
+.ust-ic{max-width:1320px;margin:0 auto;padding:10px 18px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.logo{font-weight:700;font-size:15px;white-space:nowrap}
+.logo small{display:block;font-weight:400;opacity:.7;font-size:12px}
+.arama{position:relative;flex:1;min-width:240px;max-width:560px}
+.arama input{width:100%;padding:9px 12px 9px 36px;border-radius:8px;border:1px solid #3a4a6b;background:#1e2d50;color:#fff;font-size:15px;outline:none}
+.arama input:not(:placeholder-shown)~.kbd{display:none}
+.arama input:focus{border-color:#8fb3ff;background:#22355f}
+.arama input::placeholder{color:#a9b6d3}
+.arama svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);opacity:.75}
+.kbd{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;border:1px solid #5a6a8b;border-radius:4px;padding:0 5px;color:#c4cee4}
+#sonuclar{position:absolute;top:calc(100% + 6px);left:0;right:0;background:#fff;color:var(--yazi);border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,.25);max-height:70vh;overflow:auto;display:none}
+#sonuclar.acik{display:block}
+.sonuc-ust{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid var(--cizgi);font-size:13px;color:var(--soluk);gap:8px;flex-wrap:wrap}
+.filtre button{border:1px solid var(--cizgi);background:#fff;border-radius:999px;padding:2px 10px;font-size:12px;cursor:pointer;margin-left:4px}
+.filtre button.aktif{background:var(--ana);color:#fff;border-color:var(--ana)}
+.sonuc{padding:9px 12px;border-bottom:1px solid #f0f2f6;cursor:pointer}
+.sonuc:hover,.sonuc.secili{background:var(--ana2)}
+.sonuc b{display:block;font-size:14px}
+.sonuc .yol{font-size:11px;color:var(--soluk);text-transform:uppercase;letter-spacing:.03em}
+.sonuc .ozet{font-size:13px;color:var(--soluk)}
+.sonuc .etiket{font-size:10px;background:#eef1f7;border-radius:4px;padding:1px 6px;margin-left:6px;color:#44506a;vertical-align:middle}
+.sonuc mark,.icerik mark.ara{background:var(--isaret);color:inherit;padding:0 1px;border-radius:2px}
+.durum{display:flex;align-items:center;gap:8px;font-size:13px;white-space:nowrap}
+.nokta{width:10px;height:10px;border-radius:50%;background:#f0ad4e;box-shadow:0 0 0 3px rgba(240,173,78,.25)}
+.nokta.hazir{background:#40c057;box-shadow:0 0 0 3px rgba(64,192,87,.25)}
+.nokta.hata{background:#fa5252}
+.dugme{border:0;border-radius:8px;padding:8px 13px;font-size:14px;cursor:pointer;background:var(--ana);color:#fff;font-weight:600}
+.dugme:hover{filter:brightness(1.08)}
+.dugme:disabled{opacity:.5;cursor:not-allowed}
+.dugme.ikincil{background:#e9edf5;color:#22304d}
+.ust .dugme.ikincil{background:#2b3c63;color:#fff}
+label.dugme input{display:none}
+/* Yerleşim */
+.duzen{max-width:1320px;margin:0 auto;display:grid;grid-template-columns:270px 1fr;gap:26px;padding:22px 18px 80px}
+nav.icindekiler{position:sticky;top:84px;align-self:start;max-height:calc(100vh - 100px);overflow:auto;font-size:14px;background:var(--kart);border:1px solid var(--cizgi);border-radius:12px;padding:14px 10px}
+nav.icindekiler h4{margin:0 8px 8px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--soluk)}
+nav.icindekiler a{display:block;padding:4px 8px;border-radius:6px;text-decoration:none;color:var(--yazi)}
+nav.icindekiler a.alt{padding-left:22px;font-size:13px;color:var(--soluk)}
+nav.icindekiler a:hover,nav.icindekiler a.aktif{background:var(--ana2);color:var(--ana)}
+main.icerik{min-width:0}
+.kapak{background:linear-gradient(135deg,#14213d,#1f5fbf);color:#fff;border-radius:16px;padding:30px 30px 26px;margin-bottom:22px}
+.kapak h1{margin:0 0 6px;font-size:30px;line-height:1.25}
+.kapak p{margin:6px 0 0;opacity:.92;max-width:820px}
+.rozetler{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.rozet{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);padding:3px 10px;border-radius:999px;font-size:12.5px}
+section.bolum{background:var(--kart);border:1px solid var(--cizgi);border-radius:14px;padding:22px 28px;margin-bottom:22px}
+section.bolum>h2{margin:0 0 10px;font-size:24px;color:#14213d;border-bottom:2px solid var(--ana2);padding-bottom:8px}
+.blok h3{font-size:19px;margin:24px 0 8px;color:#1b3a73}
+.blok h4{font-size:16px;margin:16px 0 6px}
+.blok.flas{animation:flas 1.6s ease}
+@keyframes flas{0%{box-shadow:0 0 0 4px rgba(255,224,102,.95);background:#fffbe6}100%{box-shadow:0 0 0 0 rgba(255,224,102,0);background:transparent}}
+.not{background:#f1f6ff;border-left:4px solid var(--ana);padding:10px 14px;border-radius:0 8px 8px 0;margin:12px 0;font-size:15px}
+.not.uyari{background:#fff6ec;border-color:var(--vurgu)}
+.not.ipucu{background:#effaf1;border-color:var(--yesil)}
+table.tablo{border-collapse:collapse;width:100%;margin:12px 0;font-size:14.5px}
+table.tablo th,table.tablo td{border:1px solid var(--cizgi);padding:7px 10px;text-align:left;vertical-align:top}
+table.tablo th{background:#f3f5fa}
+.formul{font-family:"Cambria Math","Times New Roman",serif;background:#fafbfe;border:1px dashed var(--cizgi);padding:6px 12px;border-radius:6px;display:inline-block;margin:4px 0}
+/* Kod hücresi */
+.hucre{border:1px solid #c9d3e6;border-radius:12px;overflow:hidden;margin:16px 0 10px;background:var(--kod)}
+.hucre.flas{animation:flas 1.6s ease}
+.hucre-ust{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#1b2540;color:#c8d3ea;font-size:13px;flex-wrap:wrap}
+.hucre-ust .ad{font-weight:600;margin-right:auto}
+.hucre-ust .ad span{opacity:.6;font-weight:400;margin-left:6px}
+.hucre-ust button{border:0;border-radius:6px;padding:5px 10px;font-size:12.5px;cursor:pointer;background:#2e3c62;color:#e6ecf8}
+.hucre-ust button.calis{background:#2f9e44;color:#fff;font-weight:600}
+.hucre-ust button:disabled{opacity:.5;cursor:wait}
+textarea.kod{display:block;width:100%;border:0;resize:vertical;background:var(--kod);color:var(--kodyazi);font:13.5px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;padding:12px 14px;outline:none;tab-size:4;white-space:pre;overflow:auto;min-height:120px}
+.cikti{background:#fff;border-top:1px solid #c9d3e6;display:none}
+.cikti.dolu{display:block}
+.cikti pre{margin:0;padding:12px 14px;font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;white-space:pre;overflow:auto;max-height:520px;color:#1d2433}
+.cikti pre.hatali{color:#c92a2a;background:#fff5f5}
+.cikti iframe{display:block;width:calc(100% - 16px);margin:8px auto;border:1px solid var(--cizgi);border-radius:6px;background:#fff}
+.cikti img{display:block;max-width:100%;margin:8px auto;border:1px solid var(--cizgi);border-radius:6px}
+.cikti .sure{font-size:11.5px;color:var(--soluk);padding:4px 14px 8px}
+.dosyalar{padding:4px 14px 10px;font-size:12.5px;color:var(--soluk)}
+.dosyalar button{border:1px solid var(--cizgi);background:#f6f8fc;border-radius:6px;padding:2px 8px;margin:2px;font-size:12px;cursor:pointer}
+.dene{font-size:14px;color:var(--soluk);margin:4px 0 14px}
+.dene b{color:var(--yazi)}
+/* Test */
+.soru{border:1px solid var(--cizgi);border-radius:10px;padding:12px 16px;margin:10px 0}
+.soru p{margin:0 0 6px;font-weight:600}
+.soru label{display:block;padding:3px 6px;border-radius:6px;cursor:pointer;font-size:15px}
+.soru label:hover{background:#f4f6fa}
+.soru.dogru{border-color:#8ce99a;background:#f4fcf5}
+.soru.yanlis{border-color:#ffa8a8;background:#fff6f6}
+.soru .aciklama{display:none;font-size:14px;color:var(--soluk);margin-top:6px}
+.soru.dogru .aciklama,.soru.yanlis .aciklama{display:block}
+#puan{font-weight:700;margin-left:10px}
+ol.sorular li,ol.alistirma li{margin:4px 0}
+footer{text-align:center;color:var(--soluk);font-size:13px;padding:20px}
+@media (max-width:960px){.duzen{grid-template-columns:1fr}nav.icindekiler{position:static;max-height:none}.kbd{display:none}}
+
+.ust-nav{color:#c9d6f2;text-decoration:none;font-size:13px;border:1px solid #3a4a6b;border-radius:8px;padding:6px 10px;white-space:nowrap}
+.ust-nav:hover{background:#22355f;color:#fff}
+.bolum-gezinti{display:flex;justify-content:space-between;gap:12px;margin:0 0 22px;flex-wrap:wrap}
+.bolum-gezinti a{flex:1;min-width:220px;background:#fff;border:1px solid #e3e6ee;border-radius:12px;padding:12px 16px;text-decoration:none;color:#1d2433}
+.bolum-gezinti a:hover{border-color:#1f5fbf;background:#f4f8ff}
+.bolum-gezinti small{display:block;color:#5b6476;font-size:12px}
+.bolum-gezinti .sonraki{text-align:right}
+</style>
+</head>
+<body>
+
+<header class="ust">
+  <div class="ust-ic">
+    <a class="ust-nav" href="index.html" title="Tüm bölümler">⌂ Tüm bölümler</a>
+    <div class="logo">Bölüm 3 · Pandas<small>İK verisiyle etkileşimli Python (Pyodide)</small></div>
+    <div class="arama">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="ara" type="search" autocomplete="off" placeholder="Bölümde ara: groupby, merge, pivot, iloc, fillna, seri…" aria-label="Bölüm içinde ara">
+      <span class="kbd">/</span>
+      <div id="sonuclar" role="listbox"></div>
+    </div>
+    <div class="durum"><span id="nokta" class="nokta"></span><span id="durumYazi">Python yükleniyor…</span></div>
+    <button id="tumunu" class="dugme" disabled>▶ Tümünü çalıştır</button>
+    <label class="dugme ikincil" title="Kendi CSV/XLSX dosyanızı Python çalışma klasörüne yükleyin">⬆ Veri yükle<input id="yukle" type="file" multiple accept=".csv,.xlsx,.txt,.json"></label>
+  </div>
+</header>
+
+<div class="duzen">
+<nav class="icindekiler" id="toc"><h4>İçindekiler</h4></nav>
+
+<main class="icerik" id="icerik">
+<div class="kapak">
+  <h1>Pandas</h1>
+  <p>Python'un veri analizi kütüphanesi pandas'ı İK verileriyle öğrenmek: Seri ve DataFrame yapıları, seçme ve süzme, eksik veri, gruplama, birleştirme ve pivot tablolar. Kitaptaki e-ticaret ve satış örnekleri personel listeleri, başvuru sayıları, eğitim kayıtları, izin talepleri ve kadro maliyetlerine uyarlanmıştır.</p>
+  <div class="rozetler">
+    <span class="rozet">12 çalıştırılabilir kod hücresi</span>
+    <span class="rozet">pandas · NumPy · Matplotlib</span>
+    <span class="rozet">Kurulum gerektirmez — tarayıcıda çalışır</span>
+  </div>
+</div>
+
+<section class="bolum" id="giris" data-baslik="Giriş">
+<h2>Giriş</h2>
+<div class="blok" id="b-pandas" data-baslik="Pandas nedir? Kullanım alanları">
+<p><b>Pandas</b>, veri analizi ve işleme için tasarlanmış güçlü ve açık kaynaklı bir Python kütüphanesidir. İki temel veri yapısı sunar: tek boyutlu <b>Series</b> (seri) ve iki boyutlu <b>DataFrame</b> (veri çerçevesi). CSV, Excel ve SQL veritabanları gibi kaynaklardan veriyi kolayca yükler; süzme, birleştirme, yeniden biçimlendirme ve toplulaştırma araçları sağlar; eksik veriyi bulma, doldurma ya da silme işlevleri içerir.</p>
+<p>Gruplama (<code>groupby</code>) işlevi “böl–uygula–birleştir” işlemlerinin temelidir; zaman serilerinde tarih çözümleme, tarihe göre indeksleme, yeniden örnekleme ve hareketli pencere hesapları yapılabilir; Matplotlib ve Seaborn ile bütünleşerek hızlı grafik üretir. Finanstan sağlığa, perakendeden makine öğrenmesi için ön işlemeye kadar pek çok alanda kullanılır. İK analitiğinde pandas; İKBS ve bordro dökümlerini birleştirmenin, devir oranı ve ortalama kıdem gibi metrikleri hesaplamanın ve raporları otomatikleştirmenin en yaygın aracıdır.</p>
+</div>
+<div class="blok" id="b-yapi" data-baslik="Bölümün yapısı ve amaçları">
+<h3>Bölümün yapısı ve amaçları</h3>
+<p>Bölüm; <a href="#ozellikler">pandas'ın temel özellikleri</a>, <a href="#temeller">pandas temelleri</a>, <a href="#seri">Seri</a> ve <a href="#dataframe">DataFrame</a> başlıklarından oluşur. Sonunda veri seçme ve süzme, <code>fillna()</code> ve <code>dropna()</code> ile eksik veriyi ele alma, sıralama, sütun ve satır ekleme/silme, gruplama, toplulaştırma, birleştirme ve pivot tablolarla yeniden biçimlendirme işlemlerini yapabilirsiniz.</p>
+<div class="not ipucu"><b>Nasıl kullanılır?</b> Gösterge yeşile döndüğünde hücreleri <b>▶ Çalıştır</b> ya da <b>Ctrl/⌘ + Enter</b> ile çalıştırın; kodu değiştirip yeniden deneyin, <b>↺ Sıfırla</b> özgün koda döndürür. Kendi personel dosyanızı <b>⬆ Veri yükle</b> ile yükleyip <code>pd.read_csv('dosya.csv')</code> ile okuyabilirsiniz. Arama kutusuna <b>/</b> tuşuyla geçebilirsiniz; arama, kod içindeki işlev adlarını da (ör. <code>groupby</code>, <code>pivot_table</code>) bulur.</div>
+<div class="not uyari"><b>Veri hakkında:</b> Tüm kişi adları ve İK verileri uydurmadır.</div>
+</div>
+</section>
+
+<section class="bolum" id="ozellikler" data-baslik="1. Pandas'ın temel özellikleri">
+<h2>1. Pandas'ın temel özellikleri</h2>
+<div class="blok" id="b-ozellik" data-baslik="Temel özellikler: veri yapıları, hizalama, temizleme, işleme, G/Ç, zaman serisi, birleştirme, görselleştirme">
+<ul>
+<li><b>Veri yapıları:</b> <i>Series</i> — her türden veri tutabilen tek boyutlu etiketli dizi; <i>DataFrame</i> — sütunları farklı türlerde olabilen, tablo ya da SQL tablosu benzeri iki boyutlu etiketli yapı.</li>
+<li><b>Veri hizalama ve indeksleme:</b> İşlemler indeks etiketlerine göre kendiliğinden (örtük) ya da elle (açık) hizalanır; güçlü seçme, süzme ve değiştirme olanakları sunar.</li>
+<li><b>Veri temizleme:</b> Eksik veriyi doldurma ya da silme, tür dönüştürme ve dönüşüm işlevleri.</li>
+<li><b>Veri işleme:</b> Yeniden biçimlendirme, pivot ve böl–uygula–birleştir için <code>groupby</code>.</li>
+<li><b>Girdi/çıktı araçları:</b> CSV, Excel, SQL veritabanları, JSON gibi biçimleri okuma ve yazma.</li>
+<li><b>Zaman serisi desteği:</b> Tarih aralığı üretme, sıklık dönüştürme, hareketli pencere istatistikleri.</li>
+<li><b>Birleştirme:</b> Veritabanı tarzı <code>merge</code> ve <code>join</code>.</li>
+<li><b>Görselleştirme:</b> Matplotlib ile yerleşik bütünleşme.</li>
+</ul>
+</div>
+<div class="blok" id="b-kod-hiza" data-baslik="Kod: Örtük ve açık veri hizalama — iki şubenin departman sayıları">
+<h3>Uygulama: Örtük ve açık hizalama</h3>
+<p>İki şubenin departmanlara göre çalışan sayıları toplanıyor. Departman listeleri tam örtüşmediği için örtük hizalamada yalnızca bir şubede bulunan departmanlar <code>NaN</code> olur; açık hizalamada <code>reindex(..., fill_value=0)</code> ile eksikler 0 sayılır. Üçüncü yöntem olan <code>add(..., fill_value=0)</code> tüm departmanları korur.</p>
+<div class="hucre" id="h-hizalama">
+<div class="hucre-ust"><span class="ad">🐍 Veri hizalama: iki şubenin çalışan sayıları<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="19" aria-label="Veri hizalama: iki şubenin çalışan sayıları kodu">import pandas as pd
+
+# İki şubede departmanlara göre çalışan sayısı — departman listeleri tam örtüşmüyor
+istanbul = pd.Series([10, 20, 30], index=['İK', 'BT', 'Satış'])
+ankara = pd.Series([1, 2, 3], index=['BT', 'Satış', 'Finans'])
+
+# Örtük hizalama: pandas indeks etiketlerini kendiliğinden eşleştirir
+print("Örtük hizalama (istanbul + ankara):")
+print(istanbul + ankara)
+
+# Açık hizalama: işlemden önce indeksi elle yeniden düzenle, eksikleri 0 yap
+print("\nAçık hizalama (Ankara, İstanbul'un departmanlarına göre):")
+ankara_hizali = ankara.reindex(istanbul.index, fill_value=0)
+print(istanbul + ankara_hizali)
+
+# Tüm departmanları korumak için: add() + fill_value
+print("\nTüm departmanlar, eksikler 0 sayılarak:")
+print(istanbul.add(ankara, fill_value=0).astype(int))
+</textarea>
+<div class="cikti"></div>
+</div>
+</div>
+<div class="blok" id="b-yarar" data-baslik="Pandas'ın yararları">
+<h3>Pandas'ın yararları</h3>
+<ul>
+<li><b>Kullanım kolaylığı:</b> Sütun seçme, süzme, sıralama ve toplulaştırma gibi işlemler Excel'e benzer; bu yüzden Excel kullanan İK uzmanları pandas'a hızla uyum sağlar.</li>
+<li><b>Verimlilik:</b> Büyük veri setlerinde hızlı çalışacak biçimde eniyilenmiştir.</li>
+<li><b>Esneklik:</b> Çok çeşitli veri türleri ve biçimlerini işler.</li>
+<li><b>Bütünleşme:</b> NumPy, Matplotlib, SciPy ve scikit-learn ile sorunsuz çalışır.</li>
+<li><b>Üretkenlik:</b> Yaygın işlemler için uzun özel kod yazma gereğini ortadan kaldırır.</li>
+<li><b>Topluluk ve belgeler:</b> Kapsamlı belgeler ve geniş, etkin bir kullanıcı topluluğu.</li>
+<li><b>Gerçek dünya uygulamaları:</b> Finans, veri bilimi ve makine öğrenmesi başta olmak üzere pek çok sektörde güvenle kullanılır.</li>
+</ul>
+</div>
+</section>
+
+<section class="bolum" id="temeller" data-baslik="2. Pandas temelleri">
+<h2>2. Pandas temelleri</h2>
+<div class="blok" id="b-temel" data-baslik="Temel işlemler: okuma, görüntüleme, seçme, süzme, değiştirme, silme, gruplama, kaydetme">
+<p>Pandas, NumPy üzerine kurulu açık kaynaklı bir kütüphanedir. Sık kullanılan temel işlemler:</p>
+<table class="tablo">
+<tr><th>İşlem</th><th>Kod</th><th>Açıklama</th></tr>
+<tr><td>Okuma</td><td><code>pd.read_csv('personel.csv')</code></td><td>CSV dosyasını DataFrame'e yükler</td></tr>
+<tr><td>Görüntüleme</td><td><code>df.head()</code> · <code>df.tail(3)</code> · <code>df.info()</code> · <code>df.describe()</code></td><td>İlk 5 satır · son 3 satır · yapı özeti · istatistiksel özet</td></tr>
+<tr><td>Seçme</td><td><code>df['Ad']</code> · <code>df[['Ad', 'Yas']]</code> · <code>df.loc[0]</code> · <code>df.iloc[0]</code></td><td>Tek sütun · birden çok sütun · etikete göre satır · konuma göre satır</td></tr>
+<tr><td>Süzme</td><td><code>df[df['Yas'] &gt; 30]</code></td><td>Yaşı 30'dan büyük çalışanlar</td></tr>
+<tr><td>Değiştirme</td><td><code>df['Yas'] = df['Yas'] + 1</code></td><td>Değerleri günceller</td></tr>
+<tr><td>Yeni sütun</td><td><code>df['Yillik_Maas'] = df['Maas'] * 12</code></td><td>Var olan sütundan yeni sütun üretir</td></tr>
+<tr><td>Silme</td><td><code>df.drop('Yillik_Maas', axis=1)</code> · <code>df.drop(0, axis=0)</code></td><td>Sütun silme · satır silme</td></tr>
+<tr><td>Gruplama</td><td><code>df.groupby('Departman')[['Maas']].mean()</code></td><td>Departmana göre ortalama</td></tr>
+<tr><td>Kaydetme</td><td><code>df.to_csv('cikti.csv', index=False)</code></td><td>CSV olarak yazar</td></tr>
+</table>
+</div>
+<div class="blok" id="b-kod-temel" data-baslik="Kod: Personel tablosuyla temel pandas işlemleri">
+<h3>Uygulama: Personel tablosuyla temel işlemler</h3>
+<p>Sekiz kişilik bir personel tablosu oluşturulup CSV'ye yazılıyor ve geri okunuyor; ardından yukarıdaki tablodaki işlemlerin hepsi sırayla uygulanıyor.</p>
+<div class="hucre" id="h-temeller">
+<div class="hucre-ust"><span class="ad">🐍 Pandas temelleri: personel tablosu<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="36" aria-label="Pandas temelleri: personel tablosu kodu">import pandas as pd
+
+# Seri: tek boyutlu, etiketli dizi
+s = pd.Series([10, 20, 30])
+print(s, "\n")
+
+# DataFrame: iki boyutlu, etiketli tablo
+df = pd.DataFrame({
+    'Ad':        ['Ayşe', 'Mehmet', 'Zeynep', 'Can', 'Elif', 'Burak', 'Selin', 'Emre'],
+    'Departman': ['İK', 'BT', 'Finans', 'BT', 'İK', 'Satış', 'Satış', 'Finans'],
+    'Yas':       [25, 30, 41, 28, 35, 45, 23, 38],
+    'Maas':      [48000, 72000, 85000, 65000, 56000, 61000, 42000, 79000],
+})
+df.to_csv('personel.csv', index=False)
+df = pd.read_csv('personel.csv')                # CSV dosyasını oku
+
+print(df.head(), "\n")                         # ilk 5 satır
+print(df.tail(3), "\n")                        # son 3 satır
+df.info()                                       # yapı özeti
+print("\n", df.describe(), "\n")               # istatistiksel özet
+
+print(df['Ad'].tolist())                        # tek sütun (Seri)
+print(df[['Ad', 'Yas']].head(2), "\n")          # birden çok sütun (DataFrame)
+print(df.loc[0], "\n")                          # etikete göre satır
+print(df.iloc[0].to_dict(), "\n")               # konuma göre satır
+
+print(df[df['Yas'] &gt; 30], "\n")                 # koşula göre süzme
+df['Yas'] = df['Yas'] + 1                       # değerleri güncelleme
+df['Yillik_Maas'] = df['Maas'] * 12             # yeni sütun
+print(df.drop('Yillik_Maas', axis=1).head(2), "\n")   # sütun silme (axis=1)
+print(df.drop(0, axis=0).head(2), "\n")               # satır silme  (axis=0)
+
+print(df.groupby('Departman')[['Yas', 'Maas']].mean().round(1))   # gruplama ve ortalama
+df.to_csv('personel_cikti.csv', index=False)          # kaydetme
+print("\n'personel_cikti.csv' kaydedildi.")
+</textarea>
+<div class="cikti"></div>
+</div>
+<div class="not uyari"><b>Kitaptaki koda göre değişiklik:</b> Kitaptaki <code>df.groupby('Name').mean()</code>, tabloda metin sütunları varken pandas 2.0 ve sonrasında hata verir. Burada ortalaması alınacak sayısal sütunlar açıkça seçiliyor: <code>df.groupby('Departman')[['Yas', 'Maas']].mean()</code>.</div>
+</div>
+</section>
+
+<section class="bolum" id="seri" data-baslik="3. Seri (Series)">
+<h2>3. Seri (Series)</h2>
+<div class="blok" id="b-seri" data-baslik="Seri nedir? Temel özellikleri, nitelikleri ve yöntemleri">
+<p><b>Seri</b>, her türden veriyi (tamsayı, metin, ondalıklı sayı, Python nesneleri) tutabilen tek boyutlu etiketli bir dizidir. Bir elektronik tablodaki ya da DataFrame'deki tek bir sütun gibi düşünülebilir.</p>
+<ul>
+<li><b>Etiketli indeks:</b> Her ögenin bir etiketi (indeksi) vardır; seçim sezgisel ve esnektir.</li>
+<li><b>Aynı türde veri:</b> Bir serideki tüm ögeler aynı veri türündedir.</li>
+<li><b>Boyut değişmezliği:</b> Oluşturulduktan sonra serinin boyutu doğrudan değiştirilemez (yeni bir seri üretilir).</li>
+</ul>
+<p><b>Yararlı nitelik ve yöntemler:</b> <code>s.index</code> (etiketler), <code>s.values</code> (değerler), <code>s.mean()</code> (ortalama), <code>s.sum()</code> (toplam), <code>s.head(n)</code> ve <code>s.tail(n)</code> (ilk ve son <i>n</i> öge).</p>
+</div>
+<div class="blok" id="b-kod-seri" data-baslik="Kod: Seri oluşturma, özel indeks ve erişim">
+<h3>Uygulama 1: Seri oluşturma ve erişim</h3>
+<div class="hucre" id="h-seri">
+<div class="hucre-ust"><span class="ad">🐍 Seri: oluşturma ve erişim<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="23" aria-label="Seri: oluşturma ve erişim kodu">import pandas as pd
+
+# Listeden seri: departman başına açık pozisyon sayısı
+s = pd.Series([10, 20, 30, 40])
+print(s, "\n")
+
+# Özel indeks etiketleri
+s = pd.Series([10, 20, 30], index=['İK', 'BT', 'Satış'])
+print(s, "\n")
+
+# Erişim: etikete göre ve konuma göre
+print("s['İK']    :", s['İK'])
+print("s.iloc[0]  :", s.iloc[0])     # konuma göre erişimde iloc kullanın (s[0] eski sürümlerde çalışır, artık önerilmez)
+
+# Yararlı nitelik ve yöntemler
+print("\ns.index   :", list(s.index))
+print("s.values  :", s.values)
+print("s.mean()  :", s.mean())
+print("s.sum()   :", s.sum())
+print("s.head(2) :\n", s.head(2))
+print("s.tail(1) :\n", s.tail(1))
+print("\nAynı türde veri: dtype =", s.dtype)
+</textarea>
+<div class="cikti"></div>
+</div>
+<div class="not uyari"><b>Kitaptaki koda göre değişiklik:</b> Kitaptaki <code>s[0]</code>, etiketleri metin olan bir seride konuma göre erişim için kullanılıyor. Bu kullanım pandas 2'de uyarı verir, yeni sürümlerde hata verir. Konuma göre erişimde <code>s.iloc[0]</code> kullanın.</div>
+</div>
+<div class="blok" id="b-kod-seri2" data-baslik="Kod: Haftalık başvuru serisi — eksik veri, ileri doldurma, süzme ve tarihe göre dilimleme">
+<h3>Uygulama 2: Haftalık başvuru serisi</h3>
+<p>Kitaptaki “e-ticaret mağazasının günlük satışları” senaryosunun İK karşılığı: Bir haftalık günlük iş başvurusu sayısı, sistem arızası nedeniyle bir günü eksik. Seri; eksik veriyi bulur, ileri doldurmayla (<code>ffill</code>) tamamlar, haftalık toplamı alır, yüksek başvurulu günleri süzer ve tarih aralığına göre dilimlenir.</p>
+<div class="hucre" id="h-seri_senaryo">
+<div class="hucre-ust"><span class="ad">🐍 Seri senaryosu: günlük başvuru sayısı<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="25" aria-label="Seri senaryosu: günlük başvuru sayısı kodu">import pandas as pd
+import numpy as np
+
+# Bir haftalık günlük iş başvurusu sayısı — bir gün sistem arızası nedeniyle kayıt yok
+basvurular = [200, 220, np.nan, 250, 300, 270, 310]
+tarihler = pd.date_range(start='2026-07-01', periods=7)
+basvuru_serisi = pd.Series(basvurular, index=tarihler, name='Basvuru')
+print(basvuru_serisi, "\n")
+
+# 1) Eksik veriyi bul
+print(basvuru_serisi.isna(), "\n")
+
+# 2) Eksik değeri bir önceki günün değeriyle doldur (ileri doldurma)
+dolu = basvuru_serisi.ffill()
+print(dolu, "\n")
+
+# 3) Haftalık toplam başvuru
+print("Toplam başvuru:", dolu.sum(), "\n")
+
+# 4) Başvurunun 250'nin üstünde olduğu günler
+print(dolu[dolu &gt; 250], "\n")
+
+# 5) 3–5 Temmuz arasını tarihe göre dilimle
+print(dolu['2026-07-03':'2026-07-05'])
+</textarea>
+<div class="cikti"></div>
+</div>
+</div>
+</section>
+
+<section class="bolum" id="dataframe" data-baslik="4. DataFrame">
+<h2>4. DataFrame</h2>
+<div class="blok" id="b-df" data-baslik="DataFrame nedir?">
+<p><b>DataFrame</b>, iki boyutlu, etiketli ve tablo biçiminde bir veri yapısıdır; bir elektronik tabloya, SQL tablosuna ya da serilerden oluşan bir sözlüğe benzer. Satır ve sütunlardan oluşur; her sütun bir seridir ve farklı veri türünde olabilir (sayı, metin, mantıksal); satırların indeks, sütunların ad etiketleri vardır.</p>
+</div>
+<div class="blok" id="b-kod-dfolustur" data-baslik="Kod: Sözlükten, özel indeksle ve sözlük listesinden DataFrame oluşturma">
+<h3>Uygulama 1: DataFrame oluşturma</h3>
+<p>Üç yol: sözlükten (anahtarlar sütun olur), özel indeksle (ör. sicil numarası) ve sözlük listesinden (her sözlük bir kayıttır; eksik alanlar <code>NaN</code> olur).</p>
+<div class="hucre" id="h-df_olustur">
+<div class="hucre-ust"><span class="ad">🐍 DataFrame oluşturma<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="22" aria-label="DataFrame oluşturma kodu">import pandas as pd
+
+# 1) Sözlükten DataFrame (sözlük = sütunlar)
+veri = {
+    'Ad': ['Ayşe', 'Mehmet', 'Zeynep'],
+    'Yas': [25, 30, 35],
+    'Sehir': ['İstanbul', 'Ankara', 'İzmir'],
+}
+df = pd.DataFrame(veri)
+print(df, "\n")
+
+# 2) Özel indeksle (ör. sicil numarası)
+df = pd.DataFrame(veri, index=['S01', 'S02', 'S03'])
+print(df, "\n")
+
+# 3) Sözlük listesinden DataFrame (her sözlük = bir kayıt); eksik alanlar NaN olur
+kayitlar = [
+    {'Ad': 'Ayşe', 'Yas': 25},
+    {'Ad': 'Mehmet', 'Yas': 30, 'Sehir': 'Ankara'},
+]
+print(pd.DataFrame(kayitlar))
+</textarea>
+<div class="cikti"></div>
+</div>
+<div class="not"><b>Sözlük listesi mi, liste sözlüğü mü?</b> Her öge adlandırılmış alanları olan bir kayıtsa (ör. bir API'den gelen başvurular) sözlük listesi kullanın — satır odaklı işlemler için uygundur. Veriye alan (sütun) bazında hızlı erişim gerekiyorsa liste sözlüğü tercih edin — DataFrame'in sütun odaklı yapısına uygundur.</div>
+</div>
+<div class="blok" id="b-kod-dfislem" data-baslik="Kod: DataFrame işlemleri — erişim, ekleme, silme, süzme, eksik veri, gruplama">
+<h3>Uygulama 2: Sık kullanılan DataFrame işlemleri</h3>
+<p>Sütun ve satırlara erişim (<code>loc</code> etikete, <code>iloc</code> konuma göre), sütun ekleme, <code>drop(..., inplace=True)</code> ile sütun ve satır silme, koşula göre süzme, <code>isnull</code>, <code>fillna</code> ve <code>dropna</code> ile eksik veri işlemleri ve gruplama.</p>
+<div class="hucre" id="h-df_islemler">
+<div class="hucre-ust"><span class="ad">🐍 DataFrame işlemleri<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="36" aria-label="DataFrame işlemleri kodu">import pandas as pd
+
+df = pd.DataFrame({'Ad': ['Ayşe', 'Mehmet', 'Zeynep'],
+                   'Yas': [25, 30, 35],
+                   'Sehir': ['İstanbul', 'Ankara', 'İzmir']},
+                  index=['S01', 'S02', 'S03'])
+
+# Sütunlara erişim
+print(df['Ad'], "\n")                 # Seri döner
+print(df[['Ad', 'Yas']], "\n")        # DataFrame döner
+
+# Satırlara erişim
+print(df.iloc[0], "\n")               # ilk satır (konuma göre)
+print(df.loc['S01'], "\n")            # 'S01' satırı (etikete göre)
+
+# Yeni sütun ekleme
+df['Departman'] = ['İK', 'BT', 'Finans']
+
+# Sütun ve satır silme
+df.drop('Sehir', axis=1, inplace=True)
+df.drop('S01', axis=0, inplace=True)
+print(df, "\n")
+
+# Koşula göre süzme
+print(df[df['Yas'] &gt; 30], "\n")
+
+# Eksik veri
+eksik = pd.DataFrame({'Ad': ['Ayşe', 'Mehmet', None], 'Sehir': ['İstanbul', None, 'İzmir']})
+print(eksik.isnull(), "\n")
+print(eksik.fillna('Bilinmiyor'), "\n")
+print(eksik.dropna(), "\n")
+
+# Toplulaştırma ve gruplama
+print("Ortalama yaş:", df['Yas'].mean())
+print(df.groupby('Departman')['Yas'].mean())
+</textarea>
+<div class="cikti"></div>
+</div>
+</div>
+<div class="blok" id="b-kod-egitim" data-baslik="Kod: Eğitim kayıtlarından çalışan başına toplam eğitim saati (groupby)">
+<h3>Uygulama 3: Çalışan başına toplam eğitim saati</h3>
+<p>Kitaptaki “müşteri başına toplam harcama” örneğinin İK karşılığı: Eğitim kayıtlarında çalışan başına toplam saat <code>groupby('Calisan')['Saat'].sum()</code> ile bulunuyor; <code>agg()</code> ile toplam saat, eğitim sayısı ve son eğitim tarihi tek tabloda hesaplanıyor.</p>
+<div class="hucre" id="h-egitim_kayit">
+<div class="hucre-ust"><span class="ad">🐍 groupby: eğitim kayıtları<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="18" aria-label="groupby: eğitim kayıtları kodu">import pandas as pd
+
+# Eğitim kayıtları: kim hangi eğitime kaç saat katıldı?
+kayitlar = pd.DataFrame({
+    'KayitID': [1001, 1002, 1003, 1004, 1005],
+    'Calisan': ['Ayşe', 'Mehmet', 'Ayşe', 'Zeynep', 'Mehmet'],
+    'Saat': [8, 16, 4, 12, 6],
+    'Tarih': pd.to_datetime(['2026-04-01', '2026-04-02', '2026-04-03', '2026-04-07', '2026-04-09']),
+})
+print(kayitlar, "\n")
+
+# Çalışan başına toplam eğitim saati
+print(kayitlar.groupby('Calisan')['Saat'].sum(), "\n")
+
+# Birden çok toplulaştırma birlikte
+print(kayitlar.groupby('Calisan').agg(Toplam_Saat=('Saat', 'sum'), Egitim_Sayisi=('KayitID', 'count'),
+                                       Son_Egitim=('Tarih', 'max')))
+</textarea>
+<div class="cikti"></div>
+</div>
+</div>
+<div class="blok" id="b-kod-birlestir" data-baslik="Kod: DataFrame birleştirme — concat, merge (iç ve sol), join">
+<h3>Uygulama 4: Birden çok DataFrame'i birleştirmek</h3>
+<ul>
+<li><b>Birleştirme (concat):</b> DataFrame'leri alt alta ya da yan yana ekler — iki haftanın başvuru verisi gibi.</li>
+<li><b>SQL tarzı birleştirme (merge):</b> Ortak bir anahtara göre eşleştirir — çalışan ve izin tablolarının sicil numarasıyla birleştirilmesi gibi. <code>how='left'</code> ile eşleşmesi olmayan kayıtlar da korunur.</li>
+<li><b>İndekse göre birleştirme (join):</b> İndeks anlamlıysa kullanılır — pozisyon bilgisi ile ücret bandının pozisyon koduna göre birleştirilmesi gibi.</li>
+</ul>
+<div class="hucre" id="h-birlestir">
+<div class="hucre-ust"><span class="ad">🐍 Birleştirme: concat, merge, join<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="25" aria-label="Birleştirme: concat, merge, join kodu">import pandas as pd
+
+# 1) Birleştirme (concat): iki haftanın başvuru verisini alt alta ekle
+hafta1 = pd.DataFrame({'Gun': ['Pzt', 'Sal', 'Çar'], 'Basvuru': [200, 220, 250]})
+hafta2 = pd.DataFrame({'Gun': ['Per', 'Cum', 'Cmt'], 'Basvuru': [270, 300, 310]})
+birlesik = pd.concat([hafta1, hafta2], ignore_index=True)
+print(birlesik, "\n")
+
+# 2) SQL tarzı birleştirme (merge): çalışanlar ve izin talepleri ortak anahtar üzerinden
+calisanlar = pd.DataFrame({'SicilNo': [1, 2, 3], 'Ad': ['Ayşe', 'Mehmet', 'Zeynep']})
+izinler = pd.DataFrame({'IzinID': [101, 102, 103], 'SicilNo': [1, 2, 1], 'Gun': [5, 3, 2]})
+print(pd.merge(izinler, calisanlar, on='SicilNo'), "\n")
+
+# İç ve sol birleştirme farkı: izin kullanmayan Zeynep sol birleştirmede görünür
+sol = pd.merge(calisanlar, izinler, on='SicilNo', how='left')
+print(sol, "\n")
+print("Çalışan başına izin günü (izinsizler 0):")
+print(sol.groupby('Ad')['Gun'].sum(), "\n")
+
+# 3) İndekse göre birleştirme (join): pozisyon bilgisi + ücret bandı
+pozisyonlar = pd.DataFrame({'Pozisyon': ['İK Uzmanı', 'Veri Analisti'], 'Kademe': ['Uzman', 'Uzman']},
+                           index=['P01', 'P02'])
+bantlar = pd.DataFrame({'Taban_Ucret': [45000, 60000]}, index=['P01', 'P02'])
+print(pozisyonlar.join(bantlar))
+</textarea>
+<div class="cikti"></div>
+</div>
+<div class="not"><b>İK için önemli:</b> Varsayılan <code>merge</code> bir <i>iç birleştirme</i>dir ve eşleşmeyen kayıtları atar: izin kullanmamış Zeynep tablodan kaybolur. Çalışan başına izin, eğitim ya da devamsızlık hesaplarken <code>how='left'</code> kullanmazsanız ortalamalar yanlış çıkar.</div>
+</div>
+<div class="blok" id="b-kod-pivot" data-baslik="Kod: Pivot tablo ile şehir ve kıdeme göre ortalama gelir">
+<h3>Uygulama 5: Pivot tabloyla yeniden biçimlendirme</h3>
+<p><code>pivot_table()</code> veriyi satır ve sütun kategorilerine göre yeniden düzenleyip toplulaştırır. Burada şehir ve kıdem durumuna göre ortalama gelir hesaplanıyor; <code>margins=True</code> satır ve sütun toplamlarını ekliyor.</p>
+<div class="hucre" id="h-pivot">
+<div class="hucre-ust"><span class="ad">🐍 Pivot tablo: şehir × kıdem<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="22" aria-label="Pivot tablo: şehir × kıdem kodu">import pandas as pd
+
+veri = {
+    'Ad': ['Asena', 'Tolga', 'Cem', 'Dilek', 'Ece'],
+    'Yas': [25, 30, 35, None, 29],
+    'Sehir': ['İstanbul', 'Ankara', 'İzmir', 'Ankara', 'İstanbul'],
+    'Gelir': [50000, 60000, 55000, 52000, None],
+}
+df = pd.DataFrame(veri)
+
+# Kitaptaki kodda tanımlanmamış 'Senior' sütunu burada önce oluşturuluyor:
+df['Kidemli'] = df['Yas'] &gt; 30              # yaşı bilinmeyen Dilek False sayılır!
+print(df, "\n")
+
+# Pivot tablo: şehir ve kıdem durumuna göre ortalama gelir
+pivot = df.pivot_table(values='Gelir', index='Sehir', columns='Kidemli', aggfunc='mean')
+print(pivot, "\n")
+
+# Toplamlarla birlikte
+print(df.pivot_table(values='Gelir', index='Sehir', columns='Kidemli',
+                     aggfunc='mean', margins=True, margins_name='Tümü').round(0))
+</textarea>
+<div class="cikti"></div>
+</div>
+<div class="not uyari"><b>Kitaptaki koda göre düzeltme:</b> Özgün kod, veri setinde bulunmayan <code>Senior</code> sütununu kullandığı için <code>KeyError</code> verir. Burada sütun önce <code>df['Kidemli'] = df['Yas'] &gt; 30</code> ile oluşturuluyor. Dikkat: Yaşı bilinmeyen Dilek'in değeri <code>NaN &gt; 30</code> = <code>False</code> olduğu için “kıdemsiz” sayılır; eksik değerler karşılaştırmalarda sessizce yanlış gruba düşebilir.</div>
+</div>
+</section>
+
+<section class="bolum" id="alistirma-cozum" data-baslik="Alıştırma çözümleri">
+<h2>Programlama alıştırmalarının çözümleri</h2>
+<div class="blok" id="b-alis1" data-baslik="Kod: Alıştırma 1–4 — kadro maliyeti, aday süzme, eksik değer doldurma, departmana göre toplam">
+<h3>Alıştırma 1–4</h3>
+<p>(1) Pozisyon, maaş ve kişi sayısından toplam kadro maliyeti sütunu; (2) 22 yaşından büyük ve değerlendirme notu “A” olan stajyer adaylarını süzme (koşullar <code>&amp;</code> ile birleşir, her biri parantez içinde yazılır); (3) eksik değer içeren satırları bulma, yaşı ortalamayla ve maaşı medyanla doldurma; (4) departmana göre toplam fazla mesai.</p>
+<div class="hucre" id="h-alistirma1">
+<div class="hucre-ust"><span class="ad">🐍 Alıştırma 1–4<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="30" aria-label="Alıştırma 1–4 kodu">import pandas as pd
+
+# Alıştırma 1: Kadro maliyeti
+kadro = pd.DataFrame({'Pozisyon': ['Mühendis', 'Uzman', 'Teknisyen', 'Asistan'],
+                      'Maas': [90000, 60000, 40000, 32000],
+                      'Kisi': [50, 150, 200, 80]})
+kadro['Toplam_Maliyet'] = kadro['Maas'] * kadro['Kisi']
+print(kadro, "\n")
+
+# Alıştırma 2: 22 yaşından büyük ve değerlendirme notu 'A' olan stajyer adayları
+adaylar = pd.DataFrame({'Ad': ['Asena', 'Tolga', 'Cem', 'Dilek', 'Ece'],
+                        'Yas': [23, 21, 22, 24, 23],
+                        'Not': ['A', 'B', 'C', 'A', 'B']})
+print(adaylar[(adaylar['Yas'] &gt; 22) &amp; (adaylar['Not'] == 'A')], "\n")
+
+# Alıştırma 3: Eksik değerler
+p = pd.DataFrame({'Ad': ['Asena', 'Tolga', 'Cem', 'Dilek'],
+                  'Yas': [25, None, 30, 35],
+                  'Maas': [50000, 55000, None, 60000]})
+print("Eksik değer içeren satırlar:\n", p[p.isnull().any(axis=1)], "\n")
+p['Yas'] = p['Yas'].fillna(p['Yas'].mean())
+p['Maas'] = p['Maas'].fillna(p['Maas'].median())
+print(p, "\n")
+
+# Alıştırma 4: Departmana göre toplam fazla mesai
+mesai = pd.DataFrame({'Departman': ['Üretim', 'Satış', 'Üretim', 'BT', 'Satış', 'Üretim', 'BT'],
+                      'Saat': [200, 150, 250, 300, 100, 350, 200],
+                      'Bolge': ['Kuzey', 'Güney', 'Kuzey', 'Doğu', 'Güney', 'Kuzey', 'Doğu']})
+print(mesai.groupby('Departman')['Saat'].sum())
+</textarea>
+<div class="cikti"></div>
+</div>
+</div>
+<div class="blok" id="b-alis2" data-baslik="Kod: Alıştırma 5–8 — merge, pivot, sıralama, yinelenenleri silme">
+<h3>Alıştırma 5–8</h3>
+<p>(5) Çalışan ve izin tablolarını sicil numarasıyla birleştirme; (6) tarih × departman başvuru pivotu; (7) maaşa göre azalan ve kişi sayısına göre artan sıralama; (8) yinelenen satırları silme.</p>
+<div class="hucre" id="h-alistirma2">
+<div class="hucre-ust"><span class="ad">🐍 Alıştırma 5–8<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="24" aria-label="Alıştırma 5–8 kodu">import pandas as pd
+
+# Alıştırma 5: Çalışan ve izin tablolarını sicil numarasına göre birleştir
+df1 = pd.DataFrame({'SicilNo': [1, 2, 3], 'Ad': ['Asena', 'Tolga', 'Cem']})
+df2 = pd.DataFrame({'IzinID': [101, 102, 103], 'SicilNo': [1, 2, 1], 'Gun': [5, 3, 2]})
+print(pd.merge(df1, df2, on='SicilNo'), "\n")
+
+# Alıştırma 6: Tarih × departman başvuru pivotu
+b = pd.DataFrame({'Tarih': ['2026-04-01', '2026-04-02', '2026-04-01', '2026-04-03'],
+                  'Departman': ['İK', 'BT', 'İK', 'BT'],
+                  'Basvuru': [15, 20, 25, 30]})
+print(b.pivot_table(values='Basvuru', index='Tarih', columns='Departman', aggfunc='sum', fill_value=0), "\n")
+
+# Alıştırma 7: Sıralama
+kadro = pd.DataFrame({'Pozisyon': ['Mühendis', 'Uzman', 'Teknisyen', 'Asistan'],
+                      'Maas': [90000, 60000, 40000, 32000], 'Kisi': [50, 150, 200, 80]})
+print(kadro.sort_values('Maas', ascending=False), "\n")
+print(kadro.sort_values('Kisi'), "\n")
+
+# Alıştırma 8: Yinelenen kayıtları kaldır
+tekrar = pd.DataFrame({'Pozisyon': ['Mühendis', 'Uzman', 'Mühendis', 'Teknisyen'],
+                       'Maas': [90000, 60000, 90000, 40000]})
+print(tekrar.drop_duplicates())
+</textarea>
+<div class="cikti"></div>
+</div>
+</div>
+<div class="blok" id="b-alis3" data-baslik="Kod: Alıştırma 9–10 — apply ile %10 zam, tarih indeksi ve hareketli toplam (rolling)">
+<h3>Alıştırma 9–10</h3>
+<p>(9) Maaşlara %10 zam uygulayan bir işlevi <code>apply()</code> ile sütuna uygulama; (10) tarihi indeks yapma, 3 günlük hareketli toplam (<code>rolling(3).sum()</code>) ve pandas'ın yerleşik <code>plot()</code> yöntemiyle hızlı grafik.</p>
+<div class="hucre" id="h-alistirma3">
+<div class="hucre-ust"><span class="ad">🐍 Alıştırma 9–10<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="22" aria-label="Alıştırma 9–10 kodu">import pandas as pd
+import matplotlib.pyplot as plt
+
+# Alıştırma 9: Maaşlara %10 zam uygulayan işlev
+ucret = pd.DataFrame({'Ad': ['Asena', 'Tolga', 'Cem'], 'Maas': [55000, 60000, 75000]})
+def zam_yap(maas, oran=0.10):
+    return round(maas * (1 + oran))
+ucret['Yeni_Maas'] = ucret['Maas'].apply(zam_yap)
+print(ucret, "\n")
+
+# Alıştırma 10: Zaman serisi — tarihi indeks yap, 3 günlük hareketli toplam
+gunluk = pd.DataFrame({'Tarih': pd.date_range('2026-01-01', periods=10, freq='D'),
+                       'Basvuru': [100, 150, 200, 250, 300, 180, 120, 260, 310, 240]})
+gunluk = gunluk.set_index('Tarih')
+gunluk['Hareketli_Toplam_3g'] = gunluk['Basvuru'].rolling(window=3).sum()
+print(gunluk, "\n")
+
+# pandas ile hızlı grafik (Matplotlib bütünleşmesi)
+gunluk.plot(figsize=(8, 4), marker='o', title='Günlük başvuru ve 3 günlük hareketli toplam')
+plt.ylabel('Başvuru')
+plt.show()
+</textarea>
+<div class="cikti"></div>
+</div>
+</div>
+</section>
+
+<section class="bolum" id="sonuc" data-baslik="Sonuç">
+<h2>Sonuç</h2>
+<div class="blok" id="b-sonuc" data-baslik="Bölüm özeti">
+<p>Bu bölümde pandas'ın iki temel yapısı olan Seri ve DataFrame İK verileriyle incelendi. Seri; indeksleme, dilimleme, eksik değerleri ele alma ve vektörel işlemler için kullanıldı. DataFrame ile çalışan tabloları oluşturuldu; satır ve sütun seçme, koşullu süzme, <code>fillna()</code> ve <code>dropna()</code> ile eksik veri yönetimi, sütun ekleme, silme ve sıralama yapıldı. Gruplama, toplulaştırma, birden çok tabloyu birleştirme ve pivot tablolarla yeniden biçimlendirme gibi ileri teknikler; eğitim saatleri, izin günleri ve kadro maliyetleri gibi gerçek İK görevleri üzerinden gösterildi. Bu araçlar, veriyi temizlemenin, analiz etmenin ve dönüştürmenin temelidir. Bir sonraki bölüm veri toplama ve ön işlemeyi ele alır.</p>
+</div>
+</section>
+
+<section class="bolum" id="test" data-baslik="Kendinizi sınayın">
+<h2>Kendinizi sınayın</h2>
+<div class="blok" id="b-test" data-baslik="Çoktan seçmeli sorular (20 soru)">
+<div id="testAlani"></div>
+<p><button class="dugme" id="testKontrol">Yanıtlarımı kontrol et</button> <button class="dugme ikincil" id="testSifirla">Sıfırla</button><span id="puan"></span></p>
+</div>
+<div class="blok" id="b-sorular" data-baslik="Tartışma soruları">
+<h3>Tartışma soruları</h3>
+<ol class="sorular">
+<li>Pandas'ta Seri ile DataFrame arasındaki fark nedir?</li>
+<li>Bir değer listesinden nasıl Seri oluşturulur?</li>
+<li>Bir DataFrame'de belirli bir sütun nasıl seçilir?</li>
+<li>Bir DataFrame'de satırlar bir koşula göre nasıl süzülür?</li>
+<li>Pandas'ta eksik veriyi ele almanın yaygın yöntemleri nelerdir?</li>
+<li>Bir DataFrame'de sütun adı nasıl değiştirilir? (<code>df.rename(columns={'eski': 'yeni'})</code>)</li>
+<li><code>groupby()</code> yönteminin amacı nedir, nasıl kullanılır?</li>
+<li>Bir koşula göre var olan DataFrame'e nasıl yeni sütun eklenir? (ör. maaş 60.000'in üstündeyse “Üst bant”)</li>
+<li>İki ya da daha fazla DataFrame alt alta ve yan yana nasıl birleştirilir?</li>
+<li><code>merge()</code> ile <code>join()</code> arasındaki fark nedir?</li>
+<li>Bir DataFrame bir ya da daha fazla sütuna göre nasıl sıralanır?</li>
+<li>Pandas'ta pivot tablo nedir, nasıl oluşturulur?</li>
+<li>Pandas'ta satır ya da sütun nasıl silinir?</li>
+<li>Bir DataFrame'de eksik değer olup olmadığı nasıl denetlenir?</li>
+<li>Belirli bir sütunun ortalaması, toplamı ya da başka bir özeti nasıl hesaplanır?</li>
+</ol>
+</div>
+</section>
+
+<nav class="bolum-gezinti"><a href="bolum1_veri_bilimine_giris.html"><small>← Önceki bölüm</small>Bölüm 1 · Veri Bilimine Giriş</a><a class="sonraki" href="bolum4_veri_toplama_on_isleme.html"><small>Sonraki bölüm →</small>Bölüm 4 · Veri Toplama ve Ön İşleme</a></nav>
+<footer>Kaynak: “Pandas” bölümünün kodlarından İK verisine uyarlanmış Türkçe etkileşimli sürüm · Python tarayıcıda <a href="https://pyodide.org" target="_blank" rel="noopener">Pyodide</a> ile çalışır.</footer>
+
+</main>
+</div>
+
+<script type="text/plain" id="yardimciKod"># ik_yardimci.py — mlxtend yüklenemediğinde kullanılan saf-Python yedek
+# (TransactionEncoder, apriori, fpgrowth, association_rules için küçük eşdeğerler)
+from itertools import combinations
+import pandas as pd
+
+
+class TransactionEncoder:
+    def fit(self, transactions):
+        self.columns_ = sorted({i for t in transactions for i in t})
+        return self
+
+    def transform(self, transactions):
+        import numpy as np
+        idx = {c: k for k, c in enumerate(self.columns_)}
+        arr = np.zeros((len(transactions), len(self.columns_)), dtype=bool)
+        for r, t in enumerate(transactions):
+            for i in t:
+                arr[r, idx[i]] = True
+        return arr
+
+
+def apriori(df, min_support=0.5, use_colnames=True, max_len=None):
+    n = len(df)
+    cols = list(df.columns)
+    sets = [set(df.index[df[c]]) for c in cols]
+    names = cols if use_colnames else list(range(len(cols)))
+    sonuc = []
+    seviye = []
+    for k, s in enumerate(sets):
+        sup = len(s) / n
+        if sup >= min_support:
+            seviye.append(((k,), s))
+            sonuc.append((sup, frozenset([names[k]])))
+    boy = 1
+    while seviye and (max_len is None or boy < max_len):
+        yeni = {}
+        for a in range(len(seviye)):
+            for b in range(a + 1, len(seviye)):
+                ia, sa = seviye[a]
+                ib, sb = seviye[b]
+                if ia[:-1] != ib[:-1]:
+                    continue
+                aday = tuple(sorted(set(ia) | set(ib)))
+                if aday in yeni:
+                    continue
+                ortak = sa & sb
+                sup = len(ortak) / n
+                if sup >= min_support:
+                    yeni[aday] = ortak
+        seviye = sorted(yeni.items())
+        for aday, s in seviye:
+            sonuc.append((len(s) / n, frozenset(names[i] for i in aday)))
+        boy += 1
+    return pd.DataFrame(sonuc, columns=["support", "itemsets"])
+
+
+def fpgrowth(df, min_support=0.5, use_colnames=True, max_len=None):
+    # Sonuç kümesi Apriori ile aynıdır; yalnızca arama stratejisi farklıdır.
+    return apriori(df, min_support=min_support, use_colnames=use_colnames, max_len=max_len)
+
+
+def association_rules(frequent_itemsets, metric="confidence", min_threshold=0.8):
+    sup = {fs: s for s, fs in zip(frequent_itemsets["support"], frequent_itemsets["itemsets"])}
+    satirlar = []
+    for fs, s in sup.items():
+        if len(fs) < 2:
+            continue
+        for r in range(1, len(fs)):
+            for ant in combinations(sorted(fs), r):
+                ant = frozenset(ant)
+                con = fs - ant
+                sa, sc = sup.get(ant), sup.get(con)
+                if sa is None or sc is None:
+                    continue
+                conf = s / sa
+                lift = conf / sc
+                lev = s - sa * sc
+                conv = float("inf") if conf == 1 else (1 - sc) / (1 - conf)
+                satirlar.append(dict(antecedents=ant, consequents=con,
+                                     **{"antecedent support": sa, "consequent support": sc},
+                                     support=s, confidence=conf, lift=lift,
+                                     leverage=lev, conviction=conv))
+    out = pd.DataFrame(satirlar)
+    if out.empty:
+        return out
+    return out[out[metric] >= min_threshold].reset_index(drop=True)
+</script>
+<script type="text/plain" id="snsYedekKod"># sns_yedek.py — seaborn kurulamazsa kullanılan küçük matplotlib yedeği
+# (bu sayfadaki histplot, scatterplot, regplot, boxplot çağrılarını karşılar)
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+def _veri(x, data):
+    if data is not None and isinstance(x, str):
+        return np.asarray(data[x], dtype=float)
+    return np.asarray(x, dtype=float)
+
+
+def histplot(data=None, x=None, kde=False, color=None, label=None, alpha=0.6, bins='auto', ax=None, **k):
+    ax = ax or plt.gca()
+    v = _veri(x if x is not None else data, data if x is not None else None)
+    v = v[~np.isnan(v)]
+    n, kenar, _ = ax.hist(v, bins=bins, color=color, alpha=alpha, label=label, edgecolor='white')
+    if kde and len(v) > 1:
+        from scipy.stats import gaussian_kde
+        xs = np.linspace(v.min(), v.max(), 200)
+        ax.plot(xs, gaussian_kde(v)(xs) * len(v) * (kenar[1] - kenar[0]), color=color)
+    ax.set_ylabel('Count')
+    return ax
+
+
+def scatterplot(x=None, y=None, data=None, ax=None, **k):
+    ax = ax or plt.gca()
+    ax.scatter(_veri(x, data), _veri(y, data), **{kk: vv for kk, vv in k.items() if kk in ('color', 's', 'alpha', 'label')})
+    if isinstance(x, str): ax.set_xlabel(x)
+    if isinstance(y, str): ax.set_ylabel(y)
+    return ax
+
+
+def regplot(x=None, y=None, data=None, scatter=True, color=None, ax=None, **k):
+    ax = ax or plt.gca()
+    xv, yv = _veri(x, data), _veri(y, data)
+    if scatter:
+        ax.scatter(xv, yv, color=color)
+    b, a = np.polyfit(xv, yv, 1)
+    xs = np.linspace(xv.min(), xv.max(), 100)
+    ax.plot(xs, a + b * xs, color=color)
+    return ax
+
+
+def boxplot(x=None, y=None, data=None, ax=None, **k):
+    ax = ax or plt.gca()
+    gruplar = sorted(data[x].unique())
+    ax.boxplot([data.loc[data[x] == g, y] for g in gruplar], positions=range(len(gruplar)))
+    ax.set_xticks(range(len(gruplar)), [str(g) for g in gruplar])
+    ax.set_xlabel(x); ax.set_ylabel(y)
+    return ax
+</script>
+
+<script>
+/* ===================== 1. Kod hücreleri ===================== */
+const hucreler = [...document.querySelectorAll('.hucre')];
+hucreler.forEach(h => {
+  const ta = h.querySelector('textarea');
+  ta.dataset.ozgun = ta.value;
+  const boyutla = () => { ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight + 4, 640) + 'px'; };
+  boyutla(); ta.addEventListener('input', boyutla);
+  ta.addEventListener('keydown', e => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const s = ta.selectionStart, en = ta.selectionEnd;
+      ta.setRangeText('    ', s, en, 'end');
+    } else if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault(); calistir(h);
+    }
+  });
+  h.querySelector('.calis').addEventListener('click', () => calistir(h));
+  h.querySelector('.sifirla').addEventListener('click', () => { ta.value = ta.dataset.ozgun; boyutla(); });
+  h.querySelector('.kopyala').addEventListener('click', async e => {
+    try { await navigator.clipboard.writeText(ta.value); e.target.textContent = '✓ Kopyalandı'; }
+    catch { ta.select(); document.execCommand('copy'); e.target.textContent = '✓ Kopyalandı'; }
+    setTimeout(() => e.target.textContent = '⧉ Kopyala', 1400);
+  });
+});
+
+/* ===================== 2. Pyodide ===================== */
+let py = null, hazir = false, kuyruk = Promise.resolve();
+const nokta = document.getElementById('nokta'), durumYazi = document.getElementById('durumYazi');
+const tumunuBtn = document.getElementById('tumunu');
+function durum(yazi, sinif) { durumYazi.textContent = yazi; nokta.className = 'nokta ' + (sinif || ''); }
+
+const KURULUM = `
+import sys, io, os, base64, warnings
+warnings.filterwarnings('ignore')
+os.chdir('/home/pyodide')
+if '/home/pyodide' not in sys.path:
+    sys.path.insert(0, '/home/pyodide')
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+plt.rcParams.update({'figure.dpi': 100, 'axes.grid': False, 'font.size': 10})
+_SEKILLER = []
+def _goster(*a, **k):
+    for n in plt.get_fignums():
+        f = plt.figure(n)
+        b = io.BytesIO()
+        f.savefig(b, format='png', bbox_inches='tight')
+        _SEKILLER.append(base64.b64encode(b.getvalue()).decode())
+    plt.close('all')
+plt.show = _goster
+def _sekilleri_al():
+    _goster()
+    s = list(_SEKILLER)
+    _SEKILLER.clear()
+    return s
+_HTMLLER = []
+def html_goster(html, yukseklik=450):
+    """Bir HTML belgesini (folium haritası, plotly grafiği) hücre çıktısında gösterir."""
+    _HTMLLER.append((str(html), int(yukseklik)))
+def _htmlleri_al():
+    s = list(_HTMLLER)
+    _HTMLLER.clear()
+    return s
+def _dosyalar():
+    return sorted(f for f in os.listdir('.') if f.lower().endswith(('.csv', '.xlsx', '.txt', '.json', '.html')))
+`;
+
+async function baslat() {
+  try {
+    durum('Pyodide indiriliyor…');
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/pyodide/v0.27.7/full/pyodide.js';
+    await new Promise((ok, red) => { s.onload = ok; s.onerror = () => red(new Error('Pyodide betiği yüklenemedi')); document.head.appendChild(s); });
+    py = await loadPyodide();
+    durum('Temel paketler yükleniyor…');
+    await py.loadPackage(['numpy', 'pandas', 'matplotlib'], { messageCallback: () => {} });
+    py.FS.writeFile('/home/pyodide/ik_yardimci.py', document.getElementById('yardimciKod').textContent);
+    py.FS.writeFile('/home/pyodide/sns_yedek.py', document.getElementById('snsYedekKod').textContent);
+    await py.runPythonAsync(KURULUM);
+    durum('seaborn kuruluyor…');
+    await py.loadPackage('micropip', { messageCallback: () => {} });
+    try {
+      await py.runPythonAsync("import micropip\nawait micropip.install('seaborn')\nimport seaborn");
+    } catch (e) {
+      console.warn('seaborn kurulamadı, yedek kullanılacak', e);
+      py.runPython("import sys, sns_yedek\nsys.modules['seaborn'] = sns_yedek");
+    }
+    hazir = true; tumunuBtn.disabled = false;
+    durum('Python hazır', 'hazir');
+  } catch (e) {
+    console.error(e);
+    durum('Python yüklenemedi (internet bağlantısını kontrol edin)', 'hata');
+  }
+}
+
+function calistir(h) {
+  kuyruk = kuyruk.then(() => calistirIc(h));
+  return kuyruk;
+}
+
+async function calistirIc(h) {
+  const btn = h.querySelector('.calis'), cikti = h.querySelector('.cikti');
+  const kod = h.querySelector('textarea').value;
+  if (!hazir) {
+    cikti.className = 'cikti dolu';
+    cikti.innerHTML = '<pre>Python ortamı henüz hazır değil; lütfen üst çubuktaki gösterge yeşile dönene kadar bekleyin.</pre>';
+    return;
+  }
+  btn.disabled = true; btn.textContent = '⏳ Çalışıyor';
+  cikti.className = 'cikti dolu'; cikti.innerHTML = '<pre>Gerekli paketler yükleniyor…</pre>';
+  let metin = '';
+  const t0 = performance.now();
+  let hata = null;
+  try {
+    await py.loadPackagesFromImports(kod, { messageCallback: () => {}, errorCallback: m => console.warn(m) });
+    py.setStdout({ batched: s => { metin += s + '\n'; } });
+    py.setStderr({ batched: s => { metin += s + '\n'; } });
+    cikti.innerHTML = '<pre>Çalıştırılıyor…</pre>';
+    await py.runPythonAsync(kod);
+  } catch (e) {
+    hata = String(e.message || e);
+    const i = hata.lastIndexOf('File "<exec>"');
+    if (i > 0) hata = 'Traceback (son çağrılar):\n  ' + hata.slice(i);
+  }
+  let sekiller = [];
+  try { sekiller = py.runPython('_sekilleri_al()').toJs(); } catch (e) {}
+  cikti.innerHTML = '';
+  metin = metin.split('\n').filter(l => !/^(Loading|Loaded) [\w\-, .]+$|already loaded from default channel|^No new packages to load/.test(l)).join('\n');
+  if (metin.trim()) { const p = document.createElement('pre'); p.textContent = metin.replace(/\n+$/, ''); cikti.appendChild(p); }
+  if (hata) { const p = document.createElement('pre'); p.className = 'hatali'; p.textContent = hata; cikti.appendChild(p); }
+  sekiller.forEach((b, i) => { const img = new Image(); img.src = 'data:image/png;base64,' + b; img.alt = 'Grafik ' + (i + 1); cikti.appendChild(img); });
+  let htmller = [];
+  try { htmller = py.runPython('_htmlleri_al()').toJs(); } catch (e) {}
+  htmller.forEach(([icerik, yuk]) => {
+    const fr = document.createElement('iframe');
+    fr.setAttribute('sandbox', 'allow-scripts allow-popups');
+    fr.style.height = yuk + 'px'; fr.srcdoc = icerik; fr.loading = 'lazy';
+    cikti.appendChild(fr);
+  });
+  dosyaListesi(cikti);
+  const sure = document.createElement('div'); sure.className = 'sure';
+  sure.textContent = (hata ? '✗ Hata · ' : '✓ Tamamlandı · ') + ((performance.now() - t0) / 1000).toFixed(1) + ' sn';
+  cikti.appendChild(sure);
+  if (!cikti.childNodes.length) cikti.className = 'cikti';
+  btn.disabled = false; btn.textContent = '▶ Çalıştır';
+}
+
+function dosyaListesi(cikti) {
+  let liste = [];
+  try { liste = py.runPython('_dosyalar()').toJs(); } catch (e) { return; }
+  if (!liste.length) return;
+  const d = document.createElement('div'); d.className = 'dosyalar';
+  d.append('Çalışma klasöründeki dosyalar: ');
+  liste.forEach(ad => {
+    const b = document.createElement('button'); b.textContent = '⬇ ' + ad; b.title = ad + ' dosyasını indir';
+    b.onclick = () => {
+      const veri = py.FS.readFile('/home/pyodide/' + ad);
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([veri])); a.download = ad; a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    };
+    d.appendChild(b);
+  });
+  cikti.appendChild(d);
+}
+
+tumunuBtn.addEventListener('click', async () => {
+  tumunuBtn.disabled = true;
+  for (const h of hucreler) await calistir(h);
+  tumunuBtn.disabled = false;
+});
+
+document.getElementById('yukle').addEventListener('change', async e => {
+  if (!hazir) { alert('Python ortamı henüz hazır değil.'); e.target.value = ''; return; }
+  const adlar = [];
+  for (const f of e.target.files) {
+    py.FS.writeFile('/home/pyodide/' + f.name, new Uint8Array(await f.arrayBuffer()));
+    adlar.push(f.name);
+  }
+  e.target.value = '';
+  durum('Yüklendi: ' + adlar.join(', '), 'hazir');
+  setTimeout(() => durum('Python hazır', 'hazir'), 4000);
+});
+
+baslat();
+
+/* ===================== 3. İçindekiler ===================== */
+const toc = document.getElementById('toc');
+document.querySelectorAll('section.bolum').forEach(sec => {
+  const a = document.createElement('a'); a.href = '#' + sec.id; a.textContent = sec.dataset.baslik; a.dataset.hedef = sec.id; toc.appendChild(a);
+  sec.querySelectorAll('.blok h3').forEach(h3 => {
+    const blok = h3.closest('.blok');
+    const b = document.createElement('a'); b.href = '#' + blok.id; b.className = 'alt'; b.textContent = h3.textContent; b.dataset.hedef = blok.id; toc.appendChild(b);
+  });
+});
+const tocLinkler = [...toc.querySelectorAll('a')];
+const gozlem = new IntersectionObserver(girdiler => {
+  girdiler.forEach(g => {
+    if (g.isIntersecting) {
+      tocLinkler.forEach(a => a.classList.toggle('aktif', a.dataset.hedef === g.target.id));
+    }
+  });
+}, { rootMargin: '-90px 0px -70% 0px' });
+document.querySelectorAll('section.bolum, .blok').forEach(el => gozlem.observe(el));
+
+/* ===================== 4. Arama motoru ===================== */
+// Türkçe duyarlı, aksan-toleranslı normalleştirme (karakter sayısı korunur → vurgulama konumları tutar)
+const HARF = { 'ı': 'i', 'ş': 's', 'ğ': 'g', 'ü': 'u', 'ö': 'o', 'ç': 'c', 'â': 'a', 'î': 'i', 'û': 'u' };
+function norm(s) {
+  return [...s].map(c => { const k = c.toLocaleLowerCase('tr'); return k.length === 1 ? (HARF[k] || k) : c.toLowerCase(); }).join('');
+}
+// Dizin: her blok için başlık, bölüm adı, metin ve kod
+const dizin = [...document.querySelectorAll('.blok')].map(blok => {
+  const kopya = blok.cloneNode(true);
+  kopya.querySelectorAll('.hucre, .cikti, script').forEach(x => x.remove());
+  kopya.querySelectorAll('td, th, li, p, h3, h4').forEach(x => x.append(' '));
+  const metin = kopya.textContent.replace(/\s+/g, ' ').trim();
+  const kod = [...blok.querySelectorAll('textarea')].map(t => t.value).join('\n');
+  const bolum = blok.closest('section').dataset.baslik;
+  return { blok, id: blok.id, baslik: blok.dataset.baslik, bolum, metin, kod,
+           nBaslik: norm(blok.dataset.baslik), nMetin: norm(metin), nKod: norm(kod) };
+});
+
+const araKutu = document.getElementById('ara'), sonucKutu = document.getElementById('sonuclar');
+let filtre = 'tumu', secili = -1, sonGorunen = [];
+
+function escapeHtml(s) { return s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+
+function ozetle(kaynak, nKaynak, terimler) {
+  // ilk eşleşmenin çevresinden ~160 karakterlik parça, terimler vurgulu
+  let ilk = -1;
+  for (const t of terimler) { const i = nKaynak.indexOf(t); if (i >= 0 && (ilk < 0 || i < ilk)) ilk = i; }
+  if (ilk < 0) ilk = 0;
+  const bas = Math.max(0, ilk - 60), son = Math.min(kaynak.length, ilk + 120);
+  const parca = kaynak.slice(bas, son), nParca = nKaynak.slice(bas, son);
+  const isaret = new Array(parca.length).fill(false);
+  terimler.forEach(t => { let i = nParca.indexOf(t); while (i >= 0) { for (let k = i; k < i + t.length; k++) isaret[k] = true; i = nParca.indexOf(t, i + 1); } });
+  let html = '', acik = false;
+  for (let i = 0; i < parca.length; i++) {
+    if (isaret[i] && !acik) { html += '<mark>'; acik = true; }
+    if (!isaret[i] && acik) { html += '</mark>'; acik = false; }
+    html += escapeHtml(parca[i]);
+  }
+  if (acik) html += '</mark>';
+  return (bas > 0 ? '… ' : '') + html.replace(/\n/g, ' ') + (son < kaynak.length ? ' …' : '');
+}
+
+function ara(sorgu) {
+  const terimler = norm(sorgu).split(/\s+/).filter(t => t.length > 1 || /\d/.test(t));
+  if (!terimler.length) return [];
+  const sonuc = [];
+  for (const d of dizin) {
+    let puan = 0, metinde = true, kodda = true;
+    for (const t of terimler) {
+      const b = d.nBaslik.includes(t), m = d.nMetin.includes(t), k = d.nKod.includes(t);
+      if (!b && !m && !k) { puan = -1; break; }
+      if (b) puan += 10;
+      if (m) puan += 3 + Math.min(5, d.nMetin.split(t).length - 1);
+      if (k) puan += 2 + Math.min(3, d.nKod.split(t).length - 1);
+      metinde = metinde && (b || m); kodda = kodda && k;
+    }
+    if (puan < 0) continue;
+    if (filtre === 'metin' && !metinde) continue;
+    if (filtre === 'kod' && !kodda) continue;
+    const kodaGore = filtre === 'kod' || (!metinde && kodda);
+    sonuc.push({ d, puan, kodaGore, ozet: kodaGore ? ozetle(d.kod, d.nKod, terimler) : ozetle(d.metin, d.nMetin, terimler) });
+  }
+  return sonuc.sort((a, b) => b.puan - a.puan);
+}
+
+function sonuclariGoster() {
+  const q = araKutu.value.trim();
+  if (!q) { sonucKutu.classList.remove('acik'); temizleVurgu(); return; }
+  sonGorunen = ara(q); secili = sonGorunen.length ? 0 : -1;
+  let html = `<div class="sonuc-ust"><span>${sonGorunen.length} sonuç · “${escapeHtml(q)}”</span>
+    <span class="filtre">${['tumu:Tümü', 'metin:Metin', 'kod:Kod'].map(x => { const [k, e] = x.split(':'); return `<button data-f="${k}" class="${filtre === k ? 'aktif' : ''}">${e}</button>`; }).join('')}</span></div>`;
+  if (!sonGorunen.length) html += '<div class="sonuc"><span class="ozet">Eşleşme bulunamadı. Farklı ya da daha kısa bir terim deneyin (ör. “groupby”, “birlestir”, “seri”).</span></div>';
+  sonGorunen.forEach((s, i) => {
+    html += `<div class="sonuc${i === secili ? ' secili' : ''}" data-i="${i}" role="option">
+      <span class="yol">${escapeHtml(s.d.bolum)}</span>
+      <b>${escapeHtml(s.d.baslik)}${s.kodaGore ? '<span class="etiket">kod</span>' : ''}</b>
+      <span class="ozet">${s.ozet}</span></div>`;
+  });
+  sonucKutu.innerHTML = html; sonucKutu.classList.add('acik');
+}
+
+function temizleVurgu() {
+  document.querySelectorAll('mark.ara').forEach(m => { const p = m.parentNode; p.replaceChild(document.createTextNode(m.textContent), m); p.normalize(); });
+}
+function vurgula(kok, terimler) {
+  const yuruyucu = document.createTreeWalker(kok, NodeFilter.SHOW_TEXT, {
+    acceptNode: n => n.parentElement.closest('textarea, script, .cikti, mark') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
+  const dugumler = []; while (yuruyucu.nextNode()) dugumler.push(yuruyucu.currentNode);
+  let ilk = null;
+  dugumler.forEach(n => {
+    const s = n.nodeValue, ns = norm(s);
+    const araliklar = [];
+    terimler.forEach(t => { let i = ns.indexOf(t); while (i >= 0) { araliklar.push([i, i + t.length]); i = ns.indexOf(t, i + t.length); } });
+    if (!araliklar.length) return;
+    araliklar.sort((a, b) => a[0] - b[0]);
+    const birlesik = [];
+    araliklar.forEach(r => { const son = birlesik[birlesik.length - 1]; if (son && r[0] <= son[1]) son[1] = Math.max(son[1], r[1]); else birlesik.push([...r]); });
+    const frag = document.createDocumentFragment(); let k = 0;
+    birlesik.forEach(([a, b]) => {
+      if (a > k) frag.appendChild(document.createTextNode(s.slice(k, a)));
+      const m = document.createElement('mark'); m.className = 'ara'; m.textContent = s.slice(a, b); frag.appendChild(m);
+      if (!ilk) ilk = m; k = b;
+    });
+    if (k < s.length) frag.appendChild(document.createTextNode(s.slice(k)));
+    n.parentNode.replaceChild(frag, n);
+  });
+  return ilk;
+}
+
+function git(i) {
+  const s = sonGorunen[i]; if (!s) return;
+  const terimler = norm(araKutu.value.trim()).split(/\s+/).filter(t => t.length > 1 || /\d/.test(t));
+  temizleVurgu();
+  const ilk = vurgula(s.d.blok, terimler);
+  const hedef = s.kodaGore ? (s.d.blok.querySelector('.hucre') || s.d.blok) : (ilk || s.d.blok);
+  hedef.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  const parlat = s.kodaGore ? hedef : s.d.blok;
+  parlat.classList.remove('flas'); void parlat.offsetWidth; parlat.classList.add('flas');
+  sonucKutu.classList.remove('acik');
+  history.replaceState(null, '', '#' + s.d.id);
+}
+
+let zamanlayici;
+araKutu.addEventListener('input', () => { clearTimeout(zamanlayici); zamanlayici = setTimeout(sonuclariGoster, 120); });
+araKutu.addEventListener('focus', () => { if (araKutu.value.trim()) sonuclariGoster(); });
+araKutu.addEventListener('keydown', e => {
+  const ogeler = sonucKutu.querySelectorAll('.sonuc[data-i]');
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault(); if (!ogeler.length) return;
+    secili = (secili + (e.key === 'ArrowDown' ? 1 : -1) + ogeler.length) % ogeler.length;
+    ogeler.forEach((o, i) => o.classList.toggle('secili', i === secili));
+    ogeler[secili].scrollIntoView({ block: 'nearest' });
+  } else if (e.key === 'Enter') { e.preventDefault(); git(Math.max(0, secili)); }
+  else if (e.key === 'Escape') { araKutu.value = ''; sonucKutu.classList.remove('acik'); temizleVurgu(); araKutu.blur(); }
+});
+sonucKutu.addEventListener('mousedown', e => {
+  const f = e.target.closest('button[data-f]');
+  if (f) { e.preventDefault(); filtre = f.dataset.f; sonuclariGoster(); return; }
+  const o = e.target.closest('.sonuc[data-i]'); if (o) { e.preventDefault(); git(+o.dataset.i); }
+});
+document.addEventListener('click', e => { if (!e.target.closest('.arama')) sonucKutu.classList.remove('acik'); });
+document.addEventListener('keydown', e => {
+  if (e.key === '/' && !e.target.closest('input, textarea')) { e.preventDefault(); araKutu.focus(); araKutu.select(); }
+});
+
+/* ===================== 5. Test ===================== */
+const SORULAR = [["Pandas’ta DataFrame nedir?", ["Tek boyutlu bir dizi", "İki boyutlu bir veri tablosu", "Bir değer listesi", "Listelerden oluşan bir sözlük"], 1, "Satır ve sütunlardan oluşan etiketli tablo."], ["CSV dosyasını DataFrame’e okumak için hangi yöntem kullanılır?", ["read_csv()", "import_csv()", "read()", "load_csv()"], 0, "pd.read_csv('personel.csv')"], ["Bir DataFrame’in (varsayılan sayısal indeksli) ilk satırına nasıl erişilir?", ["df.iloc[0]", "df.loc[0]", "df.head(1)", "Hepsi"], 3, "iloc konuma, loc etikete göre erişir; head(1) ilk satırı DataFrame olarak verir."], ["df’den Yas sütunu nasıl seçilir?", ["df['Yas']", "df.Yas", "df.loc['Yas']", "a ve b"], 3, "df.loc['Yas'] bir SATIR etiketi arar."], ["DataFrame’den eksik değerleri silmek için hangi yöntem kullanılır?", ["remove_na()", "dropna()", "fillna()", "del_na()"], 1, "fillna() doldurur, dropna() siler."], ["İki DataFrame’i ortak bir sütuna göre birleştirmek için hangisi kullanılır?", ["merge()", "concat()", "join()", "append()"], 0, "Ör. sicil numarasına göre çalışan ve izin tabloları."], ["Pandas’ta satırlar bir koşula göre nasıl süzülür?", ["df.select('sutun')", "df[df['sutun'] > deger]", "df.filter('sutun')", "df.sutun > deger"], 1, "Mantıksal maske ile süzme."], ["DataFrame’i sıralamak için hangi yöntem kullanılır?", ["order()", "sort_values()", "sort()", "rank()"], 1, "sort_values('Maas', ascending=False)"], ["Eksik değerler nasıl doldurulur?", ["df.fillna()", "df.replace_na()", "df.impute()", "df.dropna()"], 0, "Ör. df['Yas'].fillna(df['Yas'].mean())"], ["Pandas’ta veriyi gruplamak için hangi işlev kullanılır?", ["group()", "groupby()", "aggregate()", "partition()"], 1, "Böl–uygula–birleştir."], ["DataFrame’de eksik veriyi denetlemek için hangi işlev kullanılır?", ["isnull()", "missing()", "has_null()", "null()"], 0, "isna() ile aynıdır."], ["DataFrame’e yeni sütun eklemek için hangisi kullanılır?", ["df.append()", "df.insert()", "df['yeni_sutun'] = deger", "df.add_column()"], 2, "insert() de çalışır ama konum ister; en yaygın yol atamadır."], ["Pandas’ta iki DataFrame alt alta nasıl birleştirilir?", ["df.merge()", "pd.concat([df1, df2])", "df.concat()", "df.concatenate()"], 1, "Kitapta yanıt df.append() olarak verilmiş; ancak append() pandas 2.0’da kaldırıldı."], ["Excel dosyasını pandas’a okumak için hangi yöntem kullanılır?", ["read_excel()", "read_spreadsheet()", "import_excel()", "load_excel()"], 0, "pd.read_excel('bordro.xlsx')"], ["DataFrame’in ilk beş satırı nasıl görüntülenir?", ["df.first()", "df.head()", "df.begin()", "df.show()"], 1, "head(n) ilk n satırı verir."], ["drop() ve sum() gibi işlevlerde axis=0 parametresi ne yapar?", ["Satırlar üzerinde işlem yapıldığını belirtir", "Sütunlar üzerinde işlem yapıldığını belirtir", "Veri türünü belirtir", "Hiçbir şey yapmaz"], 0, "drop(0, axis=0) satır siler; sum(axis=0) satırlar boyunca, yani her sütunun toplamını alır."], ["pivot_table() ne işe yarar?", ["Veriyi indekse göre gruplamak", "Veriyi yeniden biçimlendirip toplulaştırmak", "İki DataFrame’i birleştirmek", "Veriyi sıralamak"], 1, "Ör. şehir × kıdem ortalama gelir."], ["Bir nesnenin türünü denetlemek için hangisi kullanılır?", ["df.type()", "type(df)", "df.object()", "df.info()"], 1, "Python’un yerleşik type() işlevi."], ["DataFrame’den yinelenen satırlar nasıl kaldırılır?", ["df.drop_duplicates()", "df.remove_duplicates()", "df.unique()", "df.distinct()"], 0, "subset= ile belirli sütunlara göre de yapılabilir."], ["Bir pandas serisini listeye çevirmek için hangisi kullanılır?", ["seri.to_list()", "list(seri)", "seri.tolist()", "b ve c"], 3, "to_list() da çalışır; kitabın yanıtı “b ve c”dir."]];
+const testAlani = document.getElementById('testAlani');
+SORULAR.forEach(([s, sec, dogru, aciklama], i) => {
+  const d = document.createElement('div'); d.className = 'soru'; d.dataset.dogru = dogru;
+  d.innerHTML = `<p>${i + 1}. ${s}</p>` + sec.map((x, j) =>
+    `<label><input type="radio" name="s${i}" value="${j}"> ${'abcd'[j]}) ${x}</label>`).join('') +
+    `<div class="aciklama">Doğru yanıt: <b>${'abcd'[dogru]}) ${sec[dogru]}</b> — ${aciklama}</div>`;
+  testAlani.appendChild(d);
+});
+document.getElementById('testKontrol').onclick = () => {
+  let p = 0;
+  testAlani.querySelectorAll('.soru').forEach((d, i) => {
+    const s = d.querySelector('input:checked');
+    const ok = s && +s.value === +d.dataset.dogru;
+    d.classList.toggle('dogru', !!ok); d.classList.toggle('yanlis', !ok);
+    if (ok) p++;
+  });
+  document.getElementById('puan').textContent = `Puanınız: ${p} / ${SORULAR.length}`;
+};
+document.getElementById('testSifirla').onclick = () => {
+  testAlani.querySelectorAll('.soru').forEach(d => d.classList.remove('dogru', 'yanlis'));
+  testAlani.querySelectorAll('input').forEach(x => x.checked = false);
+  document.getElementById('puan').textContent = '';
+};
+</script>
+</body>
+</html>

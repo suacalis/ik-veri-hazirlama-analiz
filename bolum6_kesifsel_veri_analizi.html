@@ -1,0 +1,1550 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bölüm 6 · Keşifsel Veri Analizi — İK Verisiyle Etkileşimli Python</title>
+<style>
+:root{
+  --bg:#f6f7fb; --kart:#ffffff; --yazi:#1d2433; --soluk:#5b6476; --cizgi:#e3e6ee;
+  --ana:#1f5fbf; --ana2:#e8f0fc; --vurgu:#d9480f; --yesil:#2b8a3e; --kod:#0f1729; --kodyazi:#e6edf7;
+  --isaret:#ffe066;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:84px}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--yazi);line-height:1.65;font-size:16px}
+a{color:var(--ana)}
+/* Üst çubuk */
+header.ust{position:sticky;top:0;z-index:50;background:#14213d;color:#fff;box-shadow:0 2px 10px rgba(0,0,0,.15)}
+.ust-ic{max-width:1320px;margin:0 auto;padding:10px 18px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.logo{font-weight:700;font-size:15px;white-space:nowrap}
+.logo small{display:block;font-weight:400;opacity:.7;font-size:12px}
+.arama{position:relative;flex:1;min-width:240px;max-width:560px}
+.arama input{width:100%;padding:9px 12px 9px 36px;border-radius:8px;border:1px solid #3a4a6b;background:#1e2d50;color:#fff;font-size:15px;outline:none}
+.arama input:not(:placeholder-shown)~.kbd{display:none}
+.arama input:focus{border-color:#8fb3ff;background:#22355f}
+.arama input::placeholder{color:#a9b6d3}
+.arama svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);opacity:.75}
+.kbd{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;border:1px solid #5a6a8b;border-radius:4px;padding:0 5px;color:#c4cee4}
+#sonuclar{position:absolute;top:calc(100% + 6px);left:0;right:0;background:#fff;color:var(--yazi);border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,.25);max-height:70vh;overflow:auto;display:none}
+#sonuclar.acik{display:block}
+.sonuc-ust{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid var(--cizgi);font-size:13px;color:var(--soluk);gap:8px;flex-wrap:wrap}
+.filtre button{border:1px solid var(--cizgi);background:#fff;border-radius:999px;padding:2px 10px;font-size:12px;cursor:pointer;margin-left:4px}
+.filtre button.aktif{background:var(--ana);color:#fff;border-color:var(--ana)}
+.sonuc{padding:9px 12px;border-bottom:1px solid #f0f2f6;cursor:pointer}
+.sonuc:hover,.sonuc.secili{background:var(--ana2)}
+.sonuc b{display:block;font-size:14px}
+.sonuc .yol{font-size:11px;color:var(--soluk);text-transform:uppercase;letter-spacing:.03em}
+.sonuc .ozet{font-size:13px;color:var(--soluk)}
+.sonuc .etiket{font-size:10px;background:#eef1f7;border-radius:4px;padding:1px 6px;margin-left:6px;color:#44506a;vertical-align:middle}
+.sonuc mark,.icerik mark.ara{background:var(--isaret);color:inherit;padding:0 1px;border-radius:2px}
+.durum{display:flex;align-items:center;gap:8px;font-size:13px;white-space:nowrap}
+.nokta{width:10px;height:10px;border-radius:50%;background:#f0ad4e;box-shadow:0 0 0 3px rgba(240,173,78,.25)}
+.nokta.hazir{background:#40c057;box-shadow:0 0 0 3px rgba(64,192,87,.25)}
+.nokta.hata{background:#fa5252}
+.dugme{border:0;border-radius:8px;padding:8px 13px;font-size:14px;cursor:pointer;background:var(--ana);color:#fff;font-weight:600}
+.dugme:hover{filter:brightness(1.08)}
+.dugme:disabled{opacity:.5;cursor:not-allowed}
+.dugme.ikincil{background:#e9edf5;color:#22304d}
+.ust .dugme.ikincil{background:#2b3c63;color:#fff}
+label.dugme input{display:none}
+/* Yerleşim */
+.duzen{max-width:1320px;margin:0 auto;display:grid;grid-template-columns:270px 1fr;gap:26px;padding:22px 18px 80px}
+nav.icindekiler{position:sticky;top:84px;align-self:start;max-height:calc(100vh - 100px);overflow:auto;font-size:14px;background:var(--kart);border:1px solid var(--cizgi);border-radius:12px;padding:14px 10px}
+nav.icindekiler h4{margin:0 8px 8px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--soluk)}
+nav.icindekiler a{display:block;padding:4px 8px;border-radius:6px;text-decoration:none;color:var(--yazi)}
+nav.icindekiler a.alt{padding-left:22px;font-size:13px;color:var(--soluk)}
+nav.icindekiler a:hover,nav.icindekiler a.aktif{background:var(--ana2);color:var(--ana)}
+main.icerik{min-width:0}
+.kapak{background:linear-gradient(135deg,#14213d,#1f5fbf);color:#fff;border-radius:16px;padding:30px 30px 26px;margin-bottom:22px}
+.kapak h1{margin:0 0 6px;font-size:30px;line-height:1.25}
+.kapak p{margin:6px 0 0;opacity:.92;max-width:820px}
+.rozetler{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.rozet{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);padding:3px 10px;border-radius:999px;font-size:12.5px}
+section.bolum{background:var(--kart);border:1px solid var(--cizgi);border-radius:14px;padding:22px 28px;margin-bottom:22px}
+section.bolum>h2{margin:0 0 10px;font-size:24px;color:#14213d;border-bottom:2px solid var(--ana2);padding-bottom:8px}
+.blok h3{font-size:19px;margin:24px 0 8px;color:#1b3a73}
+.blok h4{font-size:16px;margin:16px 0 6px}
+.blok.flas{animation:flas 1.6s ease}
+@keyframes flas{0%{box-shadow:0 0 0 4px rgba(255,224,102,.95);background:#fffbe6}100%{box-shadow:0 0 0 0 rgba(255,224,102,0);background:transparent}}
+.not{background:#f1f6ff;border-left:4px solid var(--ana);padding:10px 14px;border-radius:0 8px 8px 0;margin:12px 0;font-size:15px}
+.not.uyari{background:#fff6ec;border-color:var(--vurgu)}
+.not.ipucu{background:#effaf1;border-color:var(--yesil)}
+table.tablo{border-collapse:collapse;width:100%;margin:12px 0;font-size:14.5px}
+table.tablo th,table.tablo td{border:1px solid var(--cizgi);padding:7px 10px;text-align:left;vertical-align:top}
+table.tablo th{background:#f3f5fa}
+.formul{font-family:"Cambria Math","Times New Roman",serif;background:#fafbfe;border:1px dashed var(--cizgi);padding:6px 12px;border-radius:6px;display:inline-block;margin:4px 0}
+/* Kod hücresi */
+.hucre{border:1px solid #c9d3e6;border-radius:12px;overflow:hidden;margin:16px 0 10px;background:var(--kod)}
+.hucre.flas{animation:flas 1.6s ease}
+.hucre-ust{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#1b2540;color:#c8d3ea;font-size:13px;flex-wrap:wrap}
+.hucre-ust .ad{font-weight:600;margin-right:auto}
+.hucre-ust .ad span{opacity:.6;font-weight:400;margin-left:6px}
+.hucre-ust button{border:0;border-radius:6px;padding:5px 10px;font-size:12.5px;cursor:pointer;background:#2e3c62;color:#e6ecf8}
+.hucre-ust button.calis{background:#2f9e44;color:#fff;font-weight:600}
+.hucre-ust button:disabled{opacity:.5;cursor:wait}
+textarea.kod{display:block;width:100%;border:0;resize:vertical;background:var(--kod);color:var(--kodyazi);font:13.5px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;padding:12px 14px;outline:none;tab-size:4;white-space:pre;overflow:auto;min-height:120px}
+.cikti{background:#fff;border-top:1px solid #c9d3e6;display:none}
+.cikti.dolu{display:block}
+.cikti pre{margin:0;padding:12px 14px;font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;white-space:pre;overflow:auto;max-height:520px;color:#1d2433}
+.cikti pre.hatali{color:#c92a2a;background:#fff5f5}
+.cikti img{display:block;max-width:100%;margin:8px auto;border:1px solid var(--cizgi);border-radius:6px}
+.cikti .sure{font-size:11.5px;color:var(--soluk);padding:4px 14px 8px}
+.dosyalar{padding:4px 14px 10px;font-size:12.5px;color:var(--soluk)}
+.dosyalar button{border:1px solid var(--cizgi);background:#f6f8fc;border-radius:6px;padding:2px 8px;margin:2px;font-size:12px;cursor:pointer}
+.dene{font-size:14px;color:var(--soluk);margin:4px 0 14px}
+.dene b{color:var(--yazi)}
+/* Test */
+.soru{border:1px solid var(--cizgi);border-radius:10px;padding:12px 16px;margin:10px 0}
+.soru p{margin:0 0 6px;font-weight:600}
+.soru label{display:block;padding:3px 6px;border-radius:6px;cursor:pointer;font-size:15px}
+.soru label:hover{background:#f4f6fa}
+.soru.dogru{border-color:#8ce99a;background:#f4fcf5}
+.soru.yanlis{border-color:#ffa8a8;background:#fff6f6}
+.soru .aciklama{display:none;font-size:14px;color:var(--soluk);margin-top:6px}
+.soru.dogru .aciklama,.soru.yanlis .aciklama{display:block}
+#puan{font-weight:700;margin-left:10px}
+ol.sorular li,ol.alistirma li{margin:4px 0}
+footer{text-align:center;color:var(--soluk);font-size:13px;padding:20px}
+@media (max-width:960px){.duzen{grid-template-columns:1fr}nav.icindekiler{position:static;max-height:none}.kbd{display:none}}
+
+.ust-nav{color:#c9d6f2;text-decoration:none;font-size:13px;border:1px solid #3a4a6b;border-radius:8px;padding:6px 10px;white-space:nowrap}
+.ust-nav:hover{background:#22355f;color:#fff}
+.bolum-gezinti{display:flex;justify-content:space-between;gap:12px;margin:0 0 22px;flex-wrap:wrap}
+.bolum-gezinti a{flex:1;min-width:220px;background:#fff;border:1px solid #e3e6ee;border-radius:12px;padding:12px 16px;text-decoration:none;color:#1d2433}
+.bolum-gezinti a:hover{border-color:#1f5fbf;background:#f4f8ff}
+.bolum-gezinti small{display:block;color:#5b6476;font-size:12px}
+.bolum-gezinti .sonraki{text-align:right}
+</style>
+</head>
+<body>
+
+<header class="ust">
+  <div class="ust-ic">
+    <a class="ust-nav" href="index.html" title="Tüm bölümler">⌂ Tüm bölümler</a>
+    <div class="logo">Bölüm 6 · Keşifsel Veri Analizi<small>İK verisiyle etkileşimli Python (Pyodide)</small></div>
+    <div class="arama">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="ara" type="search" autocomplete="off" placeholder="Bölümde ara: t-testi, varyans, DBSCAN, lift, hipotez…" aria-label="Bölüm içinde ara">
+      <span class="kbd">/</span>
+      <div id="sonuclar" role="listbox"></div>
+    </div>
+    <div class="durum"><span id="nokta" class="nokta"></span><span id="durumYazi">Python yükleniyor…</span></div>
+    <button id="tumunu" class="dugme" disabled>▶ Tümünü çalıştır</button>
+    <label class="dugme ikincil" title="Kendi CSV/XLSX dosyanızı Python çalışma klasörüne yükleyin">⬆ Veri yükle<input id="yukle" type="file" multiple accept=".csv,.xlsx,.txt,.json"></label>
+  </div>
+</header>
+
+<div class="duzen">
+<nav class="icindekiler" id="toc"><h4>İçindekiler</h4></nav>
+
+<main class="icerik" id="icerik">
+
+<div class="kapak">
+  <h1>Keşifsel Veri Analizi (EDA)</h1>
+  <p>Ham İK verisini modellemeden önce tanımak: dağılımları özetlemek, grupları karşılaştırmak, ilişkileri ölçmek, gizli kümeleri ve birliktelikleri bulmak, sonunda sınanabilir hipotezler üretmek. Kitaptaki tüm örnekler bordro, eğitim, performans, yan hak ve işten ayrılma verilerine uyarlanmıştır.</p>
+  <div class="rozetler">
+    <span class="rozet">13 çalıştırılabilir kod hücresi</span>
+    <span class="rozet">NumPy · pandas · SciPy · scikit-learn · seaborn · mlxtend</span>
+    <span class="rozet">Kurulum gerektirmez — tarayıcıda çalışır</span>
+  </div>
+</div>
+
+<section class="bolum" id="giris" data-baslik="Giriş">
+<h2>Giriş</h2>
+<div class="blok" id="b-eda" data-baslik="Keşifsel veri analizi nedir?">
+<p><b>Keşifsel veri analizi (EDA)</b>, bir veri setinin temel özelliklerini — çoğunlukla görsel yöntemlerle — özetleyerek verinin yapısını anlamaya çalışan ilk analiz adımıdır. Amaç; örüntüleri görmek, sıra dışı gözlemleri yakalamak, varsayımları kontrol etmek ve eksik ya da aykırı değerleri resmî modellemeye geçmeden önce fark etmektir.</p>
+<p>Histogramlar, kutu grafikleri, saçılım grafikleri ve korelasyon matrisleri EDA'nın temel araçlarıdır. İK analitiğinde EDA; örneğin bir ücret bandındaki çarpıklığı, belirli bir departmanda yoğunlaşan işten ayrılmaları ya da eğitim saatleriyle performans arasındaki ilişkiyi model kurmadan önce görmeyi sağlar. Böylece yanlış sonuç çıkarma riski azalır ve ham veriyle öngörüsel analitik arasında bir köprü kurulur.</p>
+</div>
+<div class="blok" id="b-yapi" data-baslik="Bölümün yapısı ve amaçları">
+<h3>Bölümün yapısı ve amaçları</h3>
+<p>Bölüm beş başlıktan oluşur: <a href="#tanimlayici">tanımlayıcı istatistikler</a>, <a href="#karsilastirmali">karşılaştırmalı istatistikler</a> (t-testi, F-testi, ANOVA, korelasyon, regresyon), <a href="#kumeleme">kümeleme</a>, <a href="#birliktelik">birliktelik kuralları</a> ve <a href="#hipotez">hipotez üretimi</a>. Bölüm sonunda gözlenen veri özelliklerinden sınanabilir sorular türetebilir ve daha karmaşık modellere hazırlıklı geçebilirsiniz.</p>
+<div class="not ipucu"><b>Nasıl kullanılır?</b> İlk açılışta Python ortamı (Pyodide) tarayıcınıza indirilir; sağ üstteki gösterge yeşile döndüğünde hücreleri <b>▶ Çalıştır</b> düğmesiyle ya da hücre içindeyken <b>Ctrl/⌘ + Enter</b> ile çalıştırabilirsiniz. Kodları dilediğiniz gibi değiştirin; <b>↺ Sıfırla</b> özgün koda döner. Hücrelerin ürettiği CSV dosyaları çıktının altında indirilebilir. Arama kutusuna <b>/</b> tuşuyla geçebilirsiniz.</div>
+<div class="not uyari"><b>Veri hakkında:</b> Tüm İK verileri öğretim amaçlı, sabit tohumla (<code>np.random.seed</code>) üretilmiş sentetik verilerdir; gerçek kişi ya da kurumlara ait değildir.</div>
+</div>
+</section>
+
+<section class="bolum" id="tanimlayici" data-baslik="1. Tanımlayıcı istatistikler">
+<h2>1. Tanımlayıcı istatistikler</h2>
+<div class="blok" id="b-tanim" data-baslik="Tanımlayıcı istatistik nedir?">
+<p>Veri biliminde <b>öznitelikler (features)</b>, tahmin ve sınıflandırmada girdi olarak kullanılan ölçülebilir özelliklerdir (ör. kıdem, maaş, eğitim saati). <b>Tanımlayıcı istatistik</b>, bu verileri anlamlı biçimde özetleyip düzenleyen istatistik dalıdır: sayısal ölçüler ve grafiklerle verinin genel görünümünü sunar, ancak eldeki verinin ötesine genelleme ya da tahmin yapmaz — bu, çıkarımsal istatistiğin işidir.</p>
+</div>
+<div class="blok" id="b-merkezi" data-baslik="Merkezi eğilim ölçüleri: ortalama, medyan, mod">
+<h3>Merkezi eğilim ölçüleri</h3>
+<ul>
+<li><b>Ortalama (aritmetik ortalama):</b> Değerlerin toplamının gözlem sayısına bölümüdür. Verinin genel düzeyini gösterir ama uç değerlere duyarlıdır: Birkaç üst yönetici maaşı, şirketin ortalama maaşını yukarı çeker.</li>
+<li><b>Medyan (ortanca):</b> Sıralı verinin tam ortasındaki değerdir (gözlem sayısı çiftse ortadaki iki değerin ortalaması). Aykırı değerlere ve çarpık dağılımlara karşı dirençlidir; bu yüzden ücret raporlamasında genellikle medyan tercih edilir.</li>
+<li><b>Mod (tepe değer):</b> En sık görülen değerdir. Özellikle kategorik verilerde (en sık görülen ayrılma nedeni, en çok başvuru alan pozisyon) kullanışlıdır. Bir veri setinin bir (tek tepeli), birden çok (çok tepeli) ya da hiç modu olmayabilir.</li>
+</ul>
+</div>
+<div class="blok" id="b-dagilim" data-baslik="Dağılım ölçüleri: açıklık, varyans, standart sapma">
+<h3>Dağılım (yayılım) ölçüleri</h3>
+<ul>
+<li><b>Açıklık (range):</b> En büyük ile en küçük değer arasındaki farktır. Hesaplaması kolaydır ama yalnızca iki değere dayandığı için uç değerlere çok duyarlıdır.</li>
+<li><b>Varyans:</b> Her gözlemin ortalamadan sapmasının karelerinin ortalamasıdır. Büyük varyans, değerlerin geniş bir alana yayıldığını gösterir. Birimi, özgün birimin karesidir (TL²).</li>
+<li><b>Standart sapma:</b> Varyansın kareköküdür; özgün birimle (TL, saat, puan) ifade edildiği için yorumlanması kolaydır.</li>
+</ul>
+<p><span class="formul">s² = Σ(xᵢ − x̄)² / n &nbsp;&nbsp;·&nbsp;&nbsp; s = √s²</span></p>
+</div>
+<div class="blok" id="b-araclar" data-baslik="Frekans dağılımı, yüzdelikler ve çeyrekler">
+<h3>Frekans dağılımı, yüzdelikler ve çeyrekler</h3>
+<ul>
+<li><b>Frekans dağılımı:</b> Her değerin ya da değer aralığının kaç kez görüldüğünü gösterir; tablo veya histogramla sunulur (ör. maaş bantlarına göre çalışan sayısı).</li>
+<li><b>Yüzdelikler (persentiller):</b> Veriyi 100 eşit parçaya böler. 90. yüzdelik, gözlemlerin %90'ının altında kaldığı değerdir. Ücret piyasa karşılaştırmalarında (P25, P50, P75, P90) sıkça kullanılır.</li>
+<li><b>Çeyrekler:</b> Veriyi dört eşit parçaya bölen özel yüzdeliklerdir: Q1 = 25., Q2 = 50. (medyan), Q3 = 75. yüzdelik. Kutu grafiklerinde yayılımı, çarpıklığı ve aykırı değerleri göstermede kullanılır.</li>
+</ul>
+<div class="not"><b>Örnek:</b> Bir şirket çalışanlarının ortalama brüt maaşını 58.000 TL, standart sapmasını 9.000 TL olarak raporluyorsa bu, verinin tanımlayıcı bir özetidir.</div>
+</div>
+<div class="blok" id="b-kod-tanim" data-baslik="Kod: Bordro verisinin tanımlayıcı istatistikleri">
+<h3>Uygulama: Bordro verisinin tanımlayıcı istatistikleri</h3>
+<p>Aşağıdaki program 30 çalışanlık bir bordro veri seti üretir, CSV'ye kaydedip geri okur; brüt maaş sütunu için ortalama, medyan, mod, açıklık, varyans ve standart sapmayı hesaplar ve dağılımı bu üç merkezi ölçüyle birlikte çizer.</p>
+<div class="hucre" id="h-tanimlayici">
+<div class="hucre-ust"><span class="ad">🐍 Tanımlayıcı istatistikler<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="40" aria-label="Tanımlayıcı istatistikler kodu">import numpy as np
+import pandas as pd
+from scipy import stats
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# 30 çalışanlık örnek bordro veri seti (brüt aylık maaş, TL)
+np.random.seed(42)
+sicil_no = np.arange(1001, 1031)
+adlar = [f'Calisan_{i}' for i in range(1, 31)]
+# Ücret verisi genellikle sağa çarpıktır: log-normal dağılım, 1000 TL'ye yuvarlanmış
+maaslar = (np.random.lognormal(mean=np.log(55000), sigma=0.35, size=30) / 1000).round().astype(int) * 1000
+df = pd.DataFrame({
+    'Sicil_No': sicil_no,
+    'Calisan_Adi': adlar,
+    'Brut_Maas': maaslar
+})
+
+# CSV dosyasına kaydet
+df.to_csv('bordro_verisi.csv', index=False)
+print("Örnek bordro verisi 'bordro_verisi.csv' dosyasına kaydedildi")
+print(df.head(10).to_string(index=False))
+
+# CSV dosyasından oku
+maas = pd.read_csv('bordro_verisi.csv')['Brut_Maas']
+
+# Tanımlayıcı istatistikler
+ortalama = np.mean(maas)
+medyan = np.median(maas)
+mod = stats.mode(maas, keepdims=True).mode[0]
+tekrar = (maas == mod).sum()
+aciklik = np.max(maas) - np.min(maas)
+varyans = np.var(maas)
+std_sapma = np.std(maas)
+
+print(f"\nOrtalama maaş     : {ortalama:,.2f} TL")
+print(f"Medyan maaş       : {medyan:,.2f} TL")
+print(f"Mod               : {mod:,} TL ({tekrar} çalışan)")
+print(f"Açıklık (range)   : {aciklik:,} TL")
+print(f"Varyans           : {varyans:,.2f}")
+print(f"Standart sapma    : {std_sapma:,.2f} TL")
+print(f"Çeyrekler (Q1,Q2,Q3): {np.percentile(maas, [25, 50, 75])}")
+
+# Görselleştirme
+plt.figure(figsize=(8, 5))
+sns.histplot(maas, kde=True, color='steelblue')
+plt.axvline(ortalama, color='red', linestyle='--', label=f'Ortalama: {ortalama:,.0f}')
+plt.axvline(medyan, color='green', linestyle='--', label=f'Medyan: {medyan:,.0f}')
+plt.axvline(mod, color='purple', linestyle='--', label=f'Mod: {mod:,}')
+plt.title('Maaş Dağılımı: Ortalama, Medyan ve Mod')
+plt.xlabel('Brüt aylık maaş (TL)')
+plt.ylabel('Frekans (çalışan sayısı)')
+plt.legend()
+plt.show()
+</textarea>
+<div class="cikti"></div>
+</div>
+<p class="dene"><b>Deneyin:</b> <code>maaslar</code> dizisine <code>np.append(maaslar, 900000)</code> ile bir genel müdür maaşı ekleyin; ortalama ile medyanın nasıl farklı tepki verdiğini gözleyin.</p>
+</div>
+<div class="blok" id="b-iqr" data-baslik="Kod: Aykırı maaşları IQR ve z-puanı ile bulmak">
+<h3>Uygulama: Aykırı maaşları IQR ve z-puanıyla bulmak</h3>
+<p>Kutu grafiğindeki “bıyıkların” dışında kalan noktalar, <span class="formul">Q1 − 1,5·IQR</span> ve <span class="formul">Q3 + 1,5·IQR</span> sınırlarının dışındaki değerlerdir (IQR = Q3 − Q1). Z-puanı yönteminde ise ortalamadan 3 standart sapmadan fazla uzaklaşan değerler aykırı sayılır. İki yöntem her zaman aynı sonucu vermez: z-puanı, aykırı değerlerin kendisinden etkilenen ortalama ve standart sapmaya dayanır.</p>
+<div class="hucre" id="h-iqr">
+<div class="hucre-ust"><span class="ad">🐍 Aykırı değer tespiti (bölüm sonu alıştırması 1)<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="26" aria-label="Aykırı değer tespiti (bölüm sonu alıştırması 1) kodu">import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Alıştırma: IQR yöntemiyle aykırı maaşları bulmak
+np.random.seed(1)
+maas = np.append(np.random.normal(55000, 9000, 60).round(), [145000, 160000, 18000])
+s = pd.Series(maas, name='Brut_Maas')
+
+q1, q3 = s.quantile([.25, .75])
+iqr = q3 - q1
+alt, ust = q1 - 1.5 * iqr, q3 + 1.5 * iqr
+print(s.describe().round(1).to_string())
+print(f"\nQ1 = {q1:,.0f}  Q3 = {q3:,.0f}  IQR = {iqr:,.0f}")
+print(f"Alt sınır = {alt:,.0f} TL | Üst sınır = {ust:,.0f} TL")
+print("Aykırı maaşlar:", s[(s &lt; alt) | (s &gt; ust)].tolist())
+
+z = (s - s.mean()) / s.std()
+print("|z| &gt; 3 olanlar:", s[z.abs() &gt; 3].tolist())
+
+plt.figure(figsize=(8, 3))
+plt.boxplot(s, vert=False)
+plt.title('Maaşların Kutu Grafiği (IQR ile aykırı değerler)')
+plt.xlabel('Brüt aylık maaş (TL)')
+plt.show()
+</textarea>
+<div class="cikti"></div>
+</div>
+</div>
+<div class="blok" id="b-tanim-kullanim" data-baslik="Tanımlayıcı istatistik ne zaman kullanılır? (İK örnekleri)">
+<h3>Tanımlayıcı istatistik ne zaman kullanılır?</h3>
+<table class="tablo">
+<tr><th>Durum</th><th>İK örneği</th></tr>
+<tr><td>Veriyi tanıma ve keşif</td><td>Yeni devralınan İKBS verisinde ortalama kıdem ve en sık görülen pozisyonu çıkarmak; hatalı kayıtları fark etmek.</td></tr>
+<tr><td>Raporlama ve sunum</td><td>Yönetim kuruluna departman bazında çalışan sayısı ve medyan maaşı histogram/çubuk grafikle sunmak.</td></tr>
+<tr><td>Kalite kontrol ve izleme</td><td>İşe alım süresinin (time-to-fill) aylık ortalama ve yayılımını izlemek.</td></tr>
+<tr><td>Anket analizi</td><td>Bağlılık anketinde her maddeye verilen yanıtların yüzde dağılımını pasta/çubuk grafikle göstermek.</td></tr>
+<tr><td>Zaman içinde karşılaştırma</td><td>Aylık işten ayrılma oranlarını karşılaştırıp mevsimsel zirveleri bulmak.</td></tr>
+<tr><td>Hata ve aykırı değer tespiti</td><td>Bir birimde olağan dışı yüksek devamsızlık gününü aykırı değer olarak yakalamak.</td></tr>
+</table>
+</div>
+</section>
+
+<section class="bolum" id="karsilastirmali" data-baslik="2. Karşılaştırmalı istatistikler">
+<h2>2. Karşılaştırmalı istatistikler</h2>
+<div class="blok" id="b-karsi" data-baslik="Karşılaştırmalı istatistik nedir?">
+<p><b>Karşılaştırmalı istatistik</b>, iki ya da daha fazla grubu, veri setini veya değişkeni karşılaştırarak benzerlik, fark ve örüntüleri ortaya koyar. Sayısal veride ortalama, medyan ve standart sapmalar karşılaştırılır; kategorik veride oranlar çapraz tablolar ve ki-kare testiyle incelenir. Normallik varsayımı sağlanmadığında parametrik olmayan testlere başvurulur.</p>
+<table class="tablo">
+<tr><th>Amaç</th><th>Yöntem</th><th>İK örneği</th></tr>
+<tr><td>İki ortalamayı karşılaştırma</td><td>t-testi</td><td>İstanbul ve Ankara şubelerinin ortalama maaşları</td></tr>
+<tr><td>3+ ortalamayı karşılaştırma</td><td>ANOVA</td><td>Satış, Üretim ve BT'nin yıllık eğitim saatleri</td></tr>
+<tr><td>Yayılımları karşılaştırma</td><td>F-testi</td><td>İki şubede performans puanlarının varyansı</td></tr>
+<tr><td>İlişkinin yönü ve gücü</td><td>Pearson korelasyonu</td><td>Eğitim saati ↔ performans puanı</td></tr>
+<tr><td>Bir değişkenle diğerini tahmin</td><td>Regresyon</td><td>Eğitim saatinden performans tahmini</td></tr>
+</table>
+</div>
+<div class="blok" id="b-ttest" data-baslik="Bağımsız örneklem t-testi">
+<h3>Bağımsız örneklem t-testi</h3>
+<ul>
+<li><b>Sıfır hipotezi (H₀):</b> İki şubenin ortalama maaşları arasında fark yoktur.</li>
+<li><b>Alternatif hipotez (H₁):</b> İki şubenin ortalama maaşları farklıdır.</li>
+<li><b>t istatistiği:</b> Ortalamalar arasındaki farkın örneklemdeki değişkenliğe oranıdır; mutlak değeri büyüdükçe fark belirginleşir.</li>
+<li><b>p-değeri:</b> H₀ doğruysa gözlenen (ya da daha uç) bir farkın elde edilme olasılığıdır. %5 anlamlılık düzeyinde <b>p &lt; 0,05</b> ise H₀ reddedilir; <b>p ≥ 0,05</b> ise reddedilemez.</li>
+</ul>
+<div class="hucre" id="h-ttest">
+<div class="hucre-ust"><span class="ad">🐍 Bağımsız t-testi: iki şubenin maaşları<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="38" aria-label="Bağımsız t-testi: iki şubenin maaşları kodu">import numpy as np
+import pandas as pd
+from scipy import stats
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# İki şubenin çalışan maaşları (her biri 30 kişi)
+np.random.seed(42)
+istanbul = np.random.normal(62000, 12000, 30).round()
+ankara = np.random.normal(55000, 11000, 30).round()
+
+pd.DataFrame({'Calisan_ID': range(1, 31), 'Maas': istanbul}).to_csv('sube_istanbul.csv', index=False)
+pd.DataFrame({'Calisan_ID': range(1, 31), 'Maas': ankara}).to_csv('sube_ankara.csv', index=False)
+print("CSV dosyaları oluşturuldu: sube_istanbul.csv ve sube_ankara.csv")
+
+ist = pd.read_csv('sube_istanbul.csv')['Maas']
+ank = pd.read_csv('sube_ankara.csv')['Maas']
+
+# Bağımsız örneklem t-testi
+t_ist, p_degeri = stats.ttest_ind(ist, ank)
+print(f"İstanbul ort. = {ist.mean():,.0f} TL | Ankara ort. = {ank.mean():,.0f} TL")
+print(f"t istatistiği: {t_ist:.4f}")
+print(f"p-değeri     : {p_degeri:.4f}")
+
+if p_degeri &lt; 0.05:
+    print("H0 reddedildi: İki şubenin ortalama maaşları arasında anlamlı fark var.")
+else:
+    print("H0 reddedilemedi: Ortalama maaşlar arasında anlamlı fark bulunamadı.")
+
+plt.figure(figsize=(8, 5))
+sns.histplot(ist, kde=True, color='steelblue', label='İstanbul', alpha=.5)
+sns.histplot(ank, kde=True, color='orange', label='Ankara', alpha=.5)
+plt.title('İki Şubede Maaş Dağılımlarının Karşılaştırılması')
+plt.xlabel('Brüt aylık maaş (TL)')
+plt.ylabel('Frekans')
+plt.legend()
+plt.show()
+</textarea>
+<div class="cikti"></div>
+</div>
+<p class="dene"><b>Deneyin:</b> Ankara'nın ortalamasını 55000'den 61000'e çekin ve p-değerinin 0,05'in üzerine çıktığını görün. Gerçek İK verisinde varyanslar eşit değilse <code>equal_var=False</code> (Welch testi) kullanın.</p>
+</div>
+<div class="blok" id="b-anova" data-baslik="Tek yönlü ANOVA ve Tukey post hoc testi">
+<h3>Tek yönlü varyans analizi (ANOVA)</h3>
+<p>ANOVA, üç ya da daha fazla bağımsız grubun ortalamalarını tek seferde karşılaştırır. Birden çok t-testi yapmak birinci tip hata olasılığını şişireceği için bu durumda ANOVA tercih edilir.</p>
+<ul>
+<li><b>H₀:</b> Üç departmanın ortalama eğitim saatleri eşittir. <b>H₁:</b> En az bir departmanın ortalaması farklıdır.</li>
+<li><b>F istatistiği:</b> Gruplar arası değişkenliğin grup içi değişkenliğe oranıdır; büyük F, gruplar arasında belirgin fark olduğuna işaret eder.</li>
+<li>ANOVA anlamlı çıkarsa <b>hangi</b> grupların farklı olduğunu bulmak için <b>post hoc</b> testler (ör. Tukey HSD) yapılır.</li>
+</ul>
+<div class="hucre" id="h-anova">
+<div class="hucre-ust"><span class="ad">🐍 Tek yönlü ANOVA: departmanlara göre eğitim saati<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="40" aria-label="Tek yönlü ANOVA: departmanlara göre eğitim saati kodu">import numpy as np
+import pandas as pd
+from scipy import stats
+import matplotlib.pyplot as plt
+
+# Üç departmanda çalışanların yıllık eğitim saatleri (her biri 30 kişi)
+np.random.seed(42)
+satis  = np.random.normal(24, 8, 30).round(1)
+uretim = np.random.normal(26, 8, 30).round(1)
+bt     = np.random.normal(34, 8, 30).round(1)
+
+for ad, veri in [('satis', satis), ('uretim', uretim), ('bt', bt)]:
+    pd.DataFrame({'Calisan_ID': range(1, 31), 'Egitim_Saati': veri}).to_csv(f'egitim_{ad}.csv', index=False)
+print("CSV dosyaları oluşturuldu: egitim_satis.csv, egitim_uretim.csv, egitim_bt.csv")
+
+d1 = pd.read_csv('egitim_satis.csv')['Egitim_Saati']
+d2 = pd.read_csv('egitim_uretim.csv')['Egitim_Saati']
+d3 = pd.read_csv('egitim_bt.csv')['Egitim_Saati']
+
+# Tek yönlü ANOVA
+f_ist, p_degeri = stats.f_oneway(d1, d2, d3)
+print(f"F istatistiği: {f_ist:.4f}")
+print(f"p-değeri     : {p_degeri:.6f}")
+
+if p_degeri &lt; 0.05:
+    print("Departmanlar arasında eğitim saatleri bakımından anlamlı fark var.")
+    # Hangi departmanlar farklı? -&gt; Tukey HSD post hoc testi
+    sonuc = stats.tukey_hsd(d1, d2, d3)
+    print("\nTukey HSD (0=Satış, 1=Üretim, 2=BT):")
+    print(sonuc)
+else:
+    print("Departmanlar arasında anlamlı fark yok.")
+
+# Ortalamalar ve hata çubukları (±1 standart hata)
+ort = [d1.mean(), d2.mean(), d3.mean()]
+se = [stats.sem(d1), stats.sem(d2), stats.sem(d3)]
+plt.figure(figsize=(7, 5))
+plt.bar(['Satış', 'Üretim', 'BT'], ort, yerr=se, capsize=8,
+        color=['#4C72B0', '#DD8452', '#55A868'])
+plt.title('Departmanlara Göre Ortalama Yıllık Eğitim Saati (±SH)')
+plt.ylabel('Eğitim saati')
+plt.show()
+</textarea>
+<div class="cikti"></div>
+</div>
+</div>
+<div class="blok" id="b-ftest" data-baslik="F-testi: iki varyansın karşılaştırılması">
+<h3>F-testi: iki varyansın karşılaştırılması</h3>
+<p>F-testi, iki veri setinin yayılımlarının (varyanslarının) anlamlı biçimde farklı olup olmadığını sınar. Çoğu zaman t-testinin <b>eşit varyans</b> varsayımını kontrol etmek için kullanılır. F değeri 1'den belirgin biçimde büyük ya da küçükse varyanslar eşit değildir.</p>
+<ul>
+<li><b>H₀:</b> İki şubede performans puanlarının varyansları eşittir. <b>H₁:</b> Varyanslar farklıdır.</li>
+<li>Anlamlı bir fark, bir şubede performans değerlendirmesinin daha tutarsız (ör. değerlendirici kaynaklı) olduğuna işaret edebilir.</li>
+</ul>
+<div class="not uyari"><b>Kitaptaki koda göre düzeltme:</b> Özgün kodda ekrana çift yönlü p-değeri yazdırılırken karar tek yönlü <code>f.cdf</code> değerine göre veriliyordu. Burada karar da çift yönlü p-değerine göre verilir.</div>
+<div class="hucre" id="h-ftest">
+<div class="hucre-ust"><span class="ad">🐍 F-testi: performans puanlarının varyansı<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="33" aria-label="F-testi: performans puanlarının varyansı kodu">import numpy as np
+import pandas as pd
+from scipy import stats
+
+# İki şubede performans puanları (0-100): ortalamalar benzer, yayılım farklı
+np.random.seed(42)
+sube_a = np.random.normal(70, 8, 30).round(1)
+sube_b = np.random.normal(70, 14, 30).round(1)
+
+pd.DataFrame({'Calisan_ID': range(1, 31), 'Performans': sube_a}).to_csv('performans_a.csv', index=False)
+pd.DataFrame({'Calisan_ID': range(1, 31), 'Performans': sube_b}).to_csv('performans_b.csv', index=False)
+print("CSV dosyaları oluşturuldu: performans_a.csv ve performans_b.csv")
+
+a = pd.read_csv('performans_a.csv')['Performans']
+b = pd.read_csv('performans_b.csv')['Performans']
+
+# F-testi: iki varyansın oranı
+f_ist = np.var(a, ddof=1) / np.var(b, ddof=1)
+df1, df2 = len(a) - 1, len(b) - 1
+p_tek = stats.f.cdf(f_ist, df1, df2)
+p_cift = 2 * min(p_tek, 1 - p_tek)   # çift yönlü p-değeri
+
+print(f"Varyans A = {np.var(a, ddof=1):.2f} | Varyans B = {np.var(b, ddof=1):.2f}")
+print(f"F istatistiği: {f_ist:.4f}")
+print(f"p-değeri (çift yönlü): {p_cift:.6f}")
+
+# Not: Karar çift yönlü p-değerine göre verilir.
+if p_cift &lt; 0.05:
+    print("İki şubenin performans puanlarının varyansları anlamlı biçimde farklı.")
+    print("-&gt; t-testinde eşit varyans varsayımı yerine Welch t-testi (equal_var=False) kullanın.")
+else:
+    print("Varyanslar arasında anlamlı fark yok.")
+</textarea>
+<div class="cikti"></div>
+</div>
+</div>
+<div class="blok" id="b-korelasyon" data-baslik="Korelasyon katsayısı (Pearson)">
+<h3>Korelasyon katsayısı</h3>
+<p>Pearson korelasyon katsayısı (<i>r</i>), iki değişken arasındaki <b>doğrusal</b> ilişkinin yönünü ve gücünü −1 ile +1 arasında ölçer:</p>
+<ul>
+<li><b>+1:</b> Kusursuz pozitif ilişki — biri artarken diğeri de artar.</li>
+<li><b>−1:</b> Kusursuz negatif ilişki — biri artarken diğeri azalır.</li>
+<li><b>0:</b> Doğrusal ilişki yok.</li>
+</ul>
+<p>Saçılım grafiği ve üzerine çizilen regresyon doğrusu, sayısal sonucu görsel olarak destekler. Korelasyonun <b>nedensellik</b> anlamına gelmediğini unutmayın: Eğitime daha çok katılanlar zaten daha motive çalışanlar olabilir.</p>
+<div class="hucre" id="h-korelasyon">
+<div class="hucre-ust"><span class="ad">🐍 Korelasyon: eğitim saati ve performans<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="33" aria-label="Korelasyon: eğitim saati ve performans kodu">import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# 50 çalışan: yıllık eğitim saati ve performans puanı
+np.random.seed(42)
+egitim = np.random.randint(5, 80, 50)
+performans = (50 + 0.35 * egitim + np.random.normal(0, 8, 50)).clip(0, 100).round(1)
+pd.DataFrame({'Egitim_Saati': egitim, 'Performans_Puani': performans}).to_csv('egitim_performans.csv', index=False)
+print("CSV dosyası oluşturuldu: egitim_performans.csv")
+
+veri = pd.read_csv('egitim_performans.csv')
+
+r = veri['Egitim_Saati'].corr(veri['Performans_Puani'])   # Pearson
+print(f"Eğitim saati ile performans puanı arasındaki korelasyon katsayısı: {r:.4f}")
+
+if r &gt; 0:
+    print("Pozitif korelasyon: eğitim saati arttıkça performans puanı artma eğiliminde.")
+elif r &lt; 0:
+    print("Negatif korelasyon: eğitim saati arttıkça performans puanı azalma eğiliminde.")
+else:
+    print("Korelasyon yok.")
+
+plt.figure(figsize=(8, 5))
+sns.scatterplot(x='Egitim_Saati', y='Performans_Puani', data=veri)
+sns.regplot(x='Egitim_Saati', y='Performans_Puani', data=veri, scatter=False, color='red')
+plt.title(f'Eğitim Saati – Performans (r = {r:.2f})')
+plt.xlabel('Yıllık eğitim saati')
+plt.ylabel('Performans puanı')
+plt.grid(True)
+plt.show()
+</textarea>
+<div class="cikti"></div>
+</div>
+</div>
+<div class="blok" id="b-regresyon" data-baslik="Basit doğrusal regresyon">
+<h3>Basit doğrusal regresyon</h3>
+<ul>
+<li><b>Regresyon katsayısı (eğim):</b> Eğitim saati bir birim arttığında performans puanının ortalama ne kadar değiştiğini gösterir. Pozitif eğim artışı, negatif eğim azalışı, sıfır eğim ilişkisizliği anlatır.</li>
+<li><b>Sabit (kesişim):</b> Bağımsız değişken sıfırken bağımlı değişkenin tahmini değeridir; her zaman pratik bir yorumu olmasa da doğru denklemini kurmak için gereklidir.</li>
+<li><b>R²:</b> Bağımlı değişkendeki varyansın model tarafından açıklanan oranıdır.</li>
+<li><b>Karar desteği:</b> Eğitim bütçesi planlanırken ek eğitim saatinin beklenen performans getirisi tahmin edilebilir.</li>
+</ul>
+<div class="hucre" id="h-regresyon">
+<div class="hucre-ust"><span class="ad">🐍 Doğrusal regresyon: performansı tahmin etmek<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="31" aria-label="Doğrusal regresyon: performansı tahmin etmek kodu">import os
+import numpy as np
+import pandas as pd
+from sklearn.linear_model import LinearRegression
+
+# Önceki hücrenin ürettiği dosya yoksa yeniden üret
+if not os.path.exists('egitim_performans.csv'):
+    np.random.seed(42)
+    egitim = np.random.randint(5, 80, 50)
+    performans = (50 + 0.35 * egitim + np.random.normal(0, 8, 50)).clip(0, 100).round(1)
+    pd.DataFrame({'Egitim_Saati': egitim, 'Performans_Puani': performans}).to_csv('egitim_performans.csv', index=False)
+
+veri = pd.read_csv('egitim_performans.csv')
+
+X = veri[['Egitim_Saati']]
+y = veri['Performans_Puani']
+
+model = LinearRegression()
+model.fit(X, y)
+
+egim = model.coef_[0]
+sabit = model.intercept_
+print(f"Regresyon katsayısı (eğim): {egim:.4f}")
+print(f"Sabit (kesişim)           : {sabit:.4f}")
+print(f"R² (açıklanan varyans)    : {model.score(X, y):.4f}")
+print(f"\nModel: Performans = {sabit:.2f} + {egim:.3f} × Eğitim_Saati")
+
+yeni = pd.DataFrame({'Egitim_Saati': [20, 40, 60]})
+for s, tahmin in zip(yeni['Egitim_Saati'], model.predict(yeni)):
+    print(f"{s} saat eğitim alan çalışan için tahmini performans: {tahmin:.1f}")
+</textarea>
+<div class="cikti"></div>
+</div>
+</div>
+<div class="blok" id="b-karsi-kullanim" data-baslik="Karşılaştırmalı istatistik ne zaman kullanılır? Tanımlayıcı ile farkı">
+<h3>Karşılaştırmalı istatistik ne zaman kullanılır?</h3>
+<ul>
+<li><b>Gruplar arası fark:</b> A/B denemeleri — iki farklı oryantasyon programına katılanların ilk 90 gündeki ayrılma oranları.</li>
+<li><b>Müdahale etkisi:</b> Esnek çalışma uygulamasından önce ve sonra devamsızlık günleri.</li>
+<li><b>Değişkenler arası ilişki:</b> Ücret artış oranı ile bağlılık puanı.</li>
+<li><b>Kıyaslama (benchmarking):</b> Şirketin gönüllü ayrılma oranını sektör ortalamasıyla karşılaştırmak.</li>
+<li><b>Bölgesel/demografik karşılaştırma:</b> Farklı illerdeki şubelerin yan hak tercihleri.</li>
+<li><b>Zaman içindeki değişim:</b> 2025 ve 2026 yıllarının işe alım maliyetleri.</li>
+</ul>
+<table class="tablo">
+<tr><th>Özellik</th><th>Tanımlayıcı istatistik</th><th>Karşılaştırmalı istatistik</th></tr>
+<tr><td>Amaç</td><td>Veriyi özetler</td><td>Verileri karşılaştırır</td></tr>
+<tr><td>Yöntemler</td><td>Ortalama, medyan, mod, standart sapma</td><td>t-testi, ANOVA, korelasyon, regresyon</td></tr>
+<tr><td>Örnek</td><td>“Ortalama brüt maaş 58.000 TL'dir.”</td><td>“Kadın ve erkek çalışanların maaşları farklı mı?”</td></tr>
+</table>
+</div>
+</section>
+
+<section class="bolum" id="kumeleme" data-baslik="3. Kümeleme">
+<h2>3. Kümeleme</h2>
+<div class="blok" id="b-kume" data-baslik="Kümeleme nedir?">
+<p>Kümeleme ve birliktelik, <b>denetimsiz öğrenme</b> tekniklerindendir: algoritma etiketli bir çıktı olmadan verinin içindeki yapıyı keşfeder. <b>Kümeleme</b>, benzer özellikteki gözlemleri aynı gruba toplar; amaç, küme içindeki gözlemlerin birbirine diğer kümelerdekilerden daha çok benzemesidir. İK'da çalışan segmentasyonu (ör. “yüksek potansiyelli genç yetenekler”, “deneyimli uzmanlar”), aday havuzunun gruplanması ya da olağan dışı bordro hareketlerinin tespitinde kullanılır.</p>
+<p>Yaygın algoritmalar: <b>K-ortalamalar</b> (önceden belirlenen K kümeye böler), <b>hiyerarşik kümeleme</b> (benzerliğe göre küme ağacı kurar) ve <b>DBSCAN</b> (yoğun bölgeleri gruplar).</p>
+</div>
+<div class="blok" id="b-kmeans" data-baslik="K-ortalamalar (K-means) kümeleme">
+<h3>K-ortalamalar (K-means)</h3>
+<ol>
+<li><b>Başlatma:</b> K adet başlangıç merkezi (centroid) seçilir.</li>
+<li><b>Atama:</b> Her gözlem en yakın merkezin kümesine atanır.</li>
+<li><b>Güncelleme:</b> Her kümenin merkezi, kümedeki gözlemlerin ortalaması olarak yeniden hesaplanır.</li>
+<li><b>Tekrar:</b> Merkezler belirgin biçimde değişmeyene ya da yineleme sınırına ulaşılana kadar 2. ve 3. adımlar tekrarlanır.</li>
+</ol>
+<p>Aşağıda 10 çalışan <i>kıdem (yıl)</i> ve <i>yetkinlik puanı</i> boyutlarında üç kümeye ayrılıyor. Kitapta yalnızca sorularda geçen <b>dirsek (elbow) yöntemi</b> de eklendi: Küme içi kareler toplamının düşüşünün yavaşladığı “dirsek” noktası uygun K değerini önerir.</p>
+<div class="hucre" id="h-kmeans">
+<div class="hucre-ust"><span class="ad">🐍 K-ortalamalar: çalışan segmentasyonu<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="38" aria-label="K-ortalamalar: çalışan segmentasyonu kodu">import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+import numpy as np
+
+# 10 çalışan: [kıdem (yıl), yetkinlik puanı]
+veri = np.array([[2, 3], [5, 7], [8, 8], [3, 4], [4, 5],
+                 [10, 11], [8, 9], [2, 2], [9, 8], [8, 10]])
+
+k = 3
+kmeans = KMeans(n_clusters=k, n_init=10, random_state=0)
+kmeans.fit(veri)
+
+etiketler = kmeans.labels_
+merkezler = kmeans.cluster_centers_
+
+plt.figure(figsize=(7, 5))
+plt.scatter(veri[:, 0], veri[:, 1], c=etiketler, cmap='viridis', marker='o', s=100)
+plt.scatter(merkezler[:, 0], merkezler[:, 1], c='red', marker='X', s=200, label='Küme merkezi')
+plt.title(f'K-Ortalamalar ile Çalışan Segmentasyonu (K={k})')
+plt.xlabel('Kıdem (yıl)')
+plt.ylabel('Yetkinlik puanı')
+plt.legend()
+plt.show()
+
+for i in range(k):
+    print(f'Küme {i + 1} (merkez: {merkezler[i].round(2)}) şu çalışanları içerir:')
+    print(veri[etiketler == i])
+    print()
+
+# Dirsek (elbow) yöntemi: uygun küme sayısı
+ataletler = [KMeans(n_clusters=j, n_init=10, random_state=0).fit(veri).inertia_ for j in range(1, 7)]
+plt.figure(figsize=(6, 4))
+plt.plot(range(1, 7), ataletler, 'o-')
+plt.title('Dirsek Yöntemi')
+plt.xlabel('Küme sayısı (K)')
+plt.ylabel('Küme içi kareler toplamı (inertia)')
+plt.show()
+</textarea>
+<div class="cikti"></div>
+</div>
+<div class="not"><b>Not:</b> Değişkenlerin ölçekleri çok farklıysa (ör. maaş TL, kıdem yıl) K-ortalamalardan önce <code>StandardScaler</code> ile standartlaştırma yapılmalıdır; aksi hâlde büyük ölçekli değişken uzaklığa hâkim olur.</div>
+</div>
+<div class="blok" id="b-hiyerarsik" data-baslik="Hiyerarşik kümeleme ve dendrogram">
+<h3>Hiyerarşik kümeleme</h3>
+<p>Hiyerarşik yöntemler tek bir bölümleme yerine <b>dendrogram</b> adı verilen ağaç biçiminde bir küme hiyerarşisi üretir.</p>
+<ul>
+<li><b>Birleştirici (aglomeratif, aşağıdan yukarı):</b> Her gözlem kendi kümesiyle başlar; en yakın kümeler adım adım birleştirilir. Bağlantı yöntemleri: tekli (en kısa uzaklık), tam (en uzun uzaklık), ortalama ve Ward (küme içi varyansı en küçükleyen).</li>
+<li><b>Bölücü (yukarıdan aşağı):</b> Tüm gözlemler tek kümede başlar ve yinelemeli olarak bölünür; hesaplama yükü nedeniyle daha az kullanılır.</li>
+</ul>
+<p>Küme sayısını önceden belirlemek gerekmez; dendrogram belirli bir yükseklikten “kesilerek” istenen küme sayısı seçilir. Uygulama alanları: taksonomiler, belge kümeleme, müşteri/çalışan segmentasyonu, anomali tespiti. İK'da yetkinlik profillerine göre iş ailelerinin (job families) oluşturulması iyi bir örnektir.</p>
+<div class="hucre" id="h-hiyerarsik">
+<div class="hucre-ust"><span class="ad">🐍 Hiyerarşik kümeleme + dendrogram<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="29" aria-label="Hiyerarşik kümeleme + dendrogram kodu">import matplotlib.pyplot as plt
+from sklearn.cluster import AgglomerativeClustering
+from scipy.cluster.hierarchy import dendrogram, linkage
+import numpy as np
+
+# 10 çalışan: [kıdem (yıl), yetkinlik puanı]
+veri = np.array([[2, 3], [5, 7], [8, 8], [3, 4], [4, 5],
+                 [10, 11], [8, 9], [2, 2], [9, 8], [8, 10]])
+
+n_kume = 3
+model = AgglomerativeClustering(n_clusters=n_kume)   # varsayılan: Ward bağlantısı
+etiketler = model.fit_predict(veri)
+print("Küme etiketleri:", etiketler)
+
+plt.figure(figsize=(7, 5))
+plt.scatter(veri[:, 0], veri[:, 1], c=etiketler, cmap='viridis', marker='o', s=100)
+plt.title(f'Hiyerarşik Kümeleme ({n_kume} küme)')
+plt.xlabel('Kıdem (yıl)')
+plt.ylabel('Yetkinlik puanı')
+plt.show()
+
+# Dendrogram (kitapta yalnızca söz edilen ağaç diyagramı)
+Z = linkage(veri, method='ward')
+plt.figure(figsize=(8, 4))
+dendrogram(Z, labels=[f'Ç{i+1}' for i in range(len(veri))])
+plt.title('Dendrogram (Ward bağlantısı)')
+plt.ylabel('Uzaklık')
+plt.show()
+</textarea>
+<div class="cikti"></div>
+</div>
+</div>
+<div class="blok" id="b-dbscan" data-baslik="Yoğunluk tabanlı kümeleme: DBSCAN ve OPTICS">
+<h3>Yoğunluk tabanlı kümeleme: DBSCAN ve OPTICS</h3>
+<p>Yoğunluk tabanlı yöntemler kümeleri, gözlemlerin yerel yoğunluğuna göre bulur; bu sayede <b>her biçimde</b> kümeyi yakalayabilir ve gürültüyü ayırabilir.</p>
+<ul>
+<li><b>DBSCAN</b> üç tür nokta tanımlar: <b>çekirdek noktalar</b> (<code>eps</code> uzaklığı içinde en az <code>min_samples</code> komşusu olanlar), <b>sınır noktalar</b> (bir çekirdeğin <code>eps</code> komşuluğunda ama yeterli komşusu olmayanlar) ve <b>gürültü noktaları</b> (hiçbiri; etiketi −1).</li>
+<li><b>OPTICS</b>, DBSCAN fikrini genişleterek erişilebilirlik uzaklıklarına göre sıralanmış bir hiyerarşik görünüm (erişilebilirlik grafiği) üretir.</li>
+</ul>
+<p>Güçlü yanları: farklı yoğunluk ve biçimdeki kümeleri bulma, küme sayısını veriden belirleme ve aykırı değerleri açıkça işaretleme. Aşağıda kitaptaki yapay “ay” veri seti yerine çalışanların <i>aylık fazla mesai</i> ve <i>yıllık kullanılan izin</i> verisi kullanıldı: DBSCAN iki çalışma örüntüsünü kümeler, sıra dışı kombinasyonları ise <b>aykırı</b> olarak işaretler (ör. tükenmişlik riski ya da hatalı puantaj kaydı).</p>
+<div class="hucre" id="h-dbscan">
+<div class="hucre-ust"><span class="ad">🐍 DBSCAN: fazla mesai – izin örüntüleri<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="33" aria-label="DBSCAN: fazla mesai – izin örüntüleri kodu">import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.cluster import DBSCAN
+from sklearn.preprocessing import StandardScaler
+
+# 200 çalışan: aylık fazla mesai (saat) ve yıllık kullanılan izin (gün)
+np.random.seed(0)
+grup1 = np.column_stack([np.random.normal(8, 3, 90), np.random.normal(16, 3, 90)])    # dengeli
+grup2 = np.column_stack([np.random.normal(30, 4, 90), np.random.normal(6, 2, 90)])    # yoğun mesai, az izin
+aykiri = np.column_stack([np.random.uniform(0, 60, 20), np.random.uniform(0, 30, 20)])  # sıra dışı örüntüler
+X = np.vstack([grup1, grup2, aykiri]).clip(0)
+
+X_olcekli = StandardScaler().fit_transform(X)   # mesafe tabanlı yöntemlerde ölçekleme şart
+
+dbscan = DBSCAN(eps=0.3, min_samples=5)
+etiketler = dbscan.fit_predict(X_olcekli)
+
+kume_sayisi = len(set(etiketler)) - (1 if -1 in etiketler else 0)
+print(f"Bulunan küme sayısı: {kume_sayisi}")
+print(f"Gürültü/aykırı olarak işaretlenen çalışan sayısı: {(etiketler == -1).sum()}")
+print(pd.Series(etiketler).value_counts().rename('çalışan sayısı').to_string())
+
+plt.figure(figsize=(8, 5))
+plt.scatter(X[:, 0], X[:, 1], c=etiketler, cmap='viridis', marker='o', s=30)
+plt.scatter(X[etiketler == -1, 0], X[etiketler == -1, 1], facecolors='none',
+            edgecolors='red', s=90, label='Aykırı (-1)')
+plt.title('DBSCAN: Fazla Mesai – İzin Kullanımı')
+plt.xlabel('Aylık fazla mesai (saat)')
+plt.ylabel('Yıllık kullanılan izin (gün)')
+plt.legend()
+plt.show()
+</textarea>
+<div class="cikti"></div>
+</div>
+<p class="dene"><b>Deneyin:</b> <code>eps</code> değerini 0.2 ve 0.5 yapın; küme ve aykırı sayısının nasıl değiştiğine bakın. Bu iki parametre veri setine göre ayarlanmalıdır.</p>
+</div>
+<div class="blok" id="b-kume-kullanim" data-baslik="Kümeleme ne zaman kullanılır? (İK örnekleri)">
+<h3>Kümeleme ne zaman kullanılır?</h3>
+<table class="tablo">
+<tr><th>Kullanım</th><th>Yarar</th><th>İK örneği</th></tr>
+<tr><td>Segmentasyon</td><td>Hedefli politika ve kişiselleştirme</td><td>Çalışanları kariyer evresi ve beklentilerine göre gruplayıp farklı yan hak paketleri sunmak</td></tr>
+<tr><td>Anomali tespiti</td><td>Hata/suistimal yakalama</td><td>Hiçbir kümeye uymayan masraf beyanları ya da puantaj kayıtları</td></tr>
+<tr><td>Veriyi sadeleştirme</td><td>Kolay görselleştirme ve yorum</td><td>Binlerce iş unvanını birkaç iş ailesine indirgemek</td></tr>
+<tr><td>Öneri sistemleri</td><td>Kişiye özel içerik</td><td>Benzer profildeki çalışanların aldığı eğitimleri önermek</td></tr>
+<tr><td>Metin kümeleme</td><td>Belge yönetimi</td><td>Çıkış mülakatı yorumlarını konularına göre gruplamak</td></tr>
+<tr><td>Eğilim analizi</td><td>Stratejik karar</td><td>İş ilanlarında yükselen yetkinlik kümelerini izlemek</td></tr>
+</table>
+</div>
+</section>
+
+<section class="bolum" id="birliktelik" data-baslik="4. Birliktelik kuralları">
+<h2>4. Birliktelik kuralları</h2>
+<div class="blok" id="b-birlik" data-baslik="Birliktelik kuralı madenciliği nedir?">
+<p><b>Birliktelik</b>, büyük veri setlerinde değişkenler arasındaki ilişkileri “EĞER … İSE …” biçiminde kurallarla ortaya çıkaran kural tabanlı bir yöntemdir. En bilinen uygulaması pazar sepeti analizidir. İK'da bir çalışanın katıldığı eğitimler, seçtiği yan haklar, sahip olduğu sertifikalar ya da iş ilanlarında birlikte istenen yetkinlikler birer “sepet” olarak düşünülebilir: “Liderlik eğitimi alanlar çoğunlukla İletişim eğitimi de alıyor.”</p>
+<p>Yaygın algoritmalar: <b>Apriori</b> (sık öğe kümelerini bulur ve kuralları türetir), <b>Eclat</b> (bellek açısından daha verimli bir seçenek) ve <b>FP-Growth</b> (ağaç yapısıyla aday üretmeden çalışır).</p>
+</div>
+<div class="blok" id="b-metrikler" data-baslik="Destek, güven ve lift ölçüleri">
+<h3>Temel kavramlar ve ölçüler</h3>
+<ul>
+<li><b>Sık öğe kümesi:</b> Belirlenen eşikten (minimum destek) daha sık birlikte görülen öğeler topluluğu.</li>
+<li><b>Birliktelik kuralı:</b> Öncül (EĞER kısmı, <i>antecedent</i>) ve sonuç (İSE kısmı, <i>consequent</i>) olmak üzere iki parçadan oluşur: {Liderlik} ⇒ {İletişim}.</li>
+<li><b>Destek (support):</b> Öğe kümesini içeren kayıtların oranı. <span class="formul">destek(A⇒B) = P(A ∩ B)</span></li>
+<li><b>Güven (confidence):</b> Öncül varken sonucun da görülme koşullu olasılığı. <span class="formul">güven(A⇒B) = P(B | A)</span></li>
+<li><b>Lift:</b> Kuralın, iki öğe bağımsız olsaydı beklenene göre gücü. <span class="formul">lift = güven(A⇒B) / P(B)</span> — 1'den büyükse pozitif, küçükse negatif birliktelik vardır.</li>
+<li><b>Minimum destek ve güven:</b> Kullanıcının belirlediği eşiklerdir; bunları karşılamayan kurallar elenir.</li>
+<li><b>Apriori özelliği:</b> Bir öğe kümesi sık ise onun tüm alt kümeleri de sıktır. Bu özellik arama uzayını budamayı sağlar.</li>
+</ul>
+</div>
+<div class="blok" id="b-apriori" data-baslik="Apriori algoritması">
+<h3>Apriori algoritması</h3>
+<ol>
+<li><b>Başlatma:</b> Tek öğeli kümelerle başlanır, her birinin desteği hesaplanır.</li>
+<li><b>Aday üretme:</b> k öğeli sık kümelerden (k+1) öğeli aday kümeler oluşturulur.</li>
+<li><b>Budama:</b> Alt kümelerinden biri sık olmayan adaylar elenir.</li>
+<li><b>Destek hesaplama:</b> Kalan adayların desteği veri taranarak bulunur.</li>
+<li><b>Tekrar:</b> Yeni sık küme bulunamayana dek 2–4. adımlar tekrarlanır.</li>
+</ol>
+<p>Aşağıda beş çalışanın yıl içinde katıldığı eğitimler analiz ediliyor. Kod önce <code>mlxtend</code> kütüphanesini tarayıcıya kurmayı dener (internet bağlantısı gerekir); kurulamazsa sayfaya gömülü, aynı sonuçları veren yedek fonksiyonları kullanır.</p>
+<div class="hucre" id="h-apriori">
+<div class="hucre-ust"><span class="ad">🐍 Apriori: eğitim katılım sepetleri<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="38" aria-label="Apriori: eğitim katılım sepetleri kodu">import pandas as pd
+try:
+    import micropip
+    await micropip.install('mlxtend==0.23.4')   # Pyodide'deki pandas sürümüyle uyumlu
+    from mlxtend.frequent_patterns import apriori, association_rules
+    from mlxtend.preprocessing import TransactionEncoder
+    print("mlxtend yüklendi.")
+except Exception as hata:
+    from ik_yardimci import apriori, association_rules, TransactionEncoder
+    print("mlxtend yüklenemedi, yerleşik yedek fonksiyonlar kullanılıyor.")
+
+# Her satır: bir çalışanın yıl içinde katıldığı eğitimler
+kayitlar = [
+    ['Excel', 'İletişim', 'Zaman Yönetimi'],
+    ['Excel', 'Liderlik', 'Zaman Yönetimi'],
+    ['İletişim', 'Liderlik', 'Zaman Yönetimi'],
+    ['Excel', 'İletişim', 'Liderlik', 'Zaman Yönetimi'],
+    ['Excel', 'İletişim', 'Liderlik']
+]
+
+te = TransactionEncoder()
+te_dizi = te.fit(kayitlar).transform(kayitlar)
+df = pd.DataFrame(te_dizi, columns=te.columns_)
+print(df.astype(int))
+
+min_destek = 0.2
+sik_kumeler = apriori(df, min_support=min_destek, use_colnames=True)
+kume_yaz = lambda k: '{' + ', '.join(sorted(k)) + '}'   # frozenset -&gt; okunur metin
+print("\nSık öğe kümeleri:")
+print(sik_kumeler.assign(itemsets=sik_kumeler['itemsets'].map(kume_yaz)).to_string())
+
+kurallar = association_rules(sik_kumeler, metric="confidence", min_threshold=0.7)
+print("\nBirliktelik kuralları:")
+tablo = kurallar[['antecedents', 'consequents', 'support', 'confidence', 'lift']].copy()
+tablo['antecedents'] = tablo['antecedents'].map(kume_yaz)
+tablo['consequents'] = tablo['consequents'].map(kume_yaz)
+print(tablo.round(4).to_string())
+</textarea>
+<div class="cikti"></div>
+</div>
+<div class="not"><b>Yorum:</b> {Liderlik} ⇒ {İletişim} kuralının güveni 0,75'tir: Liderlik eğitimi alanların %75'i İletişim eğitimini de almıştır. Ancak lift 0,94 (&lt; 1) olduğundan bu birliktelik, İletişim eğitiminin zaten yaygın olmasından (%80) kaynaklanmaktadır; gerçek bir “çekim” yoktur.</div>
+</div>
+<div class="blok" id="b-fpgrowth" data-baslik="FP-Growth (sık örüntü büyütme) algoritması">
+<h3>FP-Growth (Frequent Pattern Growth)</h3>
+<p>FP-Growth, Apriori'deki gibi aday küme üretmeden sık öğe kümelerini bulan, büyük veride daha ölçeklenebilir bir algoritmadır:</p>
+<ol>
+<li><b>Frekans tablosu:</b> Veri bir kez taranır, her öğenin destek sayısı bulunur; eşiğin altındakiler atılır, kalanlar sıklığa göre azalan sırada dizilir.</li>
+<li><b>FP-ağacının kurulması:</b> “null” kök düğümüyle başlanır; her kayıt, seyrek öğeleri atılıp sıralandıktan sonra ağaca eklenir. Ortak önekler aynı yolu paylaşır ve yol üzerindeki sayaçlar artırılır; aynı öğeye ait düğümler bağlantılarla birbirine bağlanır.</li>
+<li><b>Ağacın özyinelemeli madenciliği:</b> En seyrek öğeden başlayarak her öğe için koşullu örüntü tabanı ve koşullu FP-ağacı kurulur, sık örüntüler böl-ve-yönet yaklaşımıyla çıkarılır.</li>
+</ol>
+<p><b>Avantajları:</b> aday üretimi yok, veriyi sıkıştırır, uzun öğe kümelerinde hızlıdır. <b>Sınırlılıkları:</b> ağaç bellek tüketebilir, küçük verilerde Apriori kadar sezgisel değildir, ortak öneki az olan çok çeşitli verilerde karmaşıklaşır.</p>
+<div class="hucre" id="h-fpgrowth">
+<div class="hucre-ust"><span class="ad">🐍 FP-Growth: esnek yan hak tercihleri<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="34" aria-label="FP-Growth: esnek yan hak tercihleri kodu">import pandas as pd
+try:
+    import micropip
+    await micropip.install('mlxtend==0.23.4')   # Pyodide'deki pandas sürümüyle uyumlu
+    from mlxtend.frequent_patterns import fpgrowth, association_rules
+    from mlxtend.preprocessing import TransactionEncoder
+except Exception:
+    from ik_yardimci import fpgrowth, association_rules, TransactionEncoder
+
+# Her satır: bir çalışanın seçtiği yan haklar (esnek yan hak paketi)
+tercihler = [
+    ['Özel Sağlık', 'Yemek Kartı', 'Spor Salonu'],
+    ['Özel Sağlık', 'Yemek Kartı', 'Esnek Çalışma'],
+    ['Özel Sağlık', 'Yemek Kartı'],
+    ['Yemek Kartı', 'Esnek Çalışma'],
+    ['Özel Sağlık', 'Yemek Kartı', 'Esnek Çalışma', 'Spor Salonu']
+]
+
+te = TransactionEncoder()
+te_dizi = te.fit(tercihler).transform(tercihler)
+df = pd.DataFrame(te_dizi, columns=te.columns_)
+
+sik_kumeler = fpgrowth(df, min_support=0.6, use_colnames=True)
+kurallar = association_rules(sik_kumeler, metric="confidence", min_threshold=0.7)
+
+kume_yaz = lambda k: '{' + ', '.join(sorted(k)) + '}'
+print("Sık öğe kümeleri:")
+print(sik_kumeler.assign(itemsets=sik_kumeler['itemsets'].map(kume_yaz)).to_string())
+print("\nBirliktelik kuralları:")
+tablo = kurallar[['antecedents', 'consequents', 'support', 'confidence', 'lift']].copy()
+tablo['antecedents'] = tablo['antecedents'].map(kume_yaz)
+tablo['consequents'] = tablo['consequents'].map(kume_yaz)
+print(tablo.round(4).to_string())
+</textarea>
+<div class="cikti"></div>
+</div>
+<p class="dene"><b>Yorum:</b> <code>min_support=0.6</code> öğe kümelerinin kayıtların en az %60'ında görülmesini, <code>min_threshold=0.7</code> kuralların en az %70 güvenle sağlanmasını ister. {Esnek Çalışma} ⇒ {Yemek Kartı} kuralının güveni 1,0'dır; ama Yemek Kartı herkes tarafından seçildiği için lift = 1, yani bilgi değeri sınırlıdır.</p>
+</div>
+<div class="blok" id="b-birlik-kullanim" data-baslik="Birliktelik ne zaman kullanılır? Kümeleme ile farkı">
+<h3>Birliktelik ne zaman kullanılır?</h3>
+<ul>
+<li><b>Yan hak paketi tasarımı:</b> Birlikte tercih edilen hakları paketleyerek esnek yan hak menüsü oluşturmak.</li>
+<li><b>Eğitim öneri sistemi:</b> “Bu eğitimi alanlar şunları da aldı” önerileri.</li>
+<li><b>Risk/uyum tespiti:</b> Olağan dışı izin–masraf–fazla mesai kombinasyonlarında uyarı üretmek.</li>
+<li><b>İş sağlığı ve güvenliği:</b> Birlikte görülen kaza nedenlerini ve ramak kala olay türlerini ortaya çıkarmak.</li>
+<li><b>Yetkinlik analizi:</b> İş ilanlarında birlikte aranan beceri kombinasyonlarını bulmak.</li>
+<li><b>Çalışan davranışı:</b> Ayrılan çalışanlarda birlikte görülen özellikler (düşük terfi + yüksek mesai + uzun yol süresi).</li>
+</ul>
+<table class="tablo">
+<tr><th>Özellik</th><th>Kümeleme</th><th>Birliktelik</th></tr>
+<tr><td>Amaç</td><td>Benzer gözlemleri gruplamak</td><td>Öğeler arasındaki ilişkileri bulmak</td></tr>
+<tr><td>Veri türü</td><td>Etiketsiz (çoğunlukla sayısal) veri</td><td>İşlem/sepet ya da kategorik veri</td></tr>
+<tr><td>Örnek</td><td>Çalışan segmentasyonu</td><td>Eğitim/yan hak sepeti analizi</td></tr>
+<tr><td>Çıktı</td><td>Benzer gözlemlerden oluşan kümeler</td><td>EĞER–İSE kuralları</td></tr>
+<tr><td>Başlıca algoritmalar</td><td>K-ortalamalar, hiyerarşik, DBSCAN</td><td>Apriori, FP-Growth, Eclat</td></tr>
+</table>
+</div>
+</section>
+
+<section class="bolum" id="hipotez" data-baslik="5. Hipotez üretimi">
+<h2>5. Hipotez üretimi</h2>
+<div class="blok" id="b-hip" data-baslik="Hipotez üretimi nedir? Yedi adım">
+<p><b>Hipotez üretimi</b>, gözlemlere, mevcut bilgiye ya da ön veri analizine dayanarak <b>sınanabilir</b> önermeler formüle etmektir. EDA'nın doğal çıktısıdır: Grafiklerde görülen örüntü, resmî bir testle doğrulanacak bir soruya dönüştürülür.</p>
+<ol>
+<li><b>Problemi anlayın:</b> Ör. “Gönüllü işten ayrılma oranı neden artıyor?”</li>
+<li><b>EDA yapın:</b> Eğilimleri, korelasyonları ve anomalileri görselleştirin (ör. ayrılmalar yeni vardiya düzeninden sonra mı arttı?).</li>
+<li><b>Alan bilgisini toplayın:</b> Hat yöneticileri ve İK iş ortaklarıyla görüşün; ücret ayarlamaları, yöneticilik değişiklikleri gibi bağlamı öğrenin.</li>
+<li><b>Değişkenleri belirleyin:</b> Bağımlı değişken (ayrılma) ve bağımsız değişkenler (memnuniyet, fazla mesai, departman, kıdem).</li>
+<li><b>Hipotezleri yazın:</b> Her biri için H₀ ve H₁ oluşturun.</li>
+<li><b>Önceliklendirin ve netleştirin:</b> En ilgili, ölçülebilir ve sınanabilir olanları seçin.</li>
+<li><b>Sınayın:</b> t-testi, ki-kare, regresyon ya da makine öğrenmesi modelleriyle verinin hipotezi destekleyip desteklemediğini değerlendirin.</li>
+</ol>
+</div>
+<div class="blok" id="b-hip-ornek" data-baslik="İK alanından hipotez örnekleri (H0 / H1)">
+<h3>İK alanından hipotez örnekleri</h3>
+<table class="tablo">
+<tr><th>Alan</th><th>H₀ (sıfır hipotezi)</th><th>H₁ (alternatif hipotez)</th></tr>
+<tr><td>İşe alım</td><td>Çalışan tavsiyesiyle gelen adaylarla diğer kanallardan gelenlerin ilk yıl kalma oranları aynıdır.</td><td>Tavsiyeyle işe alınanların ilk yıl kalma oranı daha yüksektir.</td></tr>
+<tr><td>Eğitim</td><td>Mentorluk programı yeni çalışanların performansını etkilemez.</td><td>Mentorluk alan yeni çalışanların 6. ay performansı daha yüksektir.</td></tr>
+<tr><td>Ücret</td><td>Aynı iş ailesinde kadın ve erkek çalışanların medyan ücretleri arasında fark yoktur.</td><td>Aynı iş ailesinde cinsiyete göre ücret farkı vardır.</td></tr>
+<tr><td>Performans</td><td>Uzaktan ve ofiste çalışanların performans puanları eşittir.</td><td>Hibrit çalışanların performans puanları farklıdır.</td></tr>
+<tr><td>Bağlılık</td><td>Yöneticiyle düzenli birebir görüşme sıklığı bağlılık puanıyla ilişkili değildir.</td><td>Birebir görüşme sıklığı arttıkça bağlılık puanı artar.</td></tr>
+<tr><td>İSG</td><td>Gece vardiyası ile iş kazası sıklığı arasında ilişki yoktur.</td><td>Gece vardiyasında iş kazası sıklığı daha yüksektir.</td></tr>
+<tr><td>İşten ayrılma</td><td>Fazla mesai saatleri ayrılma olasılığını etkilemez.</td><td>Fazla mesai arttıkça ayrılma olasılığı artar.</td></tr>
+</table>
+</div>
+<div class="blok" id="b-hip-kod" data-baslik="Kod: EDA'dan hipoteze — işten ayrılma örneği">
+<h3>Uygulama: EDA'dan hipoteze (bölüm sonu alıştırması 8)</h3>
+<p>300 çalışanlık bir veri setinde önce görselleştirme yapılır, sonra grafiklerden üç hipotez türetilip uygun testlerle sınanır: departman × ayrılma için <b>ki-kare</b>, memnuniyet farkı için <b>Welch t-testi</b>, fazla mesai ile ayrılma için <b>nokta-çift serili korelasyon</b>.</p>
+<div class="hucre" id="h-hipotez">
+<div class="hucre-ust"><span class="ad">🐍 Hipotez üretimi ve sınaması: işten ayrılma<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="40" aria-label="Hipotez üretimi ve sınaması: işten ayrılma kodu">import numpy as np
+import pandas as pd
+from scipy import stats
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# 300 çalışanlık sentetik İK veri seti
+np.random.seed(7)
+n = 300
+departman = np.random.choice(['Satış', 'Üretim', 'BT', 'Finans'], n, p=[.35, .30, .20, .15])
+memnuniyet = np.random.normal(3.4, 0.8, n).clip(1, 5).round(1)
+fazla_mesai = np.random.gamma(2, 6, n).round()
+olasilik = 1 / (1 + np.exp(-(-1.2 - 1.1 * (memnuniyet - 3.4) + 0.05 * (fazla_mesai - 12)
+                             + np.where(departman == 'Satış', 0.6, 0))))
+ayrildi = np.random.binomial(1, olasilik)
+ik = pd.DataFrame({'Departman': departman, 'Memnuniyet': memnuniyet,
+                   'Fazla_Mesai': fazla_mesai, 'Ayrildi': ayrildi})
+
+# 1) KEŞİF: görsel örüntüler
+fig, eksen = plt.subplots(1, 2, figsize=(11, 4))
+ik.groupby('Departman')['Ayrildi'].mean().sort_values().plot.barh(ax=eksen[0], color='indianred')
+eksen[0].set_title('Departmana göre ayrılma oranı')
+sns.boxplot(x='Ayrildi', y='Memnuniyet', data=ik, ax=eksen[1])
+eksen[1].set_xticks([0, 1], ['Kaldı', 'Ayrıldı'])
+eksen[1].set_title('Ayrılma durumuna göre memnuniyet')
+plt.tight_layout()
+plt.show()
+
+# 2) ÜRETİLEN HİPOTEZLER ve 3) SINAMA
+print("H1: Ayrılma oranı departmana göre farklılaşır (ki-kare bağımsızlık testi)")
+tablo = pd.crosstab(ik['Departman'], ik['Ayrildi'])
+ki2, p, sd, _ = stats.chi2_contingency(tablo)
+print(tablo, f"\n  χ² = {ki2:.2f}, sd = {sd}, p = {p:.4f}\n")
+
+print("H2: Ayrılan çalışanların memnuniyet puanı kalanlardan düşüktür (Welch t-testi)")
+t, p = stats.ttest_ind(ik.loc[ik.Ayrildi == 1, 'Memnuniyet'],
+                       ik.loc[ik.Ayrildi == 0, 'Memnuniyet'], equal_var=False)
+print(f"  t = {t:.2f}, p = {p:.6f}\n")
+
+print("H3: Fazla mesai ile ayrılma arasında pozitif ilişki vardır (nokta-çift serili korelasyon)")
+r, p = stats.pointbiserialr(ik['Ayrildi'], ik['Fazla_Mesai'])
+print(f"  r = {r:.3f}, p = {p:.4f}")
+</textarea>
+<div class="cikti"></div>
+</div>
+<div class="not uyari"><b>Dikkat:</b> Aynı veriyle hem hipotez üretip hem de sınamak, “veriye bakarak hipotez kurma” (HARKing) riskini taşır. İyi uygulama, hipotezi keşif örnekleminde üretip ayrı bir doğrulama örnekleminde (ya da yeni dönem verisinde) sınamaktır.</div>
+</div>
+</section>
+
+<section class="bolum" id="sonuc" data-baslik="Sonuç">
+<h2>Sonuç</h2>
+<div class="blok" id="b-sonuc" data-baslik="Bölüm özeti">
+<p>Bu bölümde ham İK verisinden anlamlı içgörü çıkarmak için istatistiksel ve görsel yöntemler birlikte kullanıldı. Tanımlayıcı istatistiklerle maaş dağılımı özetlendi; t-testi, F-testi ve ANOVA ile şube ve departman farkları sınandı; korelasyon ve regresyonla eğitim–performans ilişkisi ölçülüp modellendi. K-ortalamalar, hiyerarşik kümeleme ve DBSCAN çalışanlardaki doğal grupları ve aykırı örüntüleri ortaya çıkardı; Apriori ve FP-Growth eğitim ve yan hak tercihlerinde birlikte görülen öğeleri buldu. Son olarak gözlenen örüntülerden sınanabilir hipotezler üretildi. Bir sonraki bölüm zaman serisi, coğrafi, hiyerarşik ve ağ verilerinin görselleştirilmesine ayrılmıştır.</p>
+</div>
+</section>
+
+<section class="bolum" id="test" data-baslik="Kendinizi sınayın">
+<h2>Kendinizi sınayın</h2>
+<div class="blok" id="b-test" data-baslik="Çoktan seçmeli sorular (15 soru)">
+<div id="testAlani"></div>
+<p><button class="dugme" id="testKontrol">Yanıtlarımı kontrol et</button> <button class="dugme ikincil" id="testSifirla">Sıfırla</button><span id="puan"></span></p>
+</div>
+<div class="blok" id="b-sorular" data-baslik="Tartışma soruları">
+<h3>Tartışma soruları</h3>
+<ol class="sorular">
+<li>Ortalama, medyan ve mod arasındaki fark nedir? Ücret verisinde hangisi ne zaman daha uygundur?</li>
+<li>Standart sapma ve varyans, performans puanlarının yayılımını anlamamıza nasıl yardımcı olur?</li>
+<li>Bir veri setinde aykırı değerleri kutu grafiği ya da z-puanıyla nasıl belirlersiniz?</li>
+<li>t-testi yerine ne zaman ANOVA kullanılmalıdır?</li>
+<li>F-testi t-testinden nasıl ayrılır; en çok ne için kullanılır?</li>
+<li>İki bağımsız örneklemin ortalamalarının anlamlı biçimde farklı olup olmadığını nasıl sınarsınız?</li>
+<li>ANOVA çıktısındaki p-değerini nasıl yorumlarsınız?</li>
+<li>Korelasyon ile nedensellik arasındaki fark nedir? İK'dan bir örnekle açıklayın.</li>
+<li>Pearson korelasyon katsayısını nasıl yorumlarsınız; sınırlılıkları nelerdir?</li>
+<li>İki değişken arasındaki korelasyon −0,85 ise bu ne anlama gelir?</li>
+<li>Doğrusal regresyonun amacı nedir; katsayıları nasıl yorumlarsınız?</li>
+<li>Bir regresyon modelinin veriye iyi uyup uymadığını nasıl kontrol edersiniz?</li>
+<li>Doğrusal regresyonun geçerli olması için hangi varsayımlar sağlanmalıdır?</li>
+<li>K-ortalamalar algoritması nedir ve nasıl çalışır?</li>
+<li>Bir veri setinde uygun küme sayısına nasıl karar verirsiniz?</li>
+<li>Hiyerarşik ve hiyerarşik olmayan kümeleme arasındaki fark nedir?</li>
+<li>Birliktelik kuralı madenciliği nedir? İK'dan uygulamalı bir örnek verin.</li>
+<li>Destek, güven ve lift kavramlarını açıklayın.</li>
+<li>Birliktelik kuralları yan hak paketi tasarımında nasıl kullanılabilir?</li>
+<li>Keşifsel veri analizinde hipotez üretiminin rolü nedir?</li>
+<li>Veride görsel olarak gözlediğiniz bir eğilimden nasıl hipotez formüle edersiniz?</li>
+<li>Hipotez üretimi ile hipotez sınamasını ayırt etmek neden önemlidir?</li>
+</ol>
+</div>
+<div class="blok" id="b-alistirma" data-baslik="Programlama alıştırmaları">
+<h3>Programlama alıştırmaları</h3>
+<p>Kendi verinizi üst çubuktaki <b>⬆ Veri yükle</b> düğmesiyle yükleyip herhangi bir hücrede <code>pd.read_csv('dosya_adi.csv')</code> ile okuyabilirsiniz.</p>
+<ol class="alistirma">
+<li>Bir İK veri setinin (ör. IBM HR Attrition) sayısal sütunları için ortalama, medyan, mod, varyans ve standart sapmayı hesaplayın; histogram ve kutu grafikleri çizin; IQR yöntemiyle aykırı değerleri bulun.</li>
+<li>Maaşı kıdemle açıklayan basit doğrusal regresyon kurun; ardından en az üç açıklayıcı değişkenli çoklu regresyon modeli oluşturun; modeli R², artık grafikleri ve RMSE ile değerlendirin.</li>
+<li>Çok değişkenli bir çalışan veri setine K-ortalamalar uygulayın ve dirsek yöntemiyle K'yı seçin.</li>
+<li>İki grubun (ör. iki fabrikanın) devamsızlık günlerini bağımsız t-testiyle karşılaştırın; varyansların eşitliğini F-testiyle sınayın.</li>
+<li>Üç farklı eğitim yönteminin (yüz yüze, çevrim içi, karma) sınav puanlarını tek yönlü ANOVA ile karşılaştırın; grup ortalamalarını hata çubuklarıyla gösterin.</li>
+<li>Sayısal değişkenler için Pearson korelasyon matrisini hesaplayın; en güçlü pozitif ve negatif korelasyonları yorumlayın.</li>
+<li>Çalışanların eğitim ya da yan hak kayıtlarını one-hot biçime çevirin; Apriori ile sık öğe kümelerini ve kuralları bulup destek, güven ve lift değerlerini yorumlayın.</li>
+<li>Bir veri setini çubuk, saçılım ve eşleştirilmiş (pair) grafiklerle keşfedin; görsel örüntülere dayanarak 2–3 sınanabilir hipotez yazın ve neden sınanmaya değer olduklarını açıklayın.</li>
+</ol>
+</div>
+</section>
+
+<nav class="bolum-gezinti"><a href="bolum5_veri_temizleme.html"><small>← Önceki bölüm</small>Bölüm 5 · Veri Temizleme</a><a class="sonraki" href="bolum7_veri_gorsellestirme.html"><small>Sonraki bölüm →</small>Bölüm 7 · Veri Görselleştirme</a></nav>
+<footer>Kaynak: “Exploratory Data Analysis” bölümünün kodlarından İK verisine uyarlanmış Türkçe etkileşimli sürüm · Python tarayıcıda <a href="https://pyodide.org" target="_blank" rel="noopener">Pyodide</a> ile çalışır.</footer>
+</main>
+</div>
+
+<script type="text/plain" id="yardimciKod"># ik_yardimci.py — mlxtend yüklenemediğinde kullanılan saf-Python yedek
+# (TransactionEncoder, apriori, fpgrowth, association_rules için küçük eşdeğerler)
+from itertools import combinations
+import pandas as pd
+
+
+class TransactionEncoder:
+    def fit(self, transactions):
+        self.columns_ = sorted({i for t in transactions for i in t})
+        return self
+
+    def transform(self, transactions):
+        import numpy as np
+        idx = {c: k for k, c in enumerate(self.columns_)}
+        arr = np.zeros((len(transactions), len(self.columns_)), dtype=bool)
+        for r, t in enumerate(transactions):
+            for i in t:
+                arr[r, idx[i]] = True
+        return arr
+
+
+def apriori(df, min_support=0.5, use_colnames=True, max_len=None):
+    n = len(df)
+    cols = list(df.columns)
+    sets = [set(df.index[df[c]]) for c in cols]
+    names = cols if use_colnames else list(range(len(cols)))
+    sonuc = []
+    seviye = []
+    for k, s in enumerate(sets):
+        sup = len(s) / n
+        if sup >= min_support:
+            seviye.append(((k,), s))
+            sonuc.append((sup, frozenset([names[k]])))
+    boy = 1
+    while seviye and (max_len is None or boy < max_len):
+        yeni = {}
+        for a in range(len(seviye)):
+            for b in range(a + 1, len(seviye)):
+                ia, sa = seviye[a]
+                ib, sb = seviye[b]
+                if ia[:-1] != ib[:-1]:
+                    continue
+                aday = tuple(sorted(set(ia) | set(ib)))
+                if aday in yeni:
+                    continue
+                ortak = sa & sb
+                sup = len(ortak) / n
+                if sup >= min_support:
+                    yeni[aday] = ortak
+        seviye = sorted(yeni.items())
+        for aday, s in seviye:
+            sonuc.append((len(s) / n, frozenset(names[i] for i in aday)))
+        boy += 1
+    return pd.DataFrame(sonuc, columns=["support", "itemsets"])
+
+
+def fpgrowth(df, min_support=0.5, use_colnames=True, max_len=None):
+    # Sonuç kümesi Apriori ile aynıdır; yalnızca arama stratejisi farklıdır.
+    return apriori(df, min_support=min_support, use_colnames=use_colnames, max_len=max_len)
+
+
+def association_rules(frequent_itemsets, metric="confidence", min_threshold=0.8):
+    sup = {fs: s for s, fs in zip(frequent_itemsets["support"], frequent_itemsets["itemsets"])}
+    satirlar = []
+    for fs, s in sup.items():
+        if len(fs) < 2:
+            continue
+        for r in range(1, len(fs)):
+            for ant in combinations(sorted(fs), r):
+                ant = frozenset(ant)
+                con = fs - ant
+                sa, sc = sup.get(ant), sup.get(con)
+                if sa is None or sc is None:
+                    continue
+                conf = s / sa
+                lift = conf / sc
+                lev = s - sa * sc
+                conv = float("inf") if conf == 1 else (1 - sc) / (1 - conf)
+                satirlar.append(dict(antecedents=ant, consequents=con,
+                                     **{"antecedent support": sa, "consequent support": sc},
+                                     support=s, confidence=conf, lift=lift,
+                                     leverage=lev, conviction=conv))
+    out = pd.DataFrame(satirlar)
+    if out.empty:
+        return out
+    return out[out[metric] >= min_threshold].reset_index(drop=True)
+</script>
+<script type="text/plain" id="snsYedekKod"># sns_yedek.py — seaborn kurulamazsa kullanılan küçük matplotlib yedeği
+# (bu sayfadaki histplot, scatterplot, regplot, boxplot çağrılarını karşılar)
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+def _veri(x, data):
+    if data is not None and isinstance(x, str):
+        return np.asarray(data[x], dtype=float)
+    return np.asarray(x, dtype=float)
+
+
+def histplot(data=None, x=None, kde=False, color=None, label=None, alpha=0.6, bins='auto', ax=None, **k):
+    ax = ax or plt.gca()
+    v = _veri(x if x is not None else data, data if x is not None else None)
+    v = v[~np.isnan(v)]
+    n, kenar, _ = ax.hist(v, bins=bins, color=color, alpha=alpha, label=label, edgecolor='white')
+    if kde and len(v) > 1:
+        from scipy.stats import gaussian_kde
+        xs = np.linspace(v.min(), v.max(), 200)
+        ax.plot(xs, gaussian_kde(v)(xs) * len(v) * (kenar[1] - kenar[0]), color=color)
+    ax.set_ylabel('Count')
+    return ax
+
+
+def scatterplot(x=None, y=None, data=None, ax=None, **k):
+    ax = ax or plt.gca()
+    ax.scatter(_veri(x, data), _veri(y, data), **{kk: vv for kk, vv in k.items() if kk in ('color', 's', 'alpha', 'label')})
+    if isinstance(x, str): ax.set_xlabel(x)
+    if isinstance(y, str): ax.set_ylabel(y)
+    return ax
+
+
+def regplot(x=None, y=None, data=None, scatter=True, color=None, ax=None, **k):
+    ax = ax or plt.gca()
+    xv, yv = _veri(x, data), _veri(y, data)
+    if scatter:
+        ax.scatter(xv, yv, color=color)
+    b, a = np.polyfit(xv, yv, 1)
+    xs = np.linspace(xv.min(), xv.max(), 100)
+    ax.plot(xs, a + b * xs, color=color)
+    return ax
+
+
+def boxplot(x=None, y=None, data=None, ax=None, **k):
+    ax = ax or plt.gca()
+    gruplar = sorted(data[x].unique())
+    ax.boxplot([data.loc[data[x] == g, y] for g in gruplar], positions=range(len(gruplar)))
+    ax.set_xticks(range(len(gruplar)), [str(g) for g in gruplar])
+    ax.set_xlabel(x); ax.set_ylabel(y)
+    return ax
+</script>
+
+<script>
+/* ===================== 1. Kod hücreleri ===================== */
+const hucreler = [...document.querySelectorAll('.hucre')];
+hucreler.forEach(h => {
+  const ta = h.querySelector('textarea');
+  ta.dataset.ozgun = ta.value;
+  const boyutla = () => { ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight + 4, 640) + 'px'; };
+  boyutla(); ta.addEventListener('input', boyutla);
+  ta.addEventListener('keydown', e => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const s = ta.selectionStart, en = ta.selectionEnd;
+      ta.setRangeText('    ', s, en, 'end');
+    } else if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault(); calistir(h);
+    }
+  });
+  h.querySelector('.calis').addEventListener('click', () => calistir(h));
+  h.querySelector('.sifirla').addEventListener('click', () => { ta.value = ta.dataset.ozgun; boyutla(); });
+  h.querySelector('.kopyala').addEventListener('click', async e => {
+    try { await navigator.clipboard.writeText(ta.value); e.target.textContent = '✓ Kopyalandı'; }
+    catch { ta.select(); document.execCommand('copy'); e.target.textContent = '✓ Kopyalandı'; }
+    setTimeout(() => e.target.textContent = '⧉ Kopyala', 1400);
+  });
+});
+
+/* ===================== 2. Pyodide ===================== */
+let py = null, hazir = false, kuyruk = Promise.resolve();
+const nokta = document.getElementById('nokta'), durumYazi = document.getElementById('durumYazi');
+const tumunuBtn = document.getElementById('tumunu');
+function durum(yazi, sinif) { durumYazi.textContent = yazi; nokta.className = 'nokta ' + (sinif || ''); }
+
+const KURULUM = `
+import sys, io, os, base64, warnings
+warnings.filterwarnings('ignore')
+os.chdir('/home/pyodide')
+if '/home/pyodide' not in sys.path:
+    sys.path.insert(0, '/home/pyodide')
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+plt.rcParams.update({'figure.dpi': 100, 'axes.grid': False, 'font.size': 10})
+_SEKILLER = []
+def _goster(*a, **k):
+    for n in plt.get_fignums():
+        f = plt.figure(n)
+        b = io.BytesIO()
+        f.savefig(b, format='png', bbox_inches='tight')
+        _SEKILLER.append(base64.b64encode(b.getvalue()).decode())
+    plt.close('all')
+plt.show = _goster
+def _sekilleri_al():
+    _goster()
+    s = list(_SEKILLER)
+    _SEKILLER.clear()
+    return s
+def _dosyalar():
+    return sorted(f for f in os.listdir('.') if f.lower().endswith(('.csv', '.xlsx', '.txt', '.json')))
+`;
+
+async function baslat() {
+  try {
+    durum('Pyodide indiriliyor…');
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/pyodide/v0.27.7/full/pyodide.js';
+    await new Promise((ok, red) => { s.onload = ok; s.onerror = () => red(new Error('Pyodide betiği yüklenemedi')); document.head.appendChild(s); });
+    py = await loadPyodide();
+    durum('Temel paketler yükleniyor…');
+    await py.loadPackage(['numpy', 'pandas', 'matplotlib'], { messageCallback: () => {} });
+    py.FS.writeFile('/home/pyodide/ik_yardimci.py', document.getElementById('yardimciKod').textContent);
+    py.FS.writeFile('/home/pyodide/sns_yedek.py', document.getElementById('snsYedekKod').textContent);
+    await py.runPythonAsync(KURULUM);
+    durum('seaborn kuruluyor…');
+    await py.loadPackage('micropip', { messageCallback: () => {} });
+    try {
+      await py.runPythonAsync("import micropip\nawait micropip.install('seaborn')\nimport seaborn");
+    } catch (e) {
+      console.warn('seaborn kurulamadı, yedek kullanılacak', e);
+      py.runPython("import sys, sns_yedek\nsys.modules['seaborn'] = sns_yedek");
+    }
+    hazir = true; tumunuBtn.disabled = false;
+    durum('Python hazır', 'hazir');
+  } catch (e) {
+    console.error(e);
+    durum('Python yüklenemedi (internet bağlantısını kontrol edin)', 'hata');
+  }
+}
+
+function calistir(h) {
+  kuyruk = kuyruk.then(() => calistirIc(h));
+  return kuyruk;
+}
+
+async function calistirIc(h) {
+  const btn = h.querySelector('.calis'), cikti = h.querySelector('.cikti');
+  const kod = h.querySelector('textarea').value;
+  if (!hazir) {
+    cikti.className = 'cikti dolu';
+    cikti.innerHTML = '<pre>Python ortamı henüz hazır değil; lütfen üst çubuktaki gösterge yeşile dönene kadar bekleyin.</pre>';
+    return;
+  }
+  btn.disabled = true; btn.textContent = '⏳ Çalışıyor';
+  cikti.className = 'cikti dolu'; cikti.innerHTML = '<pre>Gerekli paketler yükleniyor…</pre>';
+  let metin = '';
+  const t0 = performance.now();
+  let hata = null;
+  try {
+    await py.loadPackagesFromImports(kod, { messageCallback: () => {}, errorCallback: m => console.warn(m) });
+    py.setStdout({ batched: s => { metin += s + '\n'; } });
+    py.setStderr({ batched: s => { metin += s + '\n'; } });
+    cikti.innerHTML = '<pre>Çalıştırılıyor…</pre>';
+    await py.runPythonAsync(kod);
+  } catch (e) {
+    hata = String(e.message || e);
+    const i = hata.lastIndexOf('File "<exec>"');
+    if (i > 0) hata = 'Traceback (son çağrılar):\n  ' + hata.slice(i);
+  }
+  let sekiller = [];
+  try { sekiller = py.runPython('_sekilleri_al()').toJs(); } catch (e) {}
+  cikti.innerHTML = '';
+  if (metin.trim()) { const p = document.createElement('pre'); p.textContent = metin.replace(/\n+$/, ''); cikti.appendChild(p); }
+  if (hata) { const p = document.createElement('pre'); p.className = 'hatali'; p.textContent = hata; cikti.appendChild(p); }
+  sekiller.forEach((b, i) => { const img = new Image(); img.src = 'data:image/png;base64,' + b; img.alt = 'Grafik ' + (i + 1); cikti.appendChild(img); });
+  dosyaListesi(cikti);
+  const sure = document.createElement('div'); sure.className = 'sure';
+  sure.textContent = (hata ? '✗ Hata · ' : '✓ Tamamlandı · ') + ((performance.now() - t0) / 1000).toFixed(1) + ' sn';
+  cikti.appendChild(sure);
+  if (!cikti.childNodes.length) cikti.className = 'cikti';
+  btn.disabled = false; btn.textContent = '▶ Çalıştır';
+}
+
+function dosyaListesi(cikti) {
+  let liste = [];
+  try { liste = py.runPython('_dosyalar()').toJs(); } catch (e) { return; }
+  if (!liste.length) return;
+  const d = document.createElement('div'); d.className = 'dosyalar';
+  d.append('Çalışma klasöründeki dosyalar: ');
+  liste.forEach(ad => {
+    const b = document.createElement('button'); b.textContent = '⬇ ' + ad; b.title = ad + ' dosyasını indir';
+    b.onclick = () => {
+      const veri = py.FS.readFile('/home/pyodide/' + ad);
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([veri])); a.download = ad; a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    };
+    d.appendChild(b);
+  });
+  cikti.appendChild(d);
+}
+
+tumunuBtn.addEventListener('click', async () => {
+  tumunuBtn.disabled = true;
+  for (const h of hucreler) await calistir(h);
+  tumunuBtn.disabled = false;
+});
+
+document.getElementById('yukle').addEventListener('change', async e => {
+  if (!hazir) { alert('Python ortamı henüz hazır değil.'); e.target.value = ''; return; }
+  const adlar = [];
+  for (const f of e.target.files) {
+    py.FS.writeFile('/home/pyodide/' + f.name, new Uint8Array(await f.arrayBuffer()));
+    adlar.push(f.name);
+  }
+  e.target.value = '';
+  durum('Yüklendi: ' + adlar.join(', '), 'hazir');
+  setTimeout(() => durum('Python hazır', 'hazir'), 4000);
+});
+
+baslat();
+
+/* ===================== 3. İçindekiler ===================== */
+const toc = document.getElementById('toc');
+document.querySelectorAll('section.bolum').forEach(sec => {
+  const a = document.createElement('a'); a.href = '#' + sec.id; a.textContent = sec.dataset.baslik; a.dataset.hedef = sec.id; toc.appendChild(a);
+  sec.querySelectorAll('.blok h3').forEach(h3 => {
+    const blok = h3.closest('.blok');
+    const b = document.createElement('a'); b.href = '#' + blok.id; b.className = 'alt'; b.textContent = h3.textContent; b.dataset.hedef = blok.id; toc.appendChild(b);
+  });
+});
+const tocLinkler = [...toc.querySelectorAll('a')];
+const gozlem = new IntersectionObserver(girdiler => {
+  girdiler.forEach(g => {
+    if (g.isIntersecting) {
+      tocLinkler.forEach(a => a.classList.toggle('aktif', a.dataset.hedef === g.target.id));
+    }
+  });
+}, { rootMargin: '-90px 0px -70% 0px' });
+document.querySelectorAll('section.bolum, .blok').forEach(el => gozlem.observe(el));
+
+/* ===================== 4. Arama motoru ===================== */
+// Türkçe duyarlı, aksan-toleranslı normalleştirme (karakter sayısı korunur → vurgulama konumları tutar)
+const HARF = { 'ı': 'i', 'ş': 's', 'ğ': 'g', 'ü': 'u', 'ö': 'o', 'ç': 'c', 'â': 'a', 'î': 'i', 'û': 'u' };
+function norm(s) {
+  return [...s].map(c => { const k = c.toLocaleLowerCase('tr'); return k.length === 1 ? (HARF[k] || k) : c.toLowerCase(); }).join('');
+}
+// Dizin: her blok için başlık, bölüm adı, metin ve kod
+const dizin = [...document.querySelectorAll('.blok')].map(blok => {
+  const kopya = blok.cloneNode(true);
+  kopya.querySelectorAll('.hucre, .cikti, script').forEach(x => x.remove());
+  kopya.querySelectorAll('td, th, li, p, h3, h4').forEach(x => x.append(' '));
+  const metin = kopya.textContent.replace(/\s+/g, ' ').trim();
+  const kod = [...blok.querySelectorAll('textarea')].map(t => t.value).join('\n');
+  const bolum = blok.closest('section').dataset.baslik;
+  return { blok, id: blok.id, baslik: blok.dataset.baslik, bolum, metin, kod,
+           nBaslik: norm(blok.dataset.baslik), nMetin: norm(metin), nKod: norm(kod) };
+});
+
+const araKutu = document.getElementById('ara'), sonucKutu = document.getElementById('sonuclar');
+let filtre = 'tumu', secili = -1, sonGorunen = [];
+
+function escapeHtml(s) { return s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+
+function ozetle(kaynak, nKaynak, terimler) {
+  // ilk eşleşmenin çevresinden ~160 karakterlik parça, terimler vurgulu
+  let ilk = -1;
+  for (const t of terimler) { const i = nKaynak.indexOf(t); if (i >= 0 && (ilk < 0 || i < ilk)) ilk = i; }
+  if (ilk < 0) ilk = 0;
+  const bas = Math.max(0, ilk - 60), son = Math.min(kaynak.length, ilk + 120);
+  const parca = kaynak.slice(bas, son), nParca = nKaynak.slice(bas, son);
+  const isaret = new Array(parca.length).fill(false);
+  terimler.forEach(t => { let i = nParca.indexOf(t); while (i >= 0) { for (let k = i; k < i + t.length; k++) isaret[k] = true; i = nParca.indexOf(t, i + 1); } });
+  let html = '', acik = false;
+  for (let i = 0; i < parca.length; i++) {
+    if (isaret[i] && !acik) { html += '<mark>'; acik = true; }
+    if (!isaret[i] && acik) { html += '</mark>'; acik = false; }
+    html += escapeHtml(parca[i]);
+  }
+  if (acik) html += '</mark>';
+  return (bas > 0 ? '… ' : '') + html.replace(/\n/g, ' ') + (son < kaynak.length ? ' …' : '');
+}
+
+function ara(sorgu) {
+  const terimler = norm(sorgu).split(/\s+/).filter(t => t.length > 1 || /\d/.test(t));
+  if (!terimler.length) return [];
+  const sonuc = [];
+  for (const d of dizin) {
+    let puan = 0, metinde = true, kodda = true;
+    for (const t of terimler) {
+      const b = d.nBaslik.includes(t), m = d.nMetin.includes(t), k = d.nKod.includes(t);
+      if (!b && !m && !k) { puan = -1; break; }
+      if (b) puan += 10;
+      if (m) puan += 3 + Math.min(5, d.nMetin.split(t).length - 1);
+      if (k) puan += 2 + Math.min(3, d.nKod.split(t).length - 1);
+      metinde = metinde && (b || m); kodda = kodda && k;
+    }
+    if (puan < 0) continue;
+    if (filtre === 'metin' && !metinde) continue;
+    if (filtre === 'kod' && !kodda) continue;
+    const kodaGore = filtre === 'kod' || (!metinde && kodda);
+    sonuc.push({ d, puan, kodaGore, ozet: kodaGore ? ozetle(d.kod, d.nKod, terimler) : ozetle(d.metin, d.nMetin, terimler) });
+  }
+  return sonuc.sort((a, b) => b.puan - a.puan);
+}
+
+function sonuclariGoster() {
+  const q = araKutu.value.trim();
+  if (!q) { sonucKutu.classList.remove('acik'); temizleVurgu(); return; }
+  sonGorunen = ara(q); secili = sonGorunen.length ? 0 : -1;
+  let html = `<div class="sonuc-ust"><span>${sonGorunen.length} sonuç · “${escapeHtml(q)}”</span>
+    <span class="filtre">${['tumu:Tümü', 'metin:Metin', 'kod:Kod'].map(x => { const [k, e] = x.split(':'); return `<button data-f="${k}" class="${filtre === k ? 'aktif' : ''}">${e}</button>`; }).join('')}</span></div>`;
+  if (!sonGorunen.length) html += '<div class="sonuc"><span class="ozet">Eşleşme bulunamadı. Farklı ya da daha kısa bir terim deneyin (ör. “varyans”, “kume”, “lift”).</span></div>';
+  sonGorunen.forEach((s, i) => {
+    html += `<div class="sonuc${i === secili ? ' secili' : ''}" data-i="${i}" role="option">
+      <span class="yol">${escapeHtml(s.d.bolum)}</span>
+      <b>${escapeHtml(s.d.baslik)}${s.kodaGore ? '<span class="etiket">kod</span>' : ''}</b>
+      <span class="ozet">${s.ozet}</span></div>`;
+  });
+  sonucKutu.innerHTML = html; sonucKutu.classList.add('acik');
+}
+
+function temizleVurgu() {
+  document.querySelectorAll('mark.ara').forEach(m => { const p = m.parentNode; p.replaceChild(document.createTextNode(m.textContent), m); p.normalize(); });
+}
+function vurgula(kok, terimler) {
+  const yuruyucu = document.createTreeWalker(kok, NodeFilter.SHOW_TEXT, {
+    acceptNode: n => n.parentElement.closest('textarea, script, .cikti, mark') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
+  const dugumler = []; while (yuruyucu.nextNode()) dugumler.push(yuruyucu.currentNode);
+  let ilk = null;
+  dugumler.forEach(n => {
+    const s = n.nodeValue, ns = norm(s);
+    const araliklar = [];
+    terimler.forEach(t => { let i = ns.indexOf(t); while (i >= 0) { araliklar.push([i, i + t.length]); i = ns.indexOf(t, i + t.length); } });
+    if (!araliklar.length) return;
+    araliklar.sort((a, b) => a[0] - b[0]);
+    const birlesik = [];
+    araliklar.forEach(r => { const son = birlesik[birlesik.length - 1]; if (son && r[0] <= son[1]) son[1] = Math.max(son[1], r[1]); else birlesik.push([...r]); });
+    const frag = document.createDocumentFragment(); let k = 0;
+    birlesik.forEach(([a, b]) => {
+      if (a > k) frag.appendChild(document.createTextNode(s.slice(k, a)));
+      const m = document.createElement('mark'); m.className = 'ara'; m.textContent = s.slice(a, b); frag.appendChild(m);
+      if (!ilk) ilk = m; k = b;
+    });
+    if (k < s.length) frag.appendChild(document.createTextNode(s.slice(k)));
+    n.parentNode.replaceChild(frag, n);
+  });
+  return ilk;
+}
+
+function git(i) {
+  const s = sonGorunen[i]; if (!s) return;
+  const terimler = norm(araKutu.value.trim()).split(/\s+/).filter(t => t.length > 1 || /\d/.test(t));
+  temizleVurgu();
+  const ilk = vurgula(s.d.blok, terimler);
+  const hedef = s.kodaGore ? (s.d.blok.querySelector('.hucre') || s.d.blok) : (ilk || s.d.blok);
+  hedef.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  const parlat = s.kodaGore ? hedef : s.d.blok;
+  parlat.classList.remove('flas'); void parlat.offsetWidth; parlat.classList.add('flas');
+  sonucKutu.classList.remove('acik');
+  history.replaceState(null, '', '#' + s.d.id);
+}
+
+let zamanlayici;
+araKutu.addEventListener('input', () => { clearTimeout(zamanlayici); zamanlayici = setTimeout(sonuclariGoster, 120); });
+araKutu.addEventListener('focus', () => { if (araKutu.value.trim()) sonuclariGoster(); });
+araKutu.addEventListener('keydown', e => {
+  const ogeler = sonucKutu.querySelectorAll('.sonuc[data-i]');
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault(); if (!ogeler.length) return;
+    secili = (secili + (e.key === 'ArrowDown' ? 1 : -1) + ogeler.length) % ogeler.length;
+    ogeler.forEach((o, i) => o.classList.toggle('secili', i === secili));
+    ogeler[secili].scrollIntoView({ block: 'nearest' });
+  } else if (e.key === 'Enter') { e.preventDefault(); git(Math.max(0, secili)); }
+  else if (e.key === 'Escape') { araKutu.value = ''; sonucKutu.classList.remove('acik'); temizleVurgu(); araKutu.blur(); }
+});
+sonucKutu.addEventListener('mousedown', e => {
+  const f = e.target.closest('button[data-f]');
+  if (f) { e.preventDefault(); filtre = f.dataset.f; sonuclariGoster(); return; }
+  const o = e.target.closest('.sonuc[data-i]'); if (o) { e.preventDefault(); git(+o.dataset.i); }
+});
+document.addEventListener('click', e => { if (!e.target.closest('.arama')) sonucKutu.classList.remove('acik'); });
+document.addEventListener('keydown', e => {
+  if (e.key === '/' && !e.target.closest('input, textarea')) { e.preventDefault(); araKutu.focus(); araKutu.select(); }
+});
+
+/* ===================== 5. Test ===================== */
+const SORULAR = [
+  ['Aşağıdakilerden hangisi aykırı değerlerden etkilenmez?', ['Ortalama', 'Standart sapma', 'Medyan', 'Açıklık'], 2, 'Medyan sıralamadaki orta değere dayandığı için birkaç çok yüksek maaştan etkilenmez.'],
+  ['Bir veri setinin yayılımını en iyi hangisi betimler?', ['Mod', 'Ortalama', 'Standart sapma', 'Frekans'], 2, 'Standart sapma, değerlerin ortalamadan ortalama ne kadar saptığını özgün birimle verir.'],
+  ['t-testi ne için kullanılır?', ['İkiden fazla grubu karşılaştırmak', 'Korelasyonun gücünü ölçmek', 'İki grubun ortalamalarını karşılaştırmak', 'Öğeler arası birlikteliği sınamak'], 2, 'Bağımsız örneklem t-testi iki grubun ortalamalarını karşılaştırır.'],
+  ['F-testi öncelikle ne için kullanılır?', ['Korelasyonu sınamak', 'Grup varyanslarını karşılaştırmak', 'Sonuç tahmin etmek', 'Veriyi görselleştirmek'], 1, 'F-testi iki varyansın oranını sınar; t-testinin eşit varyans varsayımını kontrol eder.'],
+  ['Tek yönlü ANOVA ne zaman uygundur?', ['İki grubu karşılaştırırken', 'Bir kategorik değişkene göre bir sayısal değişkeni 3+ grupta sınarken', 'Regresyon analizi yaparken', 'İki değişken arasındaki korelasyonu bulurken'], 1, 'Ör. üç departmanın ortalama eğitim saatlerini karşılaştırmak.'],
+  ['−0,95 Pearson korelasyon katsayısı neyi gösterir?', ['Güçlü negatif doğrusal ilişki', 'Güçlü pozitif doğrusal ilişki', 'İlişki yok', 'Doğrusal olmayan ilişki'], 0, 'İşaret yönü, büyüklük gücü gösterir: −0,95 çok güçlü negatif ilişkidir.'],
+  ['Korelasyon neyi ölçer?', ['Nedenselliği', 'Frekansı', 'Doğrusal ilişkinin gücünü ve yönünü', 'Gruplar arası farkları'], 2, 'Korelasyon nedensellik kanıtı değildir.'],
+  ['Basit doğrusal regresyonda bağımlı değişken nedir?', ['Tahmin için kullanılan değişken', 'Her zaman kategorik olan değişken', 'Tahmin edilen değişken', 'Bağımsız değişkenle ilgisiz değişken'], 2, 'Ör. eğitim saatinden tahmin edilen performans puanı.'],
+  ['Regresyon modelindeki R² değeri neyi söyler?', ['Modelin aşırı öğrenip öğrenmediğini', 'Kullanılan değişken sayısını', 'Model tarafından açıklanan varyans oranını', 'Ortalama tahmin hatasını'], 2, 'R² = 0,62 ise performanstaki varyansın %62’si modelle açıklanır.'],
+  ['K-ortalamalar kümeleme nedir?', ['Denetimli öğrenme algoritması', 'Sınıflandırma yöntemi', 'Denetimsiz öğrenme algoritması', 'İstatistiksel test'], 2, 'Etiket kullanmadan benzer gözlemleri gruplar.'],
+  ['Dirsek (elbow) yöntemi ne için kullanılır?', ['İstatistiksel anlamlılığı sınamak', 'Öznitelikleri normalleştirmek', 'Uygun küme sayısını belirlemek', 'Regresyon modellerini görselleştirmek'], 2, 'Küme içi kareler toplamındaki düşüşün yavaşladığı K seçilir.'],
+  ['Birliktelik kurallarında lift neyin ölçüsüdür?', ['İstatistiksel varyansın', 'Rastlantıya göre birlikteliğin gücünün', 'Dağılımın yayılımının', 'Doğrusal ilişkinin gücünün'], 1, 'Lift > 1 pozitif, < 1 negatif birliktelik gösterir.'],
+  ['Yüksek güvenli {Liderlik} ⇒ {İletişim} kuralı ne anlama gelir?', ['İletişim eğitimi, Liderlik eğitimine neden olur', 'İletişim eğitimi alan herkes Liderlik eğitimi de alır', 'Liderlik eğitimi alanların İletişim eğitimi alma olasılığı yüksektir', 'Güçlü negatif bir ilişki vardır'], 2, 'Güven, öncül varken sonucun görülme koşullu olasılığıdır; nedensellik içermez.'],
+  ['Hipotez üretimi genellikle hangi aşamada yapılır?', ['Son model değerlendirmesinde', 'Veri toplamada', 'Keşifsel veri analizinde', 'İstatistiksel çıkarımda'], 2, 'EDA’da gözlenen örüntüler sınanabilir hipotezlere dönüştürülür.'],
+  ['İyi bir hipotez nasıl olmalıdır?', ['Yalnızca sezgiye dayalı', 'Belirsiz ve esnek', 'Sınanabilir ve belirli', 'Sınanmadan önce kanıtlanmış'], 2, 'Ölçülebilir değişkenlere dayanan, yanlışlanabilir bir önerme olmalıdır.']
+];
+const testAlani = document.getElementById('testAlani');
+SORULAR.forEach(([s, sec, dogru, aciklama], i) => {
+  const d = document.createElement('div'); d.className = 'soru'; d.dataset.dogru = dogru;
+  d.innerHTML = `<p>${i + 1}. ${s}</p>` + sec.map((x, j) =>
+    `<label><input type="radio" name="s${i}" value="${j}"> ${'abcd'[j]}) ${x}</label>`).join('') +
+    `<div class="aciklama">Doğru yanıt: <b>${'abcd'[dogru]}) ${sec[dogru]}</b> — ${aciklama}</div>`;
+  testAlani.appendChild(d);
+});
+document.getElementById('testKontrol').onclick = () => {
+  let p = 0;
+  testAlani.querySelectorAll('.soru').forEach((d, i) => {
+    const s = d.querySelector('input:checked');
+    const ok = s && +s.value === +d.dataset.dogru;
+    d.classList.toggle('dogru', !!ok); d.classList.toggle('yanlis', !ok);
+    if (ok) p++;
+  });
+  document.getElementById('puan').textContent = `Puanınız: ${p} / ${SORULAR.length}`;
+};
+document.getElementById('testSifirla').onclick = () => {
+  testAlani.querySelectorAll('.soru').forEach(d => d.classList.remove('dogru', 'yanlis'));
+  testAlani.querySelectorAll('input').forEach(x => x.checked = false);
+  document.getElementById('puan').textContent = '';
+};
+</script>
+</body>
+</html>

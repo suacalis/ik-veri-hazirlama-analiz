@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bölüm 1 · Veri Bilimine Giriş — İK Verisiyle Etkileşimli Python</title>
+<style>
+:root{
+  --bg:#f6f7fb; --kart:#ffffff; --yazi:#1d2433; --soluk:#5b6476; --cizgi:#e3e6ee;
+  --ana:#1f5fbf; --ana2:#e8f0fc; --vurgu:#d9480f; --yesil:#2b8a3e; --kod:#0f1729; --kodyazi:#e6edf7;
+  --isaret:#ffe066;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:84px}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--yazi);line-height:1.65;font-size:16px}
+a{color:var(--ana)}
+/* Üst çubuk */
+header.ust{position:sticky;top:0;z-index:50;background:#14213d;color:#fff;box-shadow:0 2px 10px rgba(0,0,0,.15)}
+.ust-ic{max-width:1320px;margin:0 auto;padding:10px 18px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.logo{font-weight:700;font-size:15px;white-space:nowrap}
+.logo small{display:block;font-weight:400;opacity:.7;font-size:12px}
+.arama{position:relative;flex:1;min-width:240px;max-width:560px}
+.arama input{width:100%;padding:9px 12px 9px 36px;border-radius:8px;border:1px solid #3a4a6b;background:#1e2d50;color:#fff;font-size:15px;outline:none}
+.arama input:not(:placeholder-shown)~.kbd{display:none}
+.arama input:focus{border-color:#8fb3ff;background:#22355f}
+.arama input::placeholder{color:#a9b6d3}
+.arama svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);opacity:.75}
+.kbd{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;border:1px solid #5a6a8b;border-radius:4px;padding:0 5px;color:#c4cee4}
+#sonuclar{position:absolute;top:calc(100% + 6px);left:0;right:0;background:#fff;color:var(--yazi);border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,.25);max-height:70vh;overflow:auto;display:none}
+#sonuclar.acik{display:block}
+.sonuc-ust{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid var(--cizgi);font-size:13px;color:var(--soluk);gap:8px;flex-wrap:wrap}
+.filtre button{border:1px solid var(--cizgi);background:#fff;border-radius:999px;padding:2px 10px;font-size:12px;cursor:pointer;margin-left:4px}
+.filtre button.aktif{background:var(--ana);color:#fff;border-color:var(--ana)}
+.sonuc{padding:9px 12px;border-bottom:1px solid #f0f2f6;cursor:pointer}
+.sonuc:hover,.sonuc.secili{background:var(--ana2)}
+.sonuc b{display:block;font-size:14px}
+.sonuc .yol{font-size:11px;color:var(--soluk);text-transform:uppercase;letter-spacing:.03em}
+.sonuc .ozet{font-size:13px;color:var(--soluk)}
+.sonuc .etiket{font-size:10px;background:#eef1f7;border-radius:4px;padding:1px 6px;margin-left:6px;color:#44506a;vertical-align:middle}
+.sonuc mark,.icerik mark.ara{background:var(--isaret);color:inherit;padding:0 1px;border-radius:2px}
+.durum{display:flex;align-items:center;gap:8px;font-size:13px;white-space:nowrap}
+.nokta{width:10px;height:10px;border-radius:50%;background:#f0ad4e;box-shadow:0 0 0 3px rgba(240,173,78,.25)}
+.nokta.hazir{background:#40c057;box-shadow:0 0 0 3px rgba(64,192,87,.25)}
+.nokta.hata{background:#fa5252}
+.dugme{border:0;border-radius:8px;padding:8px 13px;font-size:14px;cursor:pointer;background:var(--ana);color:#fff;font-weight:600}
+.dugme:hover{filter:brightness(1.08)}
+.dugme:disabled{opacity:.5;cursor:not-allowed}
+.dugme.ikincil{background:#e9edf5;color:#22304d}
+.ust .dugme.ikincil{background:#2b3c63;color:#fff}
+label.dugme input{display:none}
+/* Yerleşim */
+.duzen{max-width:1320px;margin:0 auto;display:grid;grid-template-columns:270px 1fr;gap:26px;padding:22px 18px 80px}
+nav.icindekiler{position:sticky;top:84px;align-self:start;max-height:calc(100vh - 100px);overflow:auto;font-size:14px;background:var(--kart);border:1px solid var(--cizgi);border-radius:12px;padding:14px 10px}
+nav.icindekiler h4{margin:0 8px 8px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--soluk)}
+nav.icindekiler a{display:block;padding:4px 8px;border-radius:6px;text-decoration:none;color:var(--yazi)}
+nav.icindekiler a.alt{padding-left:22px;font-size:13px;color:var(--soluk)}
+nav.icindekiler a:hover,nav.icindekiler a.aktif{background:var(--ana2);color:var(--ana)}
+main.icerik{min-width:0}
+.kapak{background:linear-gradient(135deg,#14213d,#1f5fbf);color:#fff;border-radius:16px;padding:30px 30px 26px;margin-bottom:22px}
+.kapak h1{margin:0 0 6px;font-size:30px;line-height:1.25}
+.kapak p{margin:6px 0 0;opacity:.92;max-width:820px}
+.rozetler{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.rozet{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);padding:3px 10px;border-radius:999px;font-size:12.5px}
+section.bolum{background:var(--kart);border:1px solid var(--cizgi);border-radius:14px;padding:22px 28px;margin-bottom:22px}
+section.bolum>h2{margin:0 0 10px;font-size:24px;color:#14213d;border-bottom:2px solid var(--ana2);padding-bottom:8px}
+.blok h3{font-size:19px;margin:24px 0 8px;color:#1b3a73}
+.blok h4{font-size:16px;margin:16px 0 6px}
+.blok.flas{animation:flas 1.6s ease}
+@keyframes flas{0%{box-shadow:0 0 0 4px rgba(255,224,102,.95);background:#fffbe6}100%{box-shadow:0 0 0 0 rgba(255,224,102,0);background:transparent}}
+.not{background:#f1f6ff;border-left:4px solid var(--ana);padding:10px 14px;border-radius:0 8px 8px 0;margin:12px 0;font-size:15px}
+.not.uyari{background:#fff6ec;border-color:var(--vurgu)}
+.not.ipucu{background:#effaf1;border-color:var(--yesil)}
+table.tablo{border-collapse:collapse;width:100%;margin:12px 0;font-size:14.5px}
+table.tablo th,table.tablo td{border:1px solid var(--cizgi);padding:7px 10px;text-align:left;vertical-align:top}
+table.tablo th{background:#f3f5fa}
+.formul{font-family:"Cambria Math","Times New Roman",serif;background:#fafbfe;border:1px dashed var(--cizgi);padding:6px 12px;border-radius:6px;display:inline-block;margin:4px 0}
+/* Kod hücresi */
+.hucre{border:1px solid #c9d3e6;border-radius:12px;overflow:hidden;margin:16px 0 10px;background:var(--kod)}
+.hucre.flas{animation:flas 1.6s ease}
+.hucre-ust{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#1b2540;color:#c8d3ea;font-size:13px;flex-wrap:wrap}
+.hucre-ust .ad{font-weight:600;margin-right:auto}
+.hucre-ust .ad span{opacity:.6;font-weight:400;margin-left:6px}
+.hucre-ust button{border:0;border-radius:6px;padding:5px 10px;font-size:12.5px;cursor:pointer;background:#2e3c62;color:#e6ecf8}
+.hucre-ust button.calis{background:#2f9e44;color:#fff;font-weight:600}
+.hucre-ust button:disabled{opacity:.5;cursor:wait}
+textarea.kod{display:block;width:100%;border:0;resize:vertical;background:var(--kod);color:var(--kodyazi);font:13.5px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;padding:12px 14px;outline:none;tab-size:4;white-space:pre;overflow:auto;min-height:120px}
+.cikti{background:#fff;border-top:1px solid #c9d3e6;display:none}
+.cikti.dolu{display:block}
+.cikti pre{margin:0;padding:12px 14px;font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;white-space:pre;overflow:auto;max-height:520px;color:#1d2433}
+.cikti pre.hatali{color:#c92a2a;background:#fff5f5}
+.cikti iframe{display:block;width:calc(100% - 16px);margin:8px auto;border:1px solid var(--cizgi);border-radius:6px;background:#fff}
+.cikti img{display:block;max-width:100%;margin:8px auto;border:1px solid var(--cizgi);border-radius:6px}
+.cikti .sure{font-size:11.5px;color:var(--soluk);padding:4px 14px 8px}
+.dosyalar{padding:4px 14px 10px;font-size:12.5px;color:var(--soluk)}
+.dosyalar button{border:1px solid var(--cizgi);background:#f6f8fc;border-radius:6px;padding:2px 8px;margin:2px;font-size:12px;cursor:pointer}
+.dene{font-size:14px;color:var(--soluk);margin:4px 0 14px}
+.dene b{color:var(--yazi)}
+/* Test */
+.soru{border:1px solid var(--cizgi);border-radius:10px;padding:12px 16px;margin:10px 0}
+.soru p{margin:0 0 6px;font-weight:600}
+.soru label{display:block;padding:3px 6px;border-radius:6px;cursor:pointer;font-size:15px}
+.soru label:hover{background:#f4f6fa}
+.soru.dogru{border-color:#8ce99a;background:#f4fcf5}
+.soru.yanlis{border-color:#ffa8a8;background:#fff6f6}
+.soru .aciklama{display:none;font-size:14px;color:var(--soluk);margin-top:6px}
+.soru.dogru .aciklama,.soru.yanlis .aciklama{display:block}
+#puan{font-weight:700;margin-left:10px}
+ol.sorular li,ol.alistirma li{margin:4px 0}
+footer{text-align:center;color:var(--soluk);font-size:13px;padding:20px}
+@media (max-width:960px){.duzen{grid-template-columns:1fr}nav.icindekiler{position:static;max-height:none}.kbd{display:none}}
+
+.ust-nav{color:#c9d6f2;text-decoration:none;font-size:13px;border:1px solid #3a4a6b;border-radius:8px;padding:6px 10px;white-space:nowrap}
+.ust-nav:hover{background:#22355f;color:#fff}
+.bolum-gezinti{display:flex;justify-content:space-between;gap:12px;margin:0 0 22px;flex-wrap:wrap}
+.bolum-gezinti a{flex:1;min-width:220px;background:#fff;border:1px solid #e3e6ee;border-radius:12px;padding:12px 16px;text-decoration:none;color:#1d2433}
+.bolum-gezinti a:hover{border-color:#1f5fbf;background:#f4f8ff}
+.bolum-gezinti small{display:block;color:#5b6476;font-size:12px}
+.bolum-gezinti .sonraki{text-align:right}
+</style>
+</head>
+<body>
+
+<header class="ust">
+  <div class="ust-ic">
+    <a class="ust-nav" href="index.html" title="Tüm bölümler">⌂ Tüm bölümler</a>
+    <div class="logo">Bölüm 1 · Veri Bilimine Giriş<small>İK verisiyle etkileşimli Python (Pyodide)</small></div>
+    <div class="arama">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="ara" type="search" autocomplete="off" placeholder="Bölümde ara: proje aşamaları, KVKK, ROC-AUC, Anaconda, yapay zekâ…" aria-label="Bölüm içinde ara">
+      <span class="kbd">/</span>
+      <div id="sonuclar" role="listbox"></div>
+    </div>
+    <div class="durum"><span id="nokta" class="nokta"></span><span id="durumYazi">Python yükleniyor…</span></div>
+    <button id="tumunu" class="dugme" disabled>▶ Tümünü çalıştır</button>
+    <label class="dugme ikincil" title="Kendi CSV/XLSX dosyanızı Python çalışma klasörüne yükleyin">⬆ Veri yükle<input id="yukle" type="file" multiple accept=".csv,.xlsx,.txt,.json"></label>
+  </div>
+</header>
+
+<div class="duzen">
+<nav class="icindekiler" id="toc"><h4>İçindekiler</h4></nav>
+
+<main class="icerik" id="icerik">
+<div class="kapak">
+  <h1>Veri Bilimine Giriş</h1>
+  <p>Veri biliminin amaçları, tarihsel gelişimi, uygulama alanları, proje aşamaları, veri güvenliği, yakın kavramlarla farkı ve kariyer gereksinimleri — İK örnekleriyle. Kitabın bu bölümünde Python kodu bulunmadığından, bölümün kavramları çalıştırılabilir İK örneklerine dönüştürülmüştür: işten ayrılma tahmini projesinin sekiz aşaması baştan sona kodlanmıştır.</p>
+  <div class="rozetler">
+    <span class="rozet">11 çalıştırılabilir kod hücresi</span>
+    <span class="rozet">pandas · scikit-learn · Matplotlib · hashlib</span>
+    <span class="rozet">Kurulum gerektirmez — tarayıcıda çalışır</span>
+  </div>
+</div>
+
+<section class="bolum" id="giris" data-baslik="Giriş">
+<h2>Giriş</h2>
+<div class="blok" id="b-vb" data-baslik="Veri bilimi nedir?">
+<p><b>Veri bilimi</b>, veriden anlamlı içgörü elde etmek için istatistik, bilgisayar bilimi ve alan uzmanlığını birleştiren disiplinler arası bir alandır. Büyük hacimli yapılandırılmış ve yapılandırılmamış veriyi toplamayı, işlemeyi, analiz etmeyi ve yorumlamayı kapsar; amacı karmaşık sorunları çözmek ve karar almayı desteklemektir.</p>
+<p>Perakendede müşteri davranışına göre kişiselleştirilmiş kampanyalar, sağlıkta salgın tahmini, finansta dolandırıcılık tespiti ve kredi riski, sosyal medyada içerik önerisi tipik örneklerdir. İK'da ise işten ayrılma riskinin tahmini, işe alımda aday–pozisyon eşleştirme, ücret adaleti analizi, işgücü planlama ve çalışan deneyimi analitiği öne çıkar. Veri bilimciler Python ya da R, SQL ve Tableau gibi araçlarla çalışır; kapsam, geçmiş veriden geleceği öngören <b>tahmine dayalı analitik</b>ten istenen sonuca ulaşmak için eylem öneren <b>reçeteleyici analitik</b>e uzanır.</p>
+</div>
+<div class="blok" id="b-yapi" data-baslik="Bölümün yapısı ve bu sayfadaki kodlar hakkında">
+<h3>Bölümün yapısı</h3>
+<p>Bölüm; <a href="#amaclar">veri biliminin amaçları</a>, <a href="#evrim">gelişimi</a>, <a href="#alanlar">uygulama alanları</a>, <a href="#asamalar">proje aşamaları</a>, <a href="#guvenlik">veri güvenliği</a>, <a href="#farklar">veri bilimi, veri analitiği, makine öğrenmesi ve yapay zekâ farkları</a>, <a href="#kariyer">kariyer</a> ve <a href="#kurulum">Anaconda ve Python kurulumu</a> başlıklarından oluşur.</p>
+<div class="not uyari"><b>Bu sayfadaki kodlar hakkında:</b> Kitabın bu bölümü kavramsaldır ve kurulum komutu dışında Python kodu içermez. Bölümün öğrettiklerini uygulanabilir kılmak için hücreler sıfırdan yazılmıştır: ilk program ve kurulum doğrulama, sekiz aşamalı bir işten ayrılma tahmini projesi, dört analitik türünün karşılaştırması, KVKK uyumlu veri koruma teknikleri ve olağan dışı masraf beyanlarının tespiti.</div>
+<div class="not ipucu"><b>Nasıl kullanılır?</b> Gösterge yeşile döndüğünde hücreleri <b>▶ Çalıştır</b> ya da <b>Ctrl/⌘ + Enter</b> ile çalıştırın. Proje hücreleri (Aşama 1–7) birbirinin devamıdır; sırayla çalıştırın ya da <b>▶ Tümünü çalıştır</b>'ı kullanın. Arama kutusuna <b>/</b> tuşuyla geçebilirsiniz.</div>
+<div class="not"><b>Veri hakkında:</b> Tüm kişi adları, kimlik numaraları ve İK verileri uydurmadır.</div>
+</div>
+<div class="blok" id="b-kod-ilk" data-baslik="Kod: İlk program ve kurulumu doğrulama (Python ve kütüphane sürümleri)">
+<h3>Uygulama: İlk program</h3>
+<p>Kitapta Anaconda kurulduktan sonra Jupyter Notebook'ta ilk komut yazılıyor. Bu sayfada Python zaten tarayıcınızda çalışıyor: Hücre bir karşılama iletisi yazdırır, Python ve temel veri bilimi kütüphanelerinin sürümlerini listeler ve ilk İK hesabını (yıllık işgücü devir oranı) yapar.</p>
+<div class="hucre" id="h-ilk_program">
+<div class="hucre-ust"><span class="ad">🐍 İlk program: kurulum doğrulama<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="17" aria-label="İlk program: kurulum doğrulama kodu">import sys
+import platform
+
+# Jupyter'deki "ilk program"ın karşılığı
+print("Merhaba, İK veri bilimi!")
+
+# Kurulumu doğrulamak: Python ve temel kütüphanelerin sürümleri
+# (Anaconda'da aynı bilgiyi terminalde `python --version` ve `conda list` verir)
+print("\nPython sürümü:", sys.version.split()[0], "|", platform.system() or "Tarayıcı (WebAssembly)")
+import numpy, pandas, matplotlib, sklearn, scipy
+for kutuphane in [numpy, pandas, matplotlib, sklearn, scipy]:
+    print(f"  {kutuphane.__name__:&lt;12} {kutuphane.__version__}")
+
+# Basit bir hesap: yıllık işgücü devir oranı
+ayrilan, ortalama_calisan = 46, 412
+print(f"\nYıllık işgücü devir oranı: %{100 * ayrilan / ortalama_calisan:.1f}")
+</textarea>
+<div class="cikti"></div>
+</div>
+</div>
+</section>
+
+<section class="bolum" id="amaclar" data-baslik="1. Veri biliminin amaçları">
+<h2>1. Veri biliminin amaçları</h2>
+<div class="blok" id="b-amac" data-baslik="Veri biliminin temel amacı ve süreç adımları">
+<p>Veri biliminin temel amacı, ham veriyi kararları ve stratejik girişimleri yönlendirecek <b>eyleme dönük bilgiye</b> dönüştürmektir. Süreç şu adımlardan oluşur:</p>
+<ul>
+<li><b>Veri toplama:</b> Veritabanları, web kazıma ve API'lerden analize uygun ve yeterli veriyi elde etmek.</li>
+<li><b>Veri temizleme:</b> Eksik değerleri ele almak, tutarsızlıkları düzeltmek, veriyi uygun biçime getirmek.</li>
+<li><b>Keşifsel veri analizi (EDA):</b> İstatistik ve görselleştirmeyle örüntü, eğilim ve ilişkileri anlamak.</li>
+<li><b>Modelleme:</b> Makine öğrenmesi ve istatistiksel modellerle tahmin ya da sınıflandırma yapmak; doğru modeli seçmek, verinin bir kısmıyla eğitmek ve başarısını doğrulamak.</li>
+<li><b>Yorumlama ve iletişim:</b> Bulguları paydaşların karar alabileceği anlaşılır içgörü ve görsellere çevirmek.</li>
+</ul>
+<p>Veri bilimi Python, R ve SQL gibi dilleri, Hadoop ve Spark gibi büyük veri platformlarını kullanır; makine öğrenmesi, yapay zekâ ve istatistiksel analizi kapsar. Gizli örüntüleri ortaya çıkarıp gelecek eğilimleri öngörerek kurumlara verimlilik, yenilik ve rekabet üstünlüğü sağlar.</p>
+</div>
+</section>
+
+<section class="bolum" id="evrim" data-baslik="2. Veri biliminin gelişimi">
+<h2>2. Veri biliminin gelişimi</h2>
+<div class="blok" id="b-evrim" data-baslik="Veri biliminin tarihsel evreleri: istatistik, veri madenciliği, büyük veri, modern veri bilimi, gelecek">
+<table class="tablo">
+<tr><th>Dönem</th><th>Gelişmeler</th><th>İK'daki karşılığı</th></tr>
+<tr><td><b>Erken temeller</b><br>(1960'lar–1980'ler)</td><td>Regresyon, hipotez testi ve olasılık kuramı; bilgisayarlarla daha hızlı istatistiksel analiz</td><td>Personel istatistikleri, ücret araştırmaları, psikometrik testler</td></tr>
+<tr><td><b>Veri bilimi kavramlarının doğuşu</b><br>(1990'lar)</td><td>Veri madenciliği; SQL, OLAP ve ilk panolarla iş zekâsı</td><td>İlk İK bilgi sistemleri (İKBS), bordro veritabanları, raporlama</td></tr>
+<tr><td><b>Büyük veri çağı</b><br>(2000'ler)</td><td>İnternet, sosyal medya ve IoT ile veri patlaması; Apache Hadoop (2006) ve Spark; gelişmiş analitik</td><td>Çevrim içi işe alım ve başvuru takip sistemleri, e-öğrenme verisi</td></tr>
+<tr><td><b>Modern veri bilimi</b><br>(2010'lar–günümüz)</td><td>Derin öğrenme; Python ve R; TensorFlow, PyTorch, scikit-learn; Tableau ve Power BI ile veri demokratikleşmesi; AWS, Azure, Google Cloud</td><td>İnsan analitiği (people analytics) ekipleri, ayrılma tahmini, İK panoları</td></tr>
+<tr><td><b>Gelecek</b></td><td>Otomatik makine öğrenmesi (AutoML), etik ve gizlilik, disiplinler arası yaklaşım, uç bilişim ve gerçek zamanlı analitik</td><td>Algoritmik işe alımda adalet denetimi, KVKK ve AB Yapay Zekâ Yasası uyumu, ISO 30414 raporlaması</td></tr>
+</table>
+</div>
+</section>
+
+<section class="bolum" id="alanlar" data-baslik="3. Uygulama alanları">
+<h2>3. Veri biliminin farklı alanlardaki rolü</h2>
+<div class="blok" id="b-alan" data-baslik="Sektörlere göre veri bilimi uygulamaları ve İK karşılıkları">
+<table class="tablo">
+<tr><th>Alan</th><th>Uygulamalar</th><th>İK'daki benzeri</th></tr>
+<tr><td>İş ve finans</td><td>Müşteri segmentasyonu ve yaşam boyu değer, risk yönetimi ve dolandırıcılık tespiti, algoritmik alım satım</td><td>Çalışan segmentasyonu, masraf beyanlarında usulsüzlük tespiti</td></tr>
+<tr><td>Sağlık</td><td>Salgın ve yeniden yatış tahmini, tıbbi görüntü analizi, kişiselleştirilmiş tıp</td><td>İş sağlığı ve güvenliği, tükenmişlik riskinin erken fark edilmesi</td></tr>
+<tr><td>E-ticaret ve perakende</td><td>Öneri sistemleri, stok yönetimi, müşteri kaybı (churn) tahmini</td><td>Eğitim öneri sistemleri, <b>çalışan kaybı (işten ayrılma) tahmini</b></td></tr>
+<tr><td>Ulaşım ve lojistik</td><td>Rota eniyileme, kestirimci bakım, trafik yönetimi</td><td>Servis güzergâhı planlama, vardiya çizelgeleme</td></tr>
+<tr><td>İmalat</td><td>Kalite denetimi, süreç eniyileme, tedarik zinciri</td><td>İşgücü kapasite planlama, beceri açığı analizi</td></tr>
+<tr><td>Enerji</td><td>Talep tahmini, akıllı şebekeler, ekipman izleme</td><td>Personel talebi ve fazla mesai tahmini</td></tr>
+<tr><td>Eğitim</td><td>Kişiselleştirilmiş öğrenme, başarı tahmini, müfredat geliştirme</td><td>Kişiselleştirilmiş gelişim planları, eğitim etkinliği ölçümü</td></tr>
+<tr><td>Kamu politikası</td><td>Halk sağlığı izleme, suç önleme, ekonomik planlama</td><td>İşgücü piyasası analizi, istihdam politikaları</td></tr>
+</table>
+<div class="not"><b>Örnek — dolandırıcılık tespiti:</b> Bankalar makine öğrenmesiyle müşterilerin olağan harcama davranışını (tutar, konum, saat) öğrenir ve yurt dışından ani yüksek tutarlı bir işlem gibi sapmaları işaretler. Aşağıdaki hücre aynı mantığı İK'da masraf beyanlarına uygular.</div>
+</div>
+<div class="blok" id="b-kod-anomali" data-baslik="Kod: Isolation Forest ile olağan dışı masraf beyanlarını tespit etme">
+<h3>Uygulama: Olağan dışı masraf beyanları</h3>
+<p>Kitaptaki banka dolandırıcılığı örneğinin İK karşılığı: 300 olağan masraf beyanının arasına gece saatlerinde ve hafta sonu girilmiş yüksek tutarlı dört beyan karıştırılıyor. Etiket gerektirmeyen <b>Isolation Forest</b> algoritması sıra dışı beyanları incelemeye yönlendirir.</p>
+<div class="hucre" id="h-anomali">
+<div class="hucre-ust"><span class="ad">🐍 Anomali tespiti: masraf beyanları<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="31" aria-label="Anomali tespiti: masraf beyanları kodu">import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.ensemble import IsolationForest
+
+# Banka dolandırıcılık örneğinin İK karşılığı: olağan dışı masraf beyanlarını yakalamak
+np.random.seed(2)
+n = 300
+masraf = pd.DataFrame({
+    'Tutar_TL': np.random.lognormal(np.log(1200), 0.45, n).round(),
+    'Saat': np.random.normal(14, 2.5, n).clip(7, 21).round(1),          # beyanın sisteme girildiği saat
+    'Hafta_Sonu': np.random.binomial(1, 0.05, n),
+})
+supheli = pd.DataFrame({'Tutar_TL': [14800, 9600, 12500, 7900], 'Saat': [2.5, 23.4, 3.1, 1.0],
+                        'Hafta_Sonu': [1, 1, 0, 1]})
+masraf = pd.concat([masraf, supheli], ignore_index=True)
+
+model = IsolationForest(contamination=0.02, random_state=0).fit(masraf)
+masraf['Anomali'] = model.predict(masraf) == -1
+masraf['Skor'] = -model.score_samples(masraf[['Tutar_TL', 'Saat', 'Hafta_Sonu']]).round(3)
+print(f"{len(masraf)} beyandan {masraf.Anomali.sum()} tanesi incelemeye yönlendirildi:")
+print(masraf[masraf.Anomali].sort_values('Skor', ascending=False).to_string())
+
+plt.figure(figsize=(8, 4.5))
+plt.scatter(masraf.Saat, masraf.Tutar_TL, c=np.where(masraf.Anomali, 'crimson', 'steelblue'), s=18)
+plt.yscale('log')
+plt.xlabel('Beyanın girildiği saat'); plt.ylabel('Tutar (TL, log ölçek)')
+plt.title('Isolation Forest ile olağan dışı masraf beyanları (kırmızı)')
+plt.show()
+print("\nNot: Model yalnızca inceleme önerir; karar insan denetçidedir.")
+</textarea>
+<div class="cikti"></div>
+</div>
+</div>
+</section>
+
+<section class="bolum" id="asamalar" data-baslik="4. Proje aşamaları">
+<h2>4. Bir veri bilimi projesinin aşamaları</h2>
+<div class="blok" id="b-asama" data-baslik="Veri bilimi proje yaşam döngüsünün sekiz aşaması">
+<p>Bir veri bilimi projesi; problem tanımından veri toplamaya, keşfe, modellemeye, dağıtıma, yorumlamaya ve yinelemeye uzanan, birbirine bağlı ve <b>yinelemeli</b> bir süreçtir. Veri bilimcileri, alan uzmanları ve paydaşlar arasında iş birliği gerektirir.</p>
+<table class="tablo">
+<tr><th>#</th><th>Aşama</th><th>Alt adımlar</th></tr>
+<tr><td>1</td><td>Problem tanımı</td><td>Hedefleri paydaşlarla belirleme · başarı ölçütleri (KPI) · kapsam, kaynak, süre ve bütçe kısıtları</td></tr>
+<tr><td>2</td><td>Veri toplama ve temizleme</td><td>Veritabanı, API ve dosyalardan etik ve yasal veri edinimi · eksik, yinelenen ve hatalı değerleri düzeltme</td></tr>
+<tr><td>3</td><td>Keşifsel veri analizi</td><td>Görselleştirme · tanımlayıcı istatistikler ve korelasyonlar</td></tr>
+<tr><td>4</td><td>Özellik mühendisliği</td><td>Özellik seçimi · normalleştirme, kodlama, yeni özellik türetme</td></tr>
+<tr><td>5</td><td>Model geliştirme</td><td>Problem türüne göre model seçimi · eğitim ve çapraz doğrulama · doğruluk, kesinlik, duyarlılık, F1, ROC-AUC ile değerlendirme</td></tr>
+<tr><td>6</td><td>Dağıtım</td><td>Üretim ortamına bütünleştirme · sınama · başarıyı ve veri kaymasını izleme</td></tr>
+<tr><td>7</td><td>Yorumlama ve iletişim</td><td>Sonuçları alan bağlamında yorumlama · paydaşlara göre uyarlanmış rapor ve sunum</td></tr>
+<tr><td>8</td><td>Yineleme ve iyileştirme</td><td>Geri bildirim döngüsü · yeni veriyle yineleme · sürekli öğrenme</td></tr>
+</table>
+<p>Aşağıdaki hücreler bu aşamaları tek bir İK projesi üzerinde uygular: <b>“Kimlerin işten ayrılma riski yüksek?”</b> Sekizinci aşama (yineleme), altıncı aşamadaki izleme sonucunun modelin yeniden eğitilmesini gerektirmesiyle gösterilir.</p>
+</div>
+<div class="blok" id="b-kod-p1" data-baslik="Kod: Aşama 1–2a — Problem tanımı, KPI ve veri toplama">
+<h3>Aşama 1 ve 2a: Problem tanımı ve veri toplama</h3>
+<p>Proje hedefi, başarı ölçütleri ve kapsamı yazılı hâle getirilir; ardından 800 çalışanlık bir İKBS dökümü (sentetik) oluşturulur.</p>
+<div class="hucre" id="h-p1_problem">
+<div class="hucre-ust"><span class="ad">🐍 Aşama 1 — Problem tanımı ve veri toplama<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="32" aria-label="Aşama 1 — Problem tanımı ve veri toplama kodu">import numpy as np
+import pandas as pd
+
+# AŞAMA 1 — PROBLEM TANIMI: hedef, başarı ölçütü ve kapsam
+proje = {
+    'Problem': 'Gönüllü işten ayrılmalar son iki yılda arttı; kimlerin ayrılma riski yüksek?',
+    'Hedef': 'Önümüzdeki 12 ayda ayrılma olasılığı yüksek çalışanları önceden belirlemek',
+    'Başarı ölçütü (KPI)': 'Test setinde ROC-AUC ≥ 0,75; riskli grubun %60\'ını ilk %20\'lik dilimde yakalamak',
+    'Kapsam': 'Beyaz yaka çalışanlar, son 3 yılın İKBS verisi; bütçe ve KVKK kısıtları',
+}
+for k, v in proje.items():
+    print(f"{k:&lt;22}: {v}")
+
+# AŞAMA 2a — VERİ TOPLAMA: İKBS dökümünü temsil eden sentetik veri
+np.random.seed(42)
+n = 800
+ik = pd.DataFrame({
+    'Sicil': np.arange(5001, 5001 + n),
+    'Departman': np.random.choice(['Satış', 'Üretim', 'BT', 'Finans', 'İK'], n, p=[.3, .3, .2, .12, .08]),
+    'Yas': np.random.randint(22, 60, n),
+    'Kidem': np.random.exponential(5, n).round(1),
+    'Memnuniyet': np.random.normal(3.4, 0.8, n).clip(1, 5).round(1),
+    'Fazla_Mesai': np.random.gamma(2, 6, n).round(),
+    'Ucret_Orani': np.random.normal(1.0, 0.12, n).round(2),       # maaş / piyasa medyanı
+    'Son_Terfi_Yil': np.random.randint(0, 8, n),
+})
+logit = (-1.3 - 1.2 * (ik.Memnuniyet - 3.4) + 0.07 * (ik.Fazla_Mesai - 12) - 5 * (ik.Ucret_Orani - 1)
+         - 0.10 * (ik.Kidem - 5) + 0.15 * (ik.Son_Terfi_Yil - 3.5) + np.where(ik.Departman == 'Satış', 0.5, 0))
+ik['Ayrildi'] = np.random.binomial(1, 1 / (1 + np.exp(-logit)))
+ik.to_csv('ikbs_dokum.csv', index=False)
+print(f"\n{n} çalışanlık İKBS dökümü 'ikbs_dokum.csv' olarak kaydedildi. Ayrılma oranı: %{100 * ik.Ayrildi.mean():.1f}")
+</textarea>
+<div class="cikti"></div>
+</div>
+</div>
+<div class="blok" id="b-kod-p2" data-baslik="Kod: Aşama 2b — Veri temizleme: yinelenen, eksik ve hatalı kayıtlar">
+<h3>Aşama 2b: Veri temizleme</h3>
+<p>Gerçek dökümlerdeki tipik sorunlar (yinelenen sicil, eksik memnuniyet puanı, hatalı yaş) benzetilip giderilir. Eksik memnuniyet, çalışanın departmanının medyanıyla doldurulur ve doldurulduğu işaretlenir.</p>
+<div class="hucre" id="h-p2_temizleme">
+<div class="hucre-ust"><span class="ad">🐍 Aşama 2 — Veri temizleme<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="21" aria-label="Aşama 2 — Veri temizleme kodu">import numpy as np
+import pandas as pd
+
+# AŞAMA 2b — VERİ TEMİZLEME
+ham = pd.read_csv('ikbs_dokum.csv')
+# Gerçek dökümlerdeki tipik sorunları benzetelim: eksik değer, yinelenen kayıt, hatalı değer
+rng = np.random.default_rng(0)
+ham.loc[rng.choice(len(ham), 40, replace=False), 'Memnuniyet'] = np.nan
+ham.loc[rng.choice(len(ham), 5, replace=False), 'Yas'] = 150
+ham = pd.concat([ham, ham.sample(12, random_state=1)], ignore_index=True)
+print(f"Ham döküm: {len(ham)} satır | yinelenen: {ham.duplicated('Sicil').sum()} | "
+      f"eksik memnuniyet: {ham.Memnuniyet.isna().sum()} | hatalı yaş: {(ham.Yas &gt; 70).sum()}")
+
+temiz = ham.drop_duplicates('Sicil').copy()
+temiz.loc[~temiz['Yas'].between(18, 70), 'Yas'] = np.nan
+temiz['Memnuniyet_Eksikti'] = temiz['Memnuniyet'].isna()
+temiz['Memnuniyet'] = temiz.groupby('Departman')['Memnuniyet'].transform(lambda s: s.fillna(s.median()))
+temiz['Yas'] = temiz['Yas'].fillna(temiz['Yas'].median())
+print(f"Temiz veri: {len(temiz)} satır | kalan eksik hücre: {temiz.isna().sum().sum()}")
+temiz.to_csv('ikbs_temiz.csv', index=False)
+</textarea>
+<div class="cikti"></div>
+</div>
+</div>
+<div class="blok" id="b-kod-p3" data-baslik="Kod: Aşama 3 — Keşifsel veri analizi: ayrılma oranları ve korelasyonlar">
+<h3>Aşama 3: Keşifsel veri analizi</h3>
+<div class="hucre" id="h-p3_eda">
+<div class="hucre-ust"><span class="ad">🐍 Aşama 3 — Keşifsel veri analizi<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="20" aria-label="Aşama 3 — Keşifsel veri analizi kodu">import pandas as pd
+import matplotlib.pyplot as plt
+
+# AŞAMA 3 — KEŞİFSEL VERİ ANALİZİ (EDA)
+df = pd.read_csv('ikbs_temiz.csv')
+print(df[['Yas', 'Kidem', 'Memnuniyet', 'Fazla_Mesai', 'Ucret_Orani']].describe().round(2).to_string())
+print("\nDepartmana göre ayrılma oranı (%):")
+print((df.groupby('Departman')['Ayrildi'].mean() * 100).round(1).sort_values(ascending=False).to_string())
+print("\nAyrılma ile korelasyonlar:")
+print(df.drop(columns=['Sicil', 'Departman']).corr(numeric_only=True)['Ayrildi'].drop('Ayrildi').round(3).sort_values().to_string())
+
+fig, e = plt.subplots(1, 3, figsize=(13, 3.8))
+(df.groupby('Departman')['Ayrildi'].mean() * 100).sort_values().plot.barh(ax=e[0], color='indianred')
+e[0].set_title('Ayrılma oranı (%)')
+df.boxplot(column='Memnuniyet', by='Ayrildi', ax=e[1]); e[1].set_title('Memnuniyet'); e[1].set_xlabel('Ayrıldı (0/1)')
+df.boxplot(column='Ucret_Orani', by='Ayrildi', ax=e[2]); e[2].set_title('Ücret / piyasa'); e[2].set_xlabel('Ayrıldı (0/1)')
+plt.suptitle('')
+plt.tight_layout()
+plt.show()
+</textarea>
+<div class="cikti"></div>
+</div>
+</div>
+<div class="blok" id="b-kod-p4" data-baslik="Kod: Aşama 4 — Özellik mühendisliği: alan bilgisinden yeni değişkenler ve one-hot kodlama">
+<h3>Aşama 4: Özellik mühendisliği</h3>
+<p>Alan bilgisinden üç yeni özellik türetilir: 5 yıldan uzun süredir terfi alamamış olmak, ayda 20 saatten fazla fazla mesai ve piyasanın %10'dan fazla altında ücret. Departman one-hot kodlanır.</p>
+<div class="hucre" id="h-p4_ozellik">
+<div class="hucre-ust"><span class="ad">🐍 Aşama 4 — Özellik mühendisliği<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="19" aria-label="Aşama 4 — Özellik mühendisliği kodu">import pandas as pd
+
+# AŞAMA 4 — ÖZELLİK MÜHENDİSLİĞİ
+df = pd.read_csv('ikbs_temiz.csv')
+# Yeni özellikler: alan bilgisinden türetilir
+df['Terfisiz_Uzun'] = (df['Son_Terfi_Yil'] &gt;= 5).astype(int)          # 5+ yıldır terfi almamış
+df['Yuksek_Mesai'] = (df['Fazla_Mesai'] &gt; 20).astype(int)              # ayda 20 saatten fazla
+df['Piyasa_Alti'] = (df['Ucret_Orani'] &lt; 0.9).astype(int)             # piyasanın %10'dan fazla altında
+# Kategorik değişkeni kodla (one-hot)
+X = pd.get_dummies(df.drop(columns=['Sicil', 'Ayrildi', 'Memnuniyet_Eksikti']), columns=['Departman'],
+                   drop_first=True, dtype=int)
+y = df['Ayrildi']
+print("Model girdileri:", list(X.columns))
+print("Boyut:", X.shape)
+print("\nYeni özelliklerin ayrılma oranları (%):")
+for oz in ['Terfisiz_Uzun', 'Yuksek_Mesai', 'Piyasa_Alti']:
+    oran = df.groupby(oz)['Ayrildi'].mean() * 100
+    print(f"  {oz:&lt;14} hayır: {oran[0]:.1f}  evet: {oran[1]:.1f}")
+</textarea>
+<div class="cikti"></div>
+</div>
+</div>
+<div class="blok" id="b-kod-p5" data-baslik="Kod: Aşama 5 — Model geliştirme: lojistik regresyon ve rastgele orman, çapraz doğrulama, ROC-AUC">
+<h3>Aşama 5: Model geliştirme</h3>
+<p>İki model karşılaştırılır. Değerlendirme ölçütleri: <b>doğruluk</b> (doğru tahminlerin oranı), <b>kesinlik</b> (riskli dediklerimizin ne kadarı gerçekten ayrıldı), <b>duyarlılık</b> (ayrılanların ne kadarını yakaladık), <b>F1</b> (kesinlik ve duyarlılığın uyumlu ortalaması) ve <b>ROC-AUC</b> (eşikten bağımsız ayırt etme gücü).</p>
+<div class="hucre" id="h-p5_model">
+<div class="hucre-ust"><span class="ad">🐍 Aşama 5 — Model geliştirme<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="35" aria-label="Aşama 5 — Model geliştirme kodu">import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
+from sklearn.metrics import (accuracy_score, precision_score, recall_score, f1_score,
+                             roc_auc_score, RocCurveDisplay, confusion_matrix)
+
+if 'X' not in globals() or 'Terfisiz_Uzun' not in X:
+    raise NameError("Önce 'Aşama 4 — Özellik mühendisliği' hücresini çalıştırın.")
+
+# AŞAMA 5 — MODEL GELİŞTİRME: seçim, eğitim, değerlendirme
+X_eg, X_te, y_eg, y_te = train_test_split(X, y, test_size=0.25, stratify=y, random_state=0)
+modeller = {
+    'Lojistik regresyon': make_pipeline(StandardScaler(), LogisticRegression(max_iter=1000)),
+    'Rastgele orman': RandomForestClassifier(n_estimators=200, min_samples_leaf=5, random_state=0),
+}
+fig, eksen = plt.subplots(figsize=(6, 5))
+for ad, m in modeller.items():
+    cv = cross_val_score(m, X_eg, y_eg, cv=5, scoring='roc_auc')
+    m.fit(X_eg, y_eg)
+    olas = m.predict_proba(X_te)[:, 1]
+    tah = (olas &gt;= 0.5).astype(int)
+    print(f"{ad}: 5 katlı CV AUC = {cv.mean():.3f} ± {cv.std():.3f}")
+    print(f"  Test → doğruluk {accuracy_score(y_te, tah):.3f} | kesinlik {precision_score(y_te, tah):.3f} | "
+          f"duyarlılık {recall_score(y_te, tah):.3f} | F1 {f1_score(y_te, tah):.3f} | ROC-AUC {roc_auc_score(y_te, olas):.3f}")
+    print("  Karışıklık matrisi [[DN YP] [YN DP]]:", confusion_matrix(y_te, tah).tolist())
+    RocCurveDisplay.from_predictions(y_te, olas, name=ad, ax=eksen)
+eksen.plot([0, 1], [0, 1], 'k--', lw=.8)
+eksen.set_title('ROC eğrileri (test seti)')
+plt.show()
+secilen_model = modeller['Lojistik regresyon']
+print("\nKPI (AUC ≥ 0,75) sağlandı mı?", roc_auc_score(y_te, secilen_model.predict_proba(X_te)[:, 1]) &gt;= 0.75)
+</textarea>
+<div class="cikti"></div>
+</div>
+<div class="not"><b>Yorum:</b> Doğruluk yanıltıcı olabilir: Çalışanların yaklaşık %70'i kalmaktadır, herkesi “kalacak” diye tahmin eden bir model bile %70 doğruluk sağlar. Bu yüzden İK'da duyarlılık ve ROC-AUC daha anlamlıdır. Basit lojistik regresyonun rastgele ormandan iyi çıkması, yorumlanabilirliği yüksek modellerin çoğu İK probleminde yeterli olduğunu gösterir.</div>
+</div>
+<div class="blok" id="b-kod-p6" data-baslik="Kod: Aşama 6 ve 8 — Dağıtım, puanlama işlevi ve veri kayması izleme (PSI)">
+<h3>Aşama 6 ve 8: Dağıtım, izleme ve yineleme</h3>
+<p>Model bir dosyaya kaydedilir, yeniden yüklenir ve ham kayıtları puanlayan bir işlevle kullanıma sunulur. <b>İzleme</b> için bir sonraki çeyrekte ücretlerin piyasanın gerisinde kaldığı varsayılır; <b>popülasyon kararlılık endeksi</b> (PSI) bu kaymayı yakalar ve modelin yeni veriyle yeniden eğitilmesi gerektiğini — yani sekizinci aşamayı — tetikler.</p>
+<div class="hucre" id="h-p6_dagitim">
+<div class="hucre-ust"><span class="ad">🐍 Aşama 6 — Dağıtım ve izleme<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="40" aria-label="Aşama 6 — Dağıtım ve izleme kodu">import io
+import pickle
+import numpy as np
+import pandas as pd
+from sklearn.metrics import roc_auc_score
+
+if 'secilen_model' not in globals():
+    raise NameError("Önce 'Aşama 5 — Model geliştirme' hücresini çalıştırın.")
+
+# AŞAMA 6 — DAĞITIM: modeli kaydet, yükle, yeni kayıtlar için puanlama işlevi sun
+with open('ayrilma_modeli.pkl', 'wb') as f:
+    pickle.dump({'model': secilen_model, 'sutunlar': list(X.columns)}, f)
+with open('ayrilma_modeli.pkl', 'rb') as f:
+    paket = pickle.load(f)
+
+def risk_puanla(kayitlar: pd.DataFrame) -&gt; pd.Series:
+    """Ham çalışan kayıtlarını modelin beklediği biçime getirip ayrılma olasılığı döndürür."""
+    d = kayitlar.copy()
+    d['Terfisiz_Uzun'] = (d['Son_Terfi_Yil'] &gt;= 5).astype(int)
+    d['Yuksek_Mesai'] = (d['Fazla_Mesai'] &gt; 20).astype(int)
+    d['Piyasa_Alti'] = (d['Ucret_Orani'] &lt; 0.9).astype(int)
+    d = pd.get_dummies(d, columns=['Departman'], dtype=int).reindex(columns=paket['sutunlar'], fill_value=0)
+    return pd.Series(paket['model'].predict_proba(d)[:, 1], index=kayitlar.index).round(3)
+
+yeni = pd.DataFrame({'Departman': ['Satış', 'BT'], 'Yas': [27, 41], 'Kidem': [1.5, 9.0],
+                     'Memnuniyet': [2.6, 4.1], 'Fazla_Mesai': [26, 8], 'Ucret_Orani': [0.86, 1.08],
+                     'Son_Terfi_Yil': [3, 1]})
+print("Test: yeni çalışanlar için ayrılma olasılığı:", risk_puanla(yeni).tolist())
+
+# İZLEME: bir sonraki çeyrekte veri dağılımı kayarsa (ör. ücret artışları piyasanın gerisinde kaldı)
+def psi(beklenen, gercek, kova=10):
+    """Popülasyon kararlılık endeksi: &gt;0,25 belirgin kayma."""
+    sinirlar = np.quantile(beklenen, np.linspace(0, 1, kova + 1)); sinirlar[0], sinirlar[-1] = -np.inf, np.inf
+    b = np.histogram(beklenen, sinirlar)[0] / len(beklenen) + 1e-6
+    g = np.histogram(gercek, sinirlar)[0] / len(gercek) + 1e-6
+    return float(((g - b) * np.log(g / b)).sum())
+
+rng = np.random.default_rng(7)
+yeni_ceyrek = X_te.copy()
+yeni_ceyrek['Ucret_Orani'] = (yeni_ceyrek['Ucret_Orani'] - rng.normal(0.08, 0.03, len(yeni_ceyrek))).round(2)
+print(f"\nİzleme — Ücret_Oranı PSI: {psi(X_te['Ucret_Orani'], yeni_ceyrek['Ucret_Orani']):.3f} "
+      "(&gt;0,25 ise model yeniden eğitilmeli)")
+print(f"Ortalama tahmini risk: önceki çeyrek {secilen_model.predict_proba(X_te)[:, 1].mean():.3f} → "
+      f"yeni çeyrek {secilen_model.predict_proba(yeni_ceyrek)[:, 1].mean():.3f}")
+</textarea>
+<div class="cikti"></div>
+</div>
+</div>
+<div class="blok" id="b-kod-p7" data-baslik="Kod: Aşama 7 — Yorumlama ve iletişim: risk etkenleri grafiği ve yönetici özeti">
+<h3>Aşama 7: Yorumlama ve iletişim</h3>
+<p>Model katsayıları yöneticinin anlayacağı dile çevrilip görselleştirilir ve proje başında belirlenen KPI'lara göre bir yönetici özeti üretilir.</p>
+<div class="hucre" id="h-p7_yorum">
+<div class="hucre-ust"><span class="ad">🐍 Aşama 7 — Yorumlama ve yönetici özeti<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="32" aria-label="Aşama 7 — Yorumlama ve yönetici özeti kodu">import pandas as pd
+import matplotlib.pyplot as plt
+
+if 'secilen_model' not in globals():
+    raise NameError("Önce 'Aşama 5 — Model geliştirme' hücresini çalıştırın.")
+
+# AŞAMA 7 — YORUMLAMA VE İLETİŞİM: teknik çıktıyı yönetici diline çevir
+lr = secilen_model.named_steps['logisticregression']
+katsayi = pd.Series(lr.coef_[0], index=X.columns).sort_values()
+etiket = {'Memnuniyet': 'İş memnuniyeti', 'Ucret_Orani': 'Ücretin piyasaya oranı', 'Kidem': 'Kıdem',
+          'Fazla_Mesai': 'Fazla mesai', 'Son_Terfi_Yil': 'Son terfiden bu yana geçen yıl',
+          'Yuksek_Mesai': 'Ayda 20+ saat mesai', 'Piyasa_Alti': 'Piyasanın %10+ altında ücret',
+          'Terfisiz_Uzun': '5+ yıl terfisiz', 'Yas': 'Yaş'}
+katsayi.index = [etiket.get(i, i.replace('Departman_', 'Departman: ')) for i in katsayi.index]
+
+plt.figure(figsize=(8, 5))
+plt.barh(katsayi.index, katsayi.values, color=['#2b8a3e' if v &lt; 0 else '#c92a2a' for v in katsayi.values])
+plt.axvline(0, color='grey', lw=.8)
+plt.title('Ayrılma riskini artıran (kırmızı) ve azaltan (yeşil) etkenler\n(standartlaştırılmış katsayılar)')
+plt.tight_layout()
+plt.show()
+
+df_risk = X_te.assign(Risk=secilen_model.predict_proba(X_te)[:, 1], Gercek=y_te.values)
+ilk20 = df_risk.nlargest(int(len(df_risk) * .2), 'Risk')
+yakalanan = ilk20['Gercek'].sum() / df_risk['Gercek'].sum()
+print("YÖNETİCİ ÖZETİ")
+print(f"• En güçlü üç risk etkeni: {', '.join(katsayi.sort_values(ascending=False).index[:3])}.")
+print(f"• En güçlü üç koruyucu etken: {', '.join(katsayi.index[:3])}.")
+print(f"• Modelin en riskli gördüğü %20'lik dilim, gerçekte ayrılanlardan %{100 * yakalanan:.0f} kadarını içeriyor "
+      f"(KPI hedefi %60 → {'sağlandı' if yakalanan &gt;= .6 else 'sağlanamadı'}).")
+print("• Öneri: Riskli dilimle bireysel kariyer görüşmesi; piyasanın altında kalan ücretlerin gözden geçirilmesi.")
+</textarea>
+<div class="cikti"></div>
+</div>
+<div class="not uyari"><b>Dürüst raporlama:</b> İkinci KPI (riskli grubun %60'ını ilk %20'lik dilimde yakalamak) sağlanamadı. Bunu gizlemek yerine raporlamak ve yeni veri kaynaklarıyla (ör. yönetici değişikliği, işe gidiş süresi) sekizinci aşamaya dönmek, iyi bir veri bilimi uygulamasıdır.</div>
+</div>
+</section>
+
+<section class="bolum" id="guvenlik" data-baslik="5. Veri güvenliği">
+<h2>5. Veri güvenliği sorunları</h2>
+<div class="blok" id="b-guv" data-baslik="Veri güvenliği tehditleri: yetkisiz erişim, kayıp, hırsızlık, mevzuat ihlali, araya girme, içeriden tehdit">
+<p>Hassas veri işleyen kurumlar; siber güvenlik önlemleri, risk yönetimi, çalışan eğitimi ve mevzuata uyumdan oluşan kapsamlı bir yaklaşıma ihtiyaç duyar. İK verisi — kimlik bilgileri, ücretler, sağlık raporları, disiplin kayıtları, sendika üyeliği — en hassas kurumsal veriler arasındadır.</p>
+<table class="tablo">
+<tr><th>Tehdit</th><th>Açıklama</th><th>İK örneği</th></tr>
+<tr><td>Yetkisiz erişim</td><td>Veri ihlalleri (ör. 2017 Equifax ihlali: yamanmamış bir yazılım açığından 147 milyon kişinin verisi sızdı) ve içeriden tehditler</td><td>Bordro dosyasının yetkisiz kişilerce görüntülenmesi</td></tr>
+<tr><td>Veri kaybı ya da bozulması</td><td>Yanlışlıkla silme, donanım arızası, iletim ve saklama hataları</td><td>Özlük arşivinin yedeksiz silinmesi</td></tr>
+<tr><td>Hırsızlık ve casusluk</td><td>Fikrî mülkiyet ve ticari sır hırsızlığı, kurumsal casusluk</td><td>Ücret yapısı ve yetenek havuzunun rakibe sızdırılması</td></tr>
+<tr><td>Mevzuat ihlalleri</td><td>GDPR, CCPA; sektörel düzenlemeler (HIPAA, PCI-DSS, FISMA)</td><td>Türkiye'de <b>KVKK</b> (6698 sayılı Kanun): açık rıza, aydınlatma, özel nitelikli verinin korunması</td></tr>
+<tr><td>Araya girme ve kurcalama</td><td>Ortadaki adam saldırıları, iletim ya da saklama sırasında verinin değiştirilmesi</td><td>Bordro banka dosyasında IBAN değiştirilmesi</td></tr>
+<tr><td>İçeriden tehditler</td><td>Kötü niyetli ya da ihmalkâr çalışan eylemleri (oltalama bağlantısına tıklamak)</td><td>Personel listesinin kişisel e-postaya gönderilmesi</td></tr>
+<tr><td>Yetersiz güvenlik denetimleri</td><td>Zayıf parola, çok faktörlü doğrulama (MFA) eksikliği, şifrelenmemiş veri</td><td>Şifresiz paylaşılan Excel bordro dosyaları</td></tr>
+<tr><td>Tedarik zinciri riskleri</td><td>Üçüncü taraf hizmet sağlayıcılardan kaynaklanan riskler</td><td>Dış kaynaklı bordro ya da işe alım yazılımı firması</td></tr>
+</table>
+</div>
+<div class="blok" id="b-kod-guv" data-baslik="Kod: KVKK uyumlu veri koruma — takma ad (tuzlu hash), maskeleme, genelleştirme, k-anonimlik, rol tabanlı erişim">
+<h3>Uygulama: Kişisel veriyi koruyarak analiz verisi hazırlamak (ek)</h3>
+<p>Analiz ekibinin işten ayrılma ya da ücret analizi yapabilmesi için kimlik bilgilerine ihtiyacı yoktur. Hücre beş tekniği uygular: (1) <b>takma adlandırma</b> — kimlik numarasını gizli bir “tuz” ile SHA-256 özetine çevirmek; (2) <b>maskeleme</b> — ekranda kimliğin yalnızca bir kısmını göstermek; (3) <b>genelleştirme</b> — yaşı aralığa, ili bölgeye çevirmek; (4) <b>k-anonimlik denetimi</b> — her yarı-tanımlayıcı birleşiminde en az <i>k</i> kişi bulunmasını sağlamak; (5) <b>rol tabanlı erişim</b> — her rolün yalnızca ihtiyaç duyduğu sütunları görmesi (veri minimizasyonu).</p>
+<div class="hucre" id="h-veri_guvenligi">
+<div class="hucre-ust"><span class="ad">🐍 Veri güvenliği: takma ad, maskeleme, k-anonimlik<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="40" aria-label="Veri güvenliği: takma ad, maskeleme, k-anonimlik kodu">import hashlib
+import secrets
+import pandas as pd
+
+# KVKK ve veri güvenliği: analiz ekibine kişisel veriyi ifşa etmeden veri sağlamak
+personel = pd.DataFrame({
+    'TC_Kimlik': ['12345678901', '23456789012', '34567890123', '45678901234', '56789012345', '67890123456'],
+    'Ad_Soyad': ['Ayşe Yılmaz', 'Mehmet Kaya', 'Zeynep Demir', 'Can Öztürk', 'Elif Şahin', 'Burak Arslan'],
+    'Yas': [27, 34, 29, 45, 31, 52],
+    'Il': ['Sakarya', 'Kocaeli', 'Sakarya', 'Ankara', 'Kocaeli', 'Ankara'],
+    'Maas': [52000, 61000, 58000, 88000, 63000, 95000],
+    'Saglik_Raporu_Gun': [0, 12, 3, 0, 5, 21],          # özel nitelikli kişisel veri
+})
+
+# 1) Takma adlandırma (pseudonymization): tuzlu SHA-256 ile kimliği geri döndürülemez anahtara çevir
+TUZ = secrets.token_hex(16)                               # gizli tutulur, veriyle birlikte paylaşılmaz
+def takma_ad(tc):
+    return hashlib.sha256((TUZ + tc).encode()).hexdigest()[:12]
+
+# 2) Maskeleme: görüntülemede kimliğin yalnızca bir kısmını göster
+def maskele(tc):
+    return tc[:3] + '*' * 6 + tc[-2:]
+
+# 3) Genelleştirme: yaşı aralığa, ili bölgeye çevir (yeniden tanımlamayı zorlaştırır)
+BOLGE = {'Sakarya': 'Marmara', 'Kocaeli': 'Marmara', 'Ankara': 'İç Anadolu'}
+analiz = pd.DataFrame({
+    'Anahtar': personel['TC_Kimlik'].map(takma_ad),
+    'Yas_Grubu': pd.cut(personel['Yas'], [20, 30, 40, 60], labels=['20–30', '31–40', '41–60']),
+    'Bolge': personel['Il'].map(BOLGE),
+    'Maas': personel['Maas'],
+})
+print("Ekranda gösterilecek kimlikler:", personel['TC_Kimlik'].map(maskele).tolist())
+print("\nAnaliz ekibine giden veri (doğrudan tanımlayıcı ve sağlık verisi YOK):")
+print(analiz.to_string(index=False))
+
+# 4) k-anonimlik denetimi: aynı yarı-tanımlayıcı birleşimine sahip en küçük grup kaç kişi?
+k = analiz.groupby(['Yas_Grubu', 'Bolge'], observed=True).size()
+print("\nYarı-tanımlayıcı grupları:\n", k.to_string())
+print(f"k = {k.min()} → {'Yeterli değil: tek kişilik grup, maaşı ifşa olur!' if k.min() &lt; 2 else 'Kabul edilebilir'}")
+
+# 5) Rol tabanlı erişim: her rol yalnızca ihtiyacı olan sütunları görür (veri minimizasyonu)
+ROLLER = {'Bordro uzmanı': (personel, ['Ad_Soyad', 'Maas']),
+          'İSG hekimi': (personel, ['Ad_Soyad', 'Saglik_Raporu_Gun']),
+          'Analist': (analiz, ['Anahtar', 'Yas_Grubu', 'Bolge', 'Maas'])}
+def goruntule(rol):
+    tablo, sutunlar = ROLLER[rol]
+    return tablo[sutunlar]
+for rol in ROLLER:
+    print(f"\n{rol} rolünün gördüğü sütunlar:", list(goruntule(rol).columns))
+
+# Neden tuz? 11 haneli kimliklerin tuzsuz özeti kaba kuvvetle çözülebilir
+tuzsuz = hashlib.sha256('12345678901'.encode()).hexdigest()[:12]
+print("\nTuzsuz özet (tahmin edilebilir):", tuzsuz, "| Tuzlu özet:", takma_ad('12345678901'))
+</textarea>
+<div class="cikti"></div>
+</div>
+<div class="not uyari"><b>Neden tuz?</b> 11 haneli bir kimlik numarasının olası değerleri sınırlıdır; tuzsuz bir özet tüm olasılıklar denenerek kısa sürede geri çözülebilir. Tuz gizli tutulmalı, veriyle birlikte paylaşılmamalıdır. Takma adlandırılmış veri KVKK açısından hâlâ kişisel veridir; anonim sayılması için yeniden tanımlamanın makul ölçüde olanaksız olması gerekir. Hücredeki <code>Il</code> sütununu ya da daha dar yaş aralıklarını analiz tablosuna ekleyip k-değerinin 1'e düştüğünü gözleyin.</div>
+</div>
+</section>
+
+<section class="bolum" id="farklar" data-baslik="6. Veri bilimi, analitik, ML ve YZ">
+<h2>6. Veri bilimi, veri analitiği, makine öğrenmesi ve yapay zekâ</h2>
+<div class="blok" id="b-fark" data-baslik="Veri bilimi, veri analitiği, makine öğrenmesi ve yapay zekâ arasındaki farklar">
+<table class="tablo">
+<tr><th>Alan</th><th>Tanım</th><th>Odak</th><th>İK örneği</th></tr>
+<tr><td><b>Veri bilimi</b></td><td>İstatistik, makine öğrenmesi, veri madenciliği ve görselleştirmeyle yapılandırılmış ve yapılandırılmamış veriden içgörü elde eden disiplinler arası alan</td><td>Toplamadan yorumlamaya tüm veri yaşam döngüsü</td><td>Uçtan uca işten ayrılma analitiği projesi</td></tr>
+<tr><td><b>Veri analitiği</b></td><td>Karar almayı destekleyecek örüntü ve eğilimleri bulmak için veri setlerini analiz etmek</td><td>Betimleyici ve tanısal: “Ne oldu?”, “Neden oldu?”</td><td>Aylık devir oranı panosu, KPI izleme</td></tr>
+<tr><td><b>Makine öğrenmesi</b></td><td>Yapay zekânın, bilgisayarların açıkça programlanmadan veriden öğrenmesini sağlayan alt alanı</td><td>Sınıflandırma, regresyon, kümeleme, anomali tespiti</td><td>Ayrılma riski tahmin modeli</td></tr>
+<tr><td><b>Yapay zekâ</b></td><td>Öğrenme, akıl yürütme, problem çözme ve karar verme gibi insan zekâsı süreçlerinin makinelerce taklit edilmesi</td><td>İnsan zekâsı gerektiren görevler (dil anlama, karar verme)</td><td>İK sohbet robotu, otomatik özgeçmiş tarama</td></tr>
+</table>
+</div>
+<div class="blok" id="b-kod-analitik" data-baslik="Kod: Dört analitik türü — betimleyici, tanısal, tahmine dayalı ve reçeteleyici">
+<h3>Uygulama: Aynı veriyle dört analitik türü (ek)</h3>
+<p>Proje verisi üzerinden dört soru yanıtlanır: <b>Ne oldu?</b> (betimleyici — veri analitiği), <b>Neden oldu?</b> (tanısal — veri analitiği), <b>Ne olacak?</b> (tahmine dayalı — makine öğrenmesi) ve <b>Ne yapmalıyız?</b> (reçeteleyici — veri bilimi). Son adımda sınırlı bir ücret düzeltme bütçesinin, modelin en çok risk düşüşü öngördüğü kişilere verilmesi ile rastgele dağıtılması karşılaştırılır.</p>
+<div class="hucre" id="h-analitik_turleri">
+<div class="hucre-ust"><span class="ad">🐍 Betimleyici, tanısal, tahmine dayalı, reçeteleyici analitik<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="32" aria-label="Betimleyici, tanısal, tahmine dayalı, reçeteleyici analitik kodu">import numpy as np
+import pandas as pd
+
+# Veri analitiği (ne oldu, neden) → veri bilimi / makine öğrenmesi (ne olacak) → reçeteleyici (ne yapmalı)
+df = pd.read_csv('ikbs_temiz.csv') if 'secilen_model' in globals() else None
+if df is None:
+    raise NameError("Önce proje hücrelerini (Aşama 1–5) sırayla çalıştırın.")
+
+print("1) BETİMLEYİCİ — Ne oldu?")
+print(f"   Ayrılma oranı %{100 * df.Ayrildi.mean():.1f}; en yüksek: "
+      f"{df.groupby('Departman').Ayrildi.mean().idxmax()} departmanı.\n")
+
+print("2) TANISAL — Neden oldu?")
+fark = df.groupby('Ayrildi')[['Memnuniyet', 'Ucret_Orani', 'Fazla_Mesai']].mean().round(2)
+print(fark.rename(index={0: 'Kalanlar', 1: 'Ayrılanlar'}).to_string(), "\n")
+
+print("3) TAHMİNE DAYALI — Ne olacak?")
+risk = pd.Series(secilen_model.predict_proba(X)[:, 1], index=X.index)
+print(f"   Önümüzdeki dönemde beklenen ayrılan sayısı ≈ {risk.sum():.0f} kişi (toplam {len(risk)}).\n")
+
+print("4) REÇETELEYİCİ — Ne yapmalıyız? (sınırlı bütçeyle ücret düzeltmesi)")
+butce, maliyet_kisi = 30, 1          # 30 kişilik ücret düzeltme bütçesi
+aday = X[X['Ucret_Orani'] &lt; 1.0].copy()
+duzeltilmis = aday.copy()
+duzeltilmis['Ucret_Orani'] = 1.0
+duzeltilmis['Piyasa_Alti'] = 0
+kazanc = secilen_model.predict_proba(aday)[:, 1] - secilen_model.predict_proba(duzeltilmis)[:, 1]
+secim = pd.Series(kazanc, index=aday.index).nlargest(butce)
+rastgele = pd.Series(kazanc, index=aday.index).sample(butce, random_state=0)
+print(f"   En çok risk düşüşü sağlayacak {butce} kişi seçilirse beklenen kurtarılan çalışan: {secim.sum():.1f}")
+print(f"   Aynı bütçe rastgele dağıtılırsa: {rastgele.sum():.1f}")
+</textarea>
+<div class="cikti"></div>
+</div>
+<div class="not uyari"><b>Etik not:</b> Reçeteleyici sonuçlar bir modelin varsayımına dayanır; ücret kararları tek başına bir risk puanına göre alınmamalı, eşit işe eşit ücret ilkesi ve ayrımcılık yasağı gözetilmelidir.</div>
+</div>
+</section>
+
+<section class="bolum" id="kariyer" data-baslik="7. Veri biliminde kariyer">
+<h2>7. Veri biliminde kariyer</h2>
+<div class="blok" id="b-kariyer" data-baslik="Veri bilimci becerileri: teknik, analitik, alan bilgisi, sosyal beceriler, eğitim, deneyim">
+<p>Veri bilimi kariyeri teknik, analitik ve alana özgü becerileri birlikte gerektirir. <b>GitHub</b>, kod ve not defterlerinin sürüm denetimi, paylaşımı ve ekip çalışması (çekme istekleri, sorun takibi, kod incelemesi) için temel platformdur; açık kaynak projeler öğrenmeyi ve bilgi paylaşımını destekler.</p>
+<table class="tablo">
+<tr><th>Beceri alanı</th><th>İçerik</th></tr>
+<tr><td>Programlama</td><td>Python (analiz, makine öğrenmesi, betik), R (istatistik ve görselleştirme), SQL (veritabanı sorgulama)</td></tr>
+<tr><td>İstatistik ve matematik</td><td>Olasılık kuramı ve dağılımlar, Bayesçi istatistik; t-testi, ki-kare, ANOVA; doğrusal cebir ve kalkülüs</td></tr>
+<tr><td>Veri işleme</td><td>pandas, NumPy, Excel</td></tr>
+<tr><td>Makine öğrenmesi</td><td>scikit-learn, TensorFlow/PyTorch; sınıflandırma, regresyon, kümeleme ve boyut indirgeme</td></tr>
+<tr><td>Görselleştirme</td><td>Matplotlib/Seaborn, Tableau/Power BI, D3.js</td></tr>
+<tr><td>Analitik beceriler</td><td>Veri temizleme ve ön işleme, EDA, eleştirel düşünme, hipotez kurup sınayarak problem çözme</td></tr>
+<tr><td>Alan bilgisi</td><td>İş anlayışı ve alan uzmanlığı — İK analitiğinde iş hukuku, ücret yönetimi, örgütsel davranış ve psikometri bilgisi</td></tr>
+<tr><td>Sosyal beceriler</td><td>Karmaşık bulguları teknik olmayan paydaşlara anlatmak, disiplinler arası ekip çalışması, proje yönetimi</td></tr>
+<tr><td>Eğitim</td><td>Bilgisayar bilimi, istatistik, matematik, mühendislik ya da veri biliminde lisans; uzmanlaşmış ve araştırma rolleri için yüksek lisans ya da doktora</td></tr>
+<tr><td>Uygulamalı deneyim</td><td>Kişisel projeler ve stajlar, Kaggle yarışmaları, Coursera, edX, DataCamp sertifikaları</td></tr>
+<tr><td>Sürekli öğrenme</td><td>Yeni araç ve teknikleri izlemek; atölye, web semineri, konferans ve topluluklara katılmak</td></tr>
+</table>
+<div class="not ipucu"><b>İK öğrencileri için:</b> İnsan analitiği (people analytics) uzmanlığı, İK alan bilgisini veri becerileriyle birleştirir. Bu kitabın sonraki bölümleri (NumPy, pandas, veri toplama, temizleme, keşifsel analiz, görselleştirme) bu yolun teknik temelini oluşturur.</div>
+</div>
+</section>
+
+<section class="bolum" id="kurulum" data-baslik="8. Anaconda ve Python kurulumu">
+<h2>8. Anaconda ve Python kurulumu</h2>
+<div class="blok" id="b-kurulum" data-baslik="Anaconda kurulum adımları ve Jupyter Notebook">
+<p>Kitap tüm uygulamaları Python ile yapar. <b>Anaconda</b>, Python'u ve veri bilimi ile makine öğrenmesinde kullanılan kütüphanelerin çoğunu tek pakette sunan bir dağıtımdır.</p>
+<ol>
+<li><b>İndirme:</b> anaconda.com adresinden işletim sisteminize uygun Anaconda Distribution'ı indirin.</li>
+<li><b>Kurulum dosyasını çalıştırma:</b> Windows'ta <code>.exe</code> dosyasını, macOS'ta <code>.pkg</code> dosyasını çift tıklayın; Linux'ta terminalde <code>bash Anaconda3-&lt;sürüm&gt;-Linux-x86_64.sh</code> komutunu çalıştırın.</li>
+<li><b>Lisans sözleşmesini</b> kabul edin.</li>
+<li><b>Kurulum türü:</b> “Just Me (önerilen)” seçeneğini işaretleyin.</li>
+<li><b>Kurulum klasörünü</b> seçin (yaklaşık 5–6 GB alan gerekir).</li>
+<li><b>Gelişmiş seçenekler:</b> Başlat menüsü kısayolları ve “Anaconda'yı varsayılan Python olarak kaydet” önerilir; “PATH'e ekle” önerilmez.</li>
+<li><b>Kurulumu</b> başlatın ve tamamlanmasını bekleyin.</li>
+<li><b>Jupyter Notebook</b>'u Anaconda Navigator'dan (terminalde <code>anaconda-navigator</code>) ya da doğrudan simgesinden açın; tarayıcıda açılan sayfada <b>New → Python 3</b> ile ilk not defterinizi (<code>.ipynb</code>, IPython Notebook) oluşturun.</li>
+</ol>
+<div class="not"><b>Bu sayfada kurulum gerekmez:</b> Kod hücreleri, Python'un tarayıcıda çalışan sürümü <b>Pyodide</b> ile çalışır. Kendi bilgisayarınızda büyük veriyle ya da uzun süren modellerle çalışacaksanız Anaconda kurulumu yine de önerilir; bu sayfadaki her hücrenin kodunu <b>⧉ Kopyala</b> ile alıp Jupyter'e yapıştırabilirsiniz.</div>
+</div>
+</section>
+
+<section class="bolum" id="sonuc" data-baslik="Sonuç">
+<h2>Sonuç</h2>
+<div class="blok" id="b-sonuc" data-baslik="Bölüm özeti">
+<p>Bu bölümde veri bilimine giriş yapıldı ve farklı alanlardaki uygulamalarıyla önemi tartışıldı. Veri biliminin erken istatistik temellerinden geleceğine uzanan gelişimi, eksiksiz bir veri bilimi projesinin aşamaları, veri güvenliği sorunları ve veri bilimi, veri analitiği, makine öğrenmesi ve yapay zekâ arasındaki farklar ele alındı; veri bilimci olmanın gereksinimleri ve Anaconda kurulum adımları açıklandı. Bu sayfada ayrıca bu kavramlar, uçtan uca bir işten ayrılma tahmini projesi, dört analitik türü, KVKK uyumlu veri koruma teknikleri ve masraf beyanlarında anomali tespiti ile İK verisi üzerinde uygulandı. Bir sonraki bölüm, veri bilimi ve makine öğrenmesinin ilk adımı olan NumPy'yi ele alır.</p>
+</div>
+</section>
+
+<section class="bolum" id="test" data-baslik="Kendinizi sınayın">
+<h2>Kendinizi sınayın</h2>
+<div class="blok" id="b-test" data-baslik="Çoktan seçmeli sorular (20 soru)">
+<div id="testAlani"></div>
+<p><button class="dugme" id="testKontrol">Yanıtlarımı kontrol et</button> <button class="dugme ikincil" id="testSifirla">Sıfırla</button><span id="puan"></span></p>
+</div>
+<div class="blok" id="b-sorular" data-baslik="Tartışma soruları">
+<h3>Tartışma soruları</h3>
+<ol class="sorular">
+<li>Veri bilimini tanımlayın ve günümüz dijital dünyasındaki önemini açıklayın.</li>
+<li>Veri bilimi sürecinin temel bileşenleri nelerdir; veriden içgörü elde etmeye nasıl katkı sağlarlar?</li>
+<li>Veri biliminin erken temellerinden bugüne gelişimini izleyin.</li>
+<li>Büyük veri ve bulut bilişim gibi teknolojik gelişmeler veri biliminin gelişimini nasıl etkiledi?</li>
+<li>Veri biliminin güncel sorunları çözmedeki ve farklı sektörlerde yeniliği yönlendirmedeki rolünü tartışın.</li>
+<li>Bir kurumda veri bilimcinin rol ve sorumluluklarını açıklayın. Bir İK analitiği uzmanı bunlardan hangilerini üstlenir?</li>
+<li>Veri mühendisi, veri analisti ve makine öğrenmesi mühendisi nasıl farklılaşır?</li>
+<li>Veri bilimi projelerinde disiplinler arası iş birliğinin önemini ve alan uzmanlarının (ör. İK iş ortakları) rolünü tartışın.</li>
+<li>Veri bilimi kariyeri için gerekli temel beceri ve nitelikler nelerdir?</li>
+<li>Veri bilimi uzmanları için iletişim becerilerinin önemini açıklayın.</li>
+<li>Tipik bir veri bilimi projesi yaşam döngüsünün temel aşamalarını özetleyin.</li>
+<li>Problem tanımı aşaması bir projenin genel başarısını nasıl etkiler?</li>
+<li>Sağlık, finans, perakende ve İK gibi sektörlerden gerçek veri bilimi uygulamalarına örnek verin.</li>
+<li>Veri bilimi e-ticarette müşteri deneyimini ve kişiselleştirmeyi nasıl iyileştirir? Aynı yaklaşım çalışan deneyimine nasıl uyarlanabilir?</li>
+<li>Kurumların hassas veriyi işlerken karşılaşabileceği güvenlik tehditlerini belirleyip tartışın.</li>
+<li>Kurumlar yetkisiz erişim ve veri ihlali riskini nasıl azaltabilir?</li>
+<li>Veri güvenliğinde mevzuata uyumun ve veri gizliliği düzenlemelerinin (KVKK, GDPR) önemini açıklayın.</li>
+</ol>
+</div>
+</section>
+
+<nav class="bolum-gezinti"><a href="index.html"><small>← Giriş sayfası</small>Tüm bölümler</a><a class="sonraki" href="bolum3_pandas.html"><small>Sonraki bölüm →</small>Bölüm 3 · Pandas</a></nav>
+<footer>Kaynak: “Introduction to Data Science” bölümünün içeriğinden İK verisiyle hazırlanmış Türkçe etkileşimli sürüm · Python tarayıcıda <a href="https://pyodide.org" target="_blank" rel="noopener">Pyodide</a> ile çalışır.</footer>
+
+</main>
+</div>
+
+<script type="text/plain" id="yardimciKod"># ik_yardimci.py — mlxtend yüklenemediğinde kullanılan saf-Python yedek
+# (TransactionEncoder, apriori, fpgrowth, association_rules için küçük eşdeğerler)
+from itertools import combinations
+import pandas as pd
+
+
+class TransactionEncoder:
+    def fit(self, transactions):
+        self.columns_ = sorted({i for t in transactions for i in t})
+        return self
+
+    def transform(self, transactions):
+        import numpy as np
+        idx = {c: k for k, c in enumerate(self.columns_)}
+        arr = np.zeros((len(transactions), len(self.columns_)), dtype=bool)
+        for r, t in enumerate(transactions):
+            for i in t:
+                arr[r, idx[i]] = True
+        return arr
+
+
+def apriori(df, min_support=0.5, use_colnames=True, max_len=None):
+    n = len(df)
+    cols = list(df.columns)
+    sets = [set(df.index[df[c]]) for c in cols]
+    names = cols if use_colnames else list(range(len(cols)))
+    sonuc = []
+    seviye = []
+    for k, s in enumerate(sets):
+        sup = len(s) / n
+        if sup >= min_support:
+            seviye.append(((k,), s))
+            sonuc.append((sup, frozenset([names[k]])))
+    boy = 1
+    while seviye and (max_len is None or boy < max_len):
+        yeni = {}
+        for a in range(len(seviye)):
+            for b in range(a + 1, len(seviye)):
+                ia, sa = seviye[a]
+                ib, sb = seviye[b]
+                if ia[:-1] != ib[:-1]:
+                    continue
+                aday = tuple(sorted(set(ia) | set(ib)))
+                if aday in yeni:
+                    continue
+                ortak = sa & sb
+                sup = len(ortak) / n
+                if sup >= min_support:
+                    yeni[aday] = ortak
+        seviye = sorted(yeni.items())
+        for aday, s in seviye:
+            sonuc.append((len(s) / n, frozenset(names[i] for i in aday)))
+        boy += 1
+    return pd.DataFrame(sonuc, columns=["support", "itemsets"])
+
+
+def fpgrowth(df, min_support=0.5, use_colnames=True, max_len=None):
+    # Sonuç kümesi Apriori ile aynıdır; yalnızca arama stratejisi farklıdır.
+    return apriori(df, min_support=min_support, use_colnames=use_colnames, max_len=max_len)
+
+
+def association_rules(frequent_itemsets, metric="confidence", min_threshold=0.8):
+    sup = {fs: s for s, fs in zip(frequent_itemsets["support"], frequent_itemsets["itemsets"])}
+    satirlar = []
+    for fs, s in sup.items():
+        if len(fs) < 2:
+            continue
+        for r in range(1, len(fs)):
+            for ant in combinations(sorted(fs), r):
+                ant = frozenset(ant)
+                con = fs - ant
+                sa, sc = sup.get(ant), sup.get(con)
+                if sa is None or sc is None:
+                    continue
+                conf = s / sa
+                lift = conf / sc
+                lev = s - sa * sc
+                conv = float("inf") if conf == 1 else (1 - sc) / (1 - conf)
+                satirlar.append(dict(antecedents=ant, consequents=con,
+                                     **{"antecedent support": sa, "consequent support": sc},
+                                     support=s, confidence=conf, lift=lift,
+                                     leverage=lev, conviction=conv))
+    out = pd.DataFrame(satirlar)
+    if out.empty:
+        return out
+    return out[out[metric] >= min_threshold].reset_index(drop=True)
+</script>
+<script type="text/plain" id="snsYedekKod"># sns_yedek.py — seaborn kurulamazsa kullanılan küçük matplotlib yedeği
+# (bu sayfadaki histplot, scatterplot, regplot, boxplot çağrılarını karşılar)
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+def _veri(x, data):
+    if data is not None and isinstance(x, str):
+        return np.asarray(data[x], dtype=float)
+    return np.asarray(x, dtype=float)
+
+
+def histplot(data=None, x=None, kde=False, color=None, label=None, alpha=0.6, bins='auto', ax=None, **k):
+    ax = ax or plt.gca()
+    v = _veri(x if x is not None else data, data if x is not None else None)
+    v = v[~np.isnan(v)]
+    n, kenar, _ = ax.hist(v, bins=bins, color=color, alpha=alpha, label=label, edgecolor='white')
+    if kde and len(v) > 1:
+        from scipy.stats import gaussian_kde
+        xs = np.linspace(v.min(), v.max(), 200)
+        ax.plot(xs, gaussian_kde(v)(xs) * len(v) * (kenar[1] - kenar[0]), color=color)
+    ax.set_ylabel('Count')
+    return ax
+
+
+def scatterplot(x=None, y=None, data=None, ax=None, **k):
+    ax = ax or plt.gca()
+    ax.scatter(_veri(x, data), _veri(y, data), **{kk: vv for kk, vv in k.items() if kk in ('color', 's', 'alpha', 'label')})
+    if isinstance(x, str): ax.set_xlabel(x)
+    if isinstance(y, str): ax.set_ylabel(y)
+    return ax
+
+
+def regplot(x=None, y=None, data=None, scatter=True, color=None, ax=None, **k):
+    ax = ax or plt.gca()
+    xv, yv = _veri(x, data), _veri(y, data)
+    if scatter:
+        ax.scatter(xv, yv, color=color)
+    b, a = np.polyfit(xv, yv, 1)
+    xs = np.linspace(xv.min(), xv.max(), 100)
+    ax.plot(xs, a + b * xs, color=color)
+    return ax
+
+
+def boxplot(x=None, y=None, data=None, ax=None, **k):
+    ax = ax or plt.gca()
+    gruplar = sorted(data[x].unique())
+    ax.boxplot([data.loc[data[x] == g, y] for g in gruplar], positions=range(len(gruplar)))
+    ax.set_xticks(range(len(gruplar)), [str(g) for g in gruplar])
+    ax.set_xlabel(x); ax.set_ylabel(y)
+    return ax
+</script>
+
+<script>
+/* ===================== 1. Kod hücreleri ===================== */
+const hucreler = [...document.querySelectorAll('.hucre')];
+hucreler.forEach(h => {
+  const ta = h.querySelector('textarea');
+  ta.dataset.ozgun = ta.value;
+  const boyutla = () => { ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight + 4, 640) + 'px'; };
+  boyutla(); ta.addEventListener('input', boyutla);
+  ta.addEventListener('keydown', e => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const s = ta.selectionStart, en = ta.selectionEnd;
+      ta.setRangeText('    ', s, en, 'end');
+    } else if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault(); calistir(h);
+    }
+  });
+  h.querySelector('.calis').addEventListener('click', () => calistir(h));
+  h.querySelector('.sifirla').addEventListener('click', () => { ta.value = ta.dataset.ozgun; boyutla(); });
+  h.querySelector('.kopyala').addEventListener('click', async e => {
+    try { await navigator.clipboard.writeText(ta.value); e.target.textContent = '✓ Kopyalandı'; }
+    catch { ta.select(); document.execCommand('copy'); e.target.textContent = '✓ Kopyalandı'; }
+    setTimeout(() => e.target.textContent = '⧉ Kopyala', 1400);
+  });
+});
+
+/* ===================== 2. Pyodide ===================== */
+let py = null, hazir = false, kuyruk = Promise.resolve();
+const nokta = document.getElementById('nokta'), durumYazi = document.getElementById('durumYazi');
+const tumunuBtn = document.getElementById('tumunu');
+function durum(yazi, sinif) { durumYazi.textContent = yazi; nokta.className = 'nokta ' + (sinif || ''); }
+
+const KURULUM = `
+import sys, io, os, base64, warnings
+warnings.filterwarnings('ignore')
+os.chdir('/home/pyodide')
+if '/home/pyodide' not in sys.path:
+    sys.path.insert(0, '/home/pyodide')
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+plt.rcParams.update({'figure.dpi': 100, 'axes.grid': False, 'font.size': 10})
+_SEKILLER = []
+def _goster(*a, **k):
+    for n in plt.get_fignums():
+        f = plt.figure(n)
+        b = io.BytesIO()
+        f.savefig(b, format='png', bbox_inches='tight')
+        _SEKILLER.append(base64.b64encode(b.getvalue()).decode())
+    plt.close('all')
+plt.show = _goster
+def _sekilleri_al():
+    _goster()
+    s = list(_SEKILLER)
+    _SEKILLER.clear()
+    return s
+_HTMLLER = []
+def html_goster(html, yukseklik=450):
+    """Bir HTML belgesini (folium haritası, plotly grafiği) hücre çıktısında gösterir."""
+    _HTMLLER.append((str(html), int(yukseklik)))
+def _htmlleri_al():
+    s = list(_HTMLLER)
+    _HTMLLER.clear()
+    return s
+def _dosyalar():
+    return sorted(f for f in os.listdir('.') if f.lower().endswith(('.csv', '.xlsx', '.txt', '.json', '.html')))
+`;
+
+async function baslat() {
+  try {
+    durum('Pyodide indiriliyor…');
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/pyodide/v0.27.7/full/pyodide.js';
+    await new Promise((ok, red) => { s.onload = ok; s.onerror = () => red(new Error('Pyodide betiği yüklenemedi')); document.head.appendChild(s); });
+    py = await loadPyodide();
+    durum('Temel paketler yükleniyor…');
+    await py.loadPackage(['numpy', 'pandas', 'matplotlib'], { messageCallback: () => {} });
+    py.FS.writeFile('/home/pyodide/ik_yardimci.py', document.getElementById('yardimciKod').textContent);
+    py.FS.writeFile('/home/pyodide/sns_yedek.py', document.getElementById('snsYedekKod').textContent);
+    await py.runPythonAsync(KURULUM);
+    durum('seaborn kuruluyor…');
+    await py.loadPackage('micropip', { messageCallback: () => {} });
+    try {
+      await py.runPythonAsync("import micropip\nawait micropip.install('seaborn')\nimport seaborn");
+    } catch (e) {
+      console.warn('seaborn kurulamadı, yedek kullanılacak', e);
+      py.runPython("import sys, sns_yedek\nsys.modules['seaborn'] = sns_yedek");
+    }
+    hazir = true; tumunuBtn.disabled = false;
+    durum('Python hazır', 'hazir');
+  } catch (e) {
+    console.error(e);
+    durum('Python yüklenemedi (internet bağlantısını kontrol edin)', 'hata');
+  }
+}
+
+function calistir(h) {
+  kuyruk = kuyruk.then(() => calistirIc(h));
+  return kuyruk;
+}
+
+async function calistirIc(h) {
+  const btn = h.querySelector('.calis'), cikti = h.querySelector('.cikti');
+  const kod = h.querySelector('textarea').value;
+  if (!hazir) {
+    cikti.className = 'cikti dolu';
+    cikti.innerHTML = '<pre>Python ortamı henüz hazır değil; lütfen üst çubuktaki gösterge yeşile dönene kadar bekleyin.</pre>';
+    return;
+  }
+  btn.disabled = true; btn.textContent = '⏳ Çalışıyor';
+  cikti.className = 'cikti dolu'; cikti.innerHTML = '<pre>Gerekli paketler yükleniyor…</pre>';
+  let metin = '';
+  const t0 = performance.now();
+  let hata = null;
+  try {
+    await py.loadPackagesFromImports(kod, { messageCallback: () => {}, errorCallback: m => console.warn(m) });
+    py.setStdout({ batched: s => { metin += s + '\n'; } });
+    py.setStderr({ batched: s => { metin += s + '\n'; } });
+    cikti.innerHTML = '<pre>Çalıştırılıyor…</pre>';
+    await py.runPythonAsync(kod);
+  } catch (e) {
+    hata = String(e.message || e);
+    const i = hata.lastIndexOf('File "<exec>"');
+    if (i > 0) hata = 'Traceback (son çağrılar):\n  ' + hata.slice(i);
+  }
+  let sekiller = [];
+  try { sekiller = py.runPython('_sekilleri_al()').toJs(); } catch (e) {}
+  cikti.innerHTML = '';
+  metin = metin.split('\n').filter(l => !/^(Loading|Loaded) [\w\-, .]+$|already loaded from default channel|^No new packages to load/.test(l)).join('\n');
+  if (metin.trim()) { const p = document.createElement('pre'); p.textContent = metin.replace(/\n+$/, ''); cikti.appendChild(p); }
+  if (hata) { const p = document.createElement('pre'); p.className = 'hatali'; p.textContent = hata; cikti.appendChild(p); }
+  sekiller.forEach((b, i) => { const img = new Image(); img.src = 'data:image/png;base64,' + b; img.alt = 'Grafik ' + (i + 1); cikti.appendChild(img); });
+  let htmller = [];
+  try { htmller = py.runPython('_htmlleri_al()').toJs(); } catch (e) {}
+  htmller.forEach(([icerik, yuk]) => {
+    const fr = document.createElement('iframe');
+    fr.setAttribute('sandbox', 'allow-scripts allow-popups');
+    fr.style.height = yuk + 'px'; fr.srcdoc = icerik; fr.loading = 'lazy';
+    cikti.appendChild(fr);
+  });
+  dosyaListesi(cikti);
+  const sure = document.createElement('div'); sure.className = 'sure';
+  sure.textContent = (hata ? '✗ Hata · ' : '✓ Tamamlandı · ') + ((performance.now() - t0) / 1000).toFixed(1) + ' sn';
+  cikti.appendChild(sure);
+  if (!cikti.childNodes.length) cikti.className = 'cikti';
+  btn.disabled = false; btn.textContent = '▶ Çalıştır';
+}
+
+function dosyaListesi(cikti) {
+  let liste = [];
+  try { liste = py.runPython('_dosyalar()').toJs(); } catch (e) { return; }
+  if (!liste.length) return;
+  const d = document.createElement('div'); d.className = 'dosyalar';
+  d.append('Çalışma klasöründeki dosyalar: ');
+  liste.forEach(ad => {
+    const b = document.createElement('button'); b.textContent = '⬇ ' + ad; b.title = ad + ' dosyasını indir';
+    b.onclick = () => {
+      const veri = py.FS.readFile('/home/pyodide/' + ad);
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([veri])); a.download = ad; a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    };
+    d.appendChild(b);
+  });
+  cikti.appendChild(d);
+}
+
+tumunuBtn.addEventListener('click', async () => {
+  tumunuBtn.disabled = true;
+  for (const h of hucreler) await calistir(h);
+  tumunuBtn.disabled = false;
+});
+
+document.getElementById('yukle').addEventListener('change', async e => {
+  if (!hazir) { alert('Python ortamı henüz hazır değil.'); e.target.value = ''; return; }
+  const adlar = [];
+  for (const f of e.target.files) {
+    py.FS.writeFile('/home/pyodide/' + f.name, new Uint8Array(await f.arrayBuffer()));
+    adlar.push(f.name);
+  }
+  e.target.value = '';
+  durum('Yüklendi: ' + adlar.join(', '), 'hazir');
+  setTimeout(() => durum('Python hazır', 'hazir'), 4000);
+});
+
+baslat();
+
+/* ===================== 3. İçindekiler ===================== */
+const toc = document.getElementById('toc');
+document.querySelectorAll('section.bolum').forEach(sec => {
+  const a = document.createElement('a'); a.href = '#' + sec.id; a.textContent = sec.dataset.baslik; a.dataset.hedef = sec.id; toc.appendChild(a);
+  sec.querySelectorAll('.blok h3').forEach(h3 => {
+    const blok = h3.closest('.blok');
+    const b = document.createElement('a'); b.href = '#' + blok.id; b.className = 'alt'; b.textContent = h3.textContent; b.dataset.hedef = blok.id; toc.appendChild(b);
+  });
+});
+const tocLinkler = [...toc.querySelectorAll('a')];
+const gozlem = new IntersectionObserver(girdiler => {
+  girdiler.forEach(g => {
+    if (g.isIntersecting) {
+      tocLinkler.forEach(a => a.classList.toggle('aktif', a.dataset.hedef === g.target.id));
+    }
+  });
+}, { rootMargin: '-90px 0px -70% 0px' });
+document.querySelectorAll('section.bolum, .blok').forEach(el => gozlem.observe(el));
+
+/* ===================== 4. Arama motoru ===================== */
+// Türkçe duyarlı, aksan-toleranslı normalleştirme (karakter sayısı korunur → vurgulama konumları tutar)
+const HARF = { 'ı': 'i', 'ş': 's', 'ğ': 'g', 'ü': 'u', 'ö': 'o', 'ç': 'c', 'â': 'a', 'î': 'i', 'û': 'u' };
+function norm(s) {
+  return [...s].map(c => { const k = c.toLocaleLowerCase('tr'); return k.length === 1 ? (HARF[k] || k) : c.toLowerCase(); }).join('');
+}
+// Dizin: her blok için başlık, bölüm adı, metin ve kod
+const dizin = [...document.querySelectorAll('.blok')].map(blok => {
+  const kopya = blok.cloneNode(true);
+  kopya.querySelectorAll('.hucre, .cikti, script').forEach(x => x.remove());
+  kopya.querySelectorAll('td, th, li, p, h3, h4').forEach(x => x.append(' '));
+  const metin = kopya.textContent.replace(/\s+/g, ' ').trim();
+  const kod = [...blok.querySelectorAll('textarea')].map(t => t.value).join('\n');
+  const bolum = blok.closest('section').dataset.baslik;
+  return { blok, id: blok.id, baslik: blok.dataset.baslik, bolum, metin, kod,
+           nBaslik: norm(blok.dataset.baslik), nMetin: norm(metin), nKod: norm(kod) };
+});
+
+const araKutu = document.getElementById('ara'), sonucKutu = document.getElementById('sonuclar');
+let filtre = 'tumu', secili = -1, sonGorunen = [];
+
+function escapeHtml(s) { return s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+
+function ozetle(kaynak, nKaynak, terimler) {
+  // ilk eşleşmenin çevresinden ~160 karakterlik parça, terimler vurgulu
+  let ilk = -1;
+  for (const t of terimler) { const i = nKaynak.indexOf(t); if (i >= 0 && (ilk < 0 || i < ilk)) ilk = i; }
+  if (ilk < 0) ilk = 0;
+  const bas = Math.max(0, ilk - 60), son = Math.min(kaynak.length, ilk + 120);
+  const parca = kaynak.slice(bas, son), nParca = nKaynak.slice(bas, son);
+  const isaret = new Array(parca.length).fill(false);
+  terimler.forEach(t => { let i = nParca.indexOf(t); while (i >= 0) { for (let k = i; k < i + t.length; k++) isaret[k] = true; i = nParca.indexOf(t, i + 1); } });
+  let html = '', acik = false;
+  for (let i = 0; i < parca.length; i++) {
+    if (isaret[i] && !acik) { html += '<mark>'; acik = true; }
+    if (!isaret[i] && acik) { html += '</mark>'; acik = false; }
+    html += escapeHtml(parca[i]);
+  }
+  if (acik) html += '</mark>';
+  return (bas > 0 ? '… ' : '') + html.replace(/\n/g, ' ') + (son < kaynak.length ? ' …' : '');
+}
+
+function ara(sorgu) {
+  const terimler = norm(sorgu).split(/\s+/).filter(t => t.length > 1 || /\d/.test(t));
+  if (!terimler.length) return [];
+  const sonuc = [];
+  for (const d of dizin) {
+    let puan = 0, metinde = true, kodda = true;
+    for (const t of terimler) {
+      const b = d.nBaslik.includes(t), m = d.nMetin.includes(t), k = d.nKod.includes(t);
+      if (!b && !m && !k) { puan = -1; break; }
+      if (b) puan += 10;
+      if (m) puan += 3 + Math.min(5, d.nMetin.split(t).length - 1);
+      if (k) puan += 2 + Math.min(3, d.nKod.split(t).length - 1);
+      metinde = metinde && (b || m); kodda = kodda && k;
+    }
+    if (puan < 0) continue;
+    if (filtre === 'metin' && !metinde) continue;
+    if (filtre === 'kod' && !kodda) continue;
+    const kodaGore = filtre === 'kod' || (!metinde && kodda);
+    sonuc.push({ d, puan, kodaGore, ozet: kodaGore ? ozetle(d.kod, d.nKod, terimler) : ozetle(d.metin, d.nMetin, terimler) });
+  }
+  return sonuc.sort((a, b) => b.puan - a.puan);
+}
+
+function sonuclariGoster() {
+  const q = araKutu.value.trim();
+  if (!q) { sonucKutu.classList.remove('acik'); temizleVurgu(); return; }
+  sonGorunen = ara(q); secili = sonGorunen.length ? 0 : -1;
+  let html = `<div class="sonuc-ust"><span>${sonGorunen.length} sonuç · “${escapeHtml(q)}”</span>
+    <span class="filtre">${['tumu:Tümü', 'metin:Metin', 'kod:Kod'].map(x => { const [k, e] = x.split(':'); return `<button data-f="${k}" class="${filtre === k ? 'aktif' : ''}">${e}</button>`; }).join('')}</span></div>`;
+  if (!sonGorunen.length) html += '<div class="sonuc"><span class="ozet">Eşleşme bulunamadı. Farklı ya da daha kısa bir terim deneyin (ör. “asama”, “guvenlik”, “kariyer”).</span></div>';
+  sonGorunen.forEach((s, i) => {
+    html += `<div class="sonuc${i === secili ? ' secili' : ''}" data-i="${i}" role="option">
+      <span class="yol">${escapeHtml(s.d.bolum)}</span>
+      <b>${escapeHtml(s.d.baslik)}${s.kodaGore ? '<span class="etiket">kod</span>' : ''}</b>
+      <span class="ozet">${s.ozet}</span></div>`;
+  });
+  sonucKutu.innerHTML = html; sonucKutu.classList.add('acik');
+}
+
+function temizleVurgu() {
+  document.querySelectorAll('mark.ara').forEach(m => { const p = m.parentNode; p.replaceChild(document.createTextNode(m.textContent), m); p.normalize(); });
+}
+function vurgula(kok, terimler) {
+  const yuruyucu = document.createTreeWalker(kok, NodeFilter.SHOW_TEXT, {
+    acceptNode: n => n.parentElement.closest('textarea, script, .cikti, mark') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
+  const dugumler = []; while (yuruyucu.nextNode()) dugumler.push(yuruyucu.currentNode);
+  let ilk = null;
+  dugumler.forEach(n => {
+    const s = n.nodeValue, ns = norm(s);
+    const araliklar = [];
+    terimler.forEach(t => { let i = ns.indexOf(t); while (i >= 0) { araliklar.push([i, i + t.length]); i = ns.indexOf(t, i + t.length); } });
+    if (!araliklar.length) return;
+    araliklar.sort((a, b) => a[0] - b[0]);
+    const birlesik = [];
+    araliklar.forEach(r => { const son = birlesik[birlesik.length - 1]; if (son && r[0] <= son[1]) son[1] = Math.max(son[1], r[1]); else birlesik.push([...r]); });
+    const frag = document.createDocumentFragment(); let k = 0;
+    birlesik.forEach(([a, b]) => {
+      if (a > k) frag.appendChild(document.createTextNode(s.slice(k, a)));
+      const m = document.createElement('mark'); m.className = 'ara'; m.textContent = s.slice(a, b); frag.appendChild(m);
+      if (!ilk) ilk = m; k = b;
+    });
+    if (k < s.length) frag.appendChild(document.createTextNode(s.slice(k)));
+    n.parentNode.replaceChild(frag, n);
+  });
+  return ilk;
+}
+
+function git(i) {
+  const s = sonGorunen[i]; if (!s) return;
+  const terimler = norm(araKutu.value.trim()).split(/\s+/).filter(t => t.length > 1 || /\d/.test(t));
+  temizleVurgu();
+  const ilk = vurgula(s.d.blok, terimler);
+  const hedef = s.kodaGore ? (s.d.blok.querySelector('.hucre') || s.d.blok) : (ilk || s.d.blok);
+  hedef.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  const parlat = s.kodaGore ? hedef : s.d.blok;
+  parlat.classList.remove('flas'); void parlat.offsetWidth; parlat.classList.add('flas');
+  sonucKutu.classList.remove('acik');
+  history.replaceState(null, '', '#' + s.d.id);
+}
+
+let zamanlayici;
+araKutu.addEventListener('input', () => { clearTimeout(zamanlayici); zamanlayici = setTimeout(sonuclariGoster, 120); });
+araKutu.addEventListener('focus', () => { if (araKutu.value.trim()) sonuclariGoster(); });
+araKutu.addEventListener('keydown', e => {
+  const ogeler = sonucKutu.querySelectorAll('.sonuc[data-i]');
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault(); if (!ogeler.length) return;
+    secili = (secili + (e.key === 'ArrowDown' ? 1 : -1) + ogeler.length) % ogeler.length;
+    ogeler.forEach((o, i) => o.classList.toggle('secili', i === secili));
+    ogeler[secili].scrollIntoView({ block: 'nearest' });
+  } else if (e.key === 'Enter') { e.preventDefault(); git(Math.max(0, secili)); }
+  else if (e.key === 'Escape') { araKutu.value = ''; sonucKutu.classList.remove('acik'); temizleVurgu(); araKutu.blur(); }
+});
+sonucKutu.addEventListener('mousedown', e => {
+  const f = e.target.closest('button[data-f]');
+  if (f) { e.preventDefault(); filtre = f.dataset.f; sonuclariGoster(); return; }
+  const o = e.target.closest('.sonuc[data-i]'); if (o) { e.preventDefault(); git(+o.dataset.i); }
+});
+document.addEventListener('click', e => { if (!e.target.closest('.arama')) sonucKutu.classList.remove('acik'); });
+document.addEventListener('keydown', e => {
+  if (e.key === '/' && !e.target.closest('input, textarea')) { e.preventDefault(); araKutu.focus(); araKutu.select(); }
+});
+
+/* ===================== 5. Test ===================== */
+const SORULAR = [["Veri biliminin temel amacı nedir?", ["Mobil uygulama geliştirmek", "Yalnızca grafik çizmek", "Veriden bilgi ve içgörü elde etmek", "Web sitesi kurmak"], 2, "Ham veriyi eyleme dönük bilgiye dönüştürmek."], ["Hangisi veri biliminin gelişimini en iyi temsil eder?", ["Excel → PowerPoint → Python", "İstatistik → Veri madenciliği → Veri bilimi", "Makine öğrenmesi → Excel → Tableau", "Veritabanı → Java → Veri analizi"], 1, "1960–80’ler istatistik, 1990’lar veri madenciliği, 2010’lar modern veri bilimi."], ["Hangisi veri biliminin tipik bir uygulaması DEĞİLDİR?", ["Dolandırıcılık tespiti", "Öneri sistemleri", "Yüz tanıma", "Şiir yazmak"], 3, "Diğerleri veriden öğrenen tahmin ve tanıma görevleridir."], ["Seçeneklerden hangisi bir veri bilimi projesinde en önce gelir?", ["Model kurma", "Veri toplama", "Veri temizleme", "Dağıtım"], 1, "Bölümde ilk aşama problem tanımıdır; seçenekler arasında en önce gelen veri toplamadır."], ["Tipik bir iş akışında veri temizlemeden sonra hangi aşama gelir?", ["Dağıtım", "Görselleştirme", "Keşifsel veri analizi (EDA)", "Gereksinim toplama"], 2, "Temizlenen veri önce keşfedilir."], ["Veri biliminde veri güvenliğine ilişkin başlıca kaygı nedir?", ["Dosya sıkıştırma", "Bulut yedekleri", "Hassas veriye yetkisiz erişim", "Dosya boyutu sınırları"], 2, "Ör. bordro ve sağlık verisinin sızması."], ["Veri bilimi ve makine öğrenmesi için hangisi doğrudur?", ["Tamamen ilgisizdir", "Makine öğrenmesi veri biliminin bir alt kümesidir", "Veri bilimi makine öğrenmesinin bir dalıdır", "Eş anlamlıdır"], 1, "Veri bilimi makine öğrenmesini araç olarak kullanır."], ["Hangi alan öncelikle insan benzeri karar vermeye odaklanır?", ["Veri bilimi", "Veri analizi", "Yapay zekâ", "İş zekâsı"], 2, "Yapay zekâ insan zekâsı süreçlerini taklit eder."], ["Hangisi bir veri bilimcinin üstlenebileceği roller arasında DEĞİLDİR?", ["Veri mühendisi", "İş analisti", "Yazılım test uzmanı", "Makine öğrenmesi mühendisi"], 2, "Yazılım testi ayrı bir uzmanlıktır."], ["Bir veri bilimci için en önemli becerilerden biri hangisidir?", ["Video düzenleme", "İstatistiksel analiz", "Bilgisayar destekli tasarım (CAD)", "Klavye hızı"], 1, "İstatistik, veri biliminin temelidir."], ["Veri bilimci rolleri için genellikle asgari eğitim gereksinimi nedir?", ["Lise diploması", "Ön lisans", "Sayısal bir alanda lisans ya da yüksek lisans", "Sertifika programı"], 2, "Bilgisayar bilimi, istatistik, matematik, mühendislik ya da veri bilimi."], ["Veri bilimi ortamlarını yönetmek için yaygın kullanılan araç hangisidir?", ["WordPress", "Android Studio", "Anaconda", "Canva"], 2, "Python ve kütüphaneleri tek dağıtımda sunar."], ["Anaconda kurulumunun ilk adımı nedir?", ["Python’u ayrıca kurmak", "Resmî Anaconda sitesinden indirmek", "Jupyter Notebook’u açmak", "GitHub hesabı açmak"], 1, "Python Anaconda ile birlikte gelir."], ["Anaconda kurulduktan sonra Python için varsayılan olarak hangi ortam gelir?", ["Visual Studio", "Eclipse", "Jupyter Notebook", "Android Studio"], 2, "Tarayıcıda açılan etkileşimli not defteri."], ["Anaconda Navigator’ı terminalden başlatan komut hangisidir?", ["anaconda", "launch-anaconda", "anaconda-navigator", "start anaconda"], 2, "anaconda-navigator"], ["Hangisi veri analizini en iyi tanımlar?", ["Yapay zekâ modelleri oluşturmak", "Özet istatistikler ve görsellerle veriyi anlamak", "Oyun geliştirmek", "Mobil uygulama yapmak"], 1, "“Ne oldu, neden oldu?” sorularını yanıtlar."], ["Hangisi bir yapay zekâ uygulamasıdır?", ["Excel grafikleri", "Siri ve Alexa gibi sesli asistanlar", "Google Dokümanlar", "Not Defteri"], 1, "Dil anlama ve karar verme içerir."], ["Veri biliminde Python kullanmanın başlıca avantajı nedir?", ["Yüksek bellek kullanımı", "Okunması kolay söz dizimi ve zengin kütüphaneler", "Karmaşık kurulum gerektirmesi", "Sınırlı topluluk desteği"], 1, "pandas, NumPy, scikit-learn, Matplotlib…"], ["Hangisi makine öğrenmesi için popüler bir Python kütüphanesidir?", ["NumPy", "Matplotlib", "Scikit-learn", "WordPress"], 2, "Bu sayfadaki modeller scikit-learn ile kuruldu."], [".ipynb uzantısı neyi ifade eder?", ["iPad notebook", "IPython Notebook", "Interactive presentation notebook", "Internet Python block"], 1, "Jupyter not defterlerinin dosya biçimi."]];
+const testAlani = document.getElementById('testAlani');
+SORULAR.forEach(([s, sec, dogru, aciklama], i) => {
+  const d = document.createElement('div'); d.className = 'soru'; d.dataset.dogru = dogru;
+  d.innerHTML = `<p>${i + 1}. ${s}</p>` + sec.map((x, j) =>
+    `<label><input type="radio" name="s${i}" value="${j}"> ${'abcd'[j]}) ${x}</label>`).join('') +
+    `<div class="aciklama">Doğru yanıt: <b>${'abcd'[dogru]}) ${sec[dogru]}</b> — ${aciklama}</div>`;
+  testAlani.appendChild(d);
+});
+document.getElementById('testKontrol').onclick = () => {
+  let p = 0;
+  testAlani.querySelectorAll('.soru').forEach((d, i) => {
+    const s = d.querySelector('input:checked');
+    const ok = s && +s.value === +d.dataset.dogru;
+    d.classList.toggle('dogru', !!ok); d.classList.toggle('yanlis', !ok);
+    if (ok) p++;
+  });
+  document.getElementById('puan').textContent = `Puanınız: ${p} / ${SORULAR.length}`;
+};
+document.getElementById('testSifirla').onclick = () => {
+  testAlani.querySelectorAll('.soru').forEach(d => d.classList.remove('dogru', 'yanlis'));
+  testAlani.querySelectorAll('input').forEach(x => x.checked = false);
+  document.getElementById('puan').textContent = '';
+};
+</script>
+</body>
+</html>

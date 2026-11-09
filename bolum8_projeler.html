@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bölüm 8 · Projeler — İK Verisiyle Etkileşimli Python</title>
+<style>
+:root{
+  --bg:#f6f7fb; --kart:#ffffff; --yazi:#1d2433; --soluk:#5b6476; --cizgi:#e3e6ee;
+  --ana:#1f5fbf; --ana2:#e8f0fc; --vurgu:#d9480f; --yesil:#2b8a3e; --kod:#0f1729; --kodyazi:#e6edf7;
+  --isaret:#ffe066;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:84px}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--yazi);line-height:1.65;font-size:16px}
+a{color:var(--ana)}
+/* Üst çubuk */
+header.ust{position:sticky;top:0;z-index:50;background:#14213d;color:#fff;box-shadow:0 2px 10px rgba(0,0,0,.15)}
+.ust-ic{max-width:1320px;margin:0 auto;padding:10px 18px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.logo{font-weight:700;font-size:15px;white-space:nowrap}
+.logo small{display:block;font-weight:400;opacity:.7;font-size:12px}
+.arama{position:relative;flex:1;min-width:240px;max-width:560px}
+.arama input{width:100%;padding:9px 12px 9px 36px;border-radius:8px;border:1px solid #3a4a6b;background:#1e2d50;color:#fff;font-size:15px;outline:none}
+.arama input:not(:placeholder-shown)~.kbd{display:none}
+.arama input:focus{border-color:#8fb3ff;background:#22355f}
+.arama input::placeholder{color:#a9b6d3}
+.arama svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);opacity:.75}
+.kbd{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;border:1px solid #5a6a8b;border-radius:4px;padding:0 5px;color:#c4cee4}
+#sonuclar{position:absolute;top:calc(100% + 6px);left:0;right:0;background:#fff;color:var(--yazi);border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,.25);max-height:70vh;overflow:auto;display:none}
+#sonuclar.acik{display:block}
+.sonuc-ust{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid var(--cizgi);font-size:13px;color:var(--soluk);gap:8px;flex-wrap:wrap}
+.filtre button{border:1px solid var(--cizgi);background:#fff;border-radius:999px;padding:2px 10px;font-size:12px;cursor:pointer;margin-left:4px}
+.filtre button.aktif{background:var(--ana);color:#fff;border-color:var(--ana)}
+.sonuc{padding:9px 12px;border-bottom:1px solid #f0f2f6;cursor:pointer}
+.sonuc:hover,.sonuc.secili{background:var(--ana2)}
+.sonuc b{display:block;font-size:14px}
+.sonuc .yol{font-size:11px;color:var(--soluk);text-transform:uppercase;letter-spacing:.03em}
+.sonuc .ozet{font-size:13px;color:var(--soluk)}
+.sonuc .etiket{font-size:10px;background:#eef1f7;border-radius:4px;padding:1px 6px;margin-left:6px;color:#44506a;vertical-align:middle}
+.sonuc mark,.icerik mark.ara{background:var(--isaret);color:inherit;padding:0 1px;border-radius:2px}
+.durum{display:flex;align-items:center;gap:8px;font-size:13px;white-space:nowrap}
+.nokta{width:10px;height:10px;border-radius:50%;background:#f0ad4e;box-shadow:0 0 0 3px rgba(240,173,78,.25)}
+.nokta.hazir{background:#40c057;box-shadow:0 0 0 3px rgba(64,192,87,.25)}
+.nokta.hata{background:#fa5252}
+.dugme{border:0;border-radius:8px;padding:8px 13px;font-size:14px;cursor:pointer;background:var(--ana);color:#fff;font-weight:600}
+.dugme:hover{filter:brightness(1.08)}
+.dugme:disabled{opacity:.5;cursor:not-allowed}
+.dugme.ikincil{background:#e9edf5;color:#22304d}
+.ust .dugme.ikincil{background:#2b3c63;color:#fff}
+label.dugme input{display:none}
+/* Yerleşim */
+.duzen{max-width:1320px;margin:0 auto;display:grid;grid-template-columns:270px 1fr;gap:26px;padding:22px 18px 80px}
+nav.icindekiler{position:sticky;top:84px;align-self:start;max-height:calc(100vh - 100px);overflow:auto;font-size:14px;background:var(--kart);border:1px solid var(--cizgi);border-radius:12px;padding:14px 10px}
+nav.icindekiler h4{margin:0 8px 8px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--soluk)}
+nav.icindekiler a{display:block;padding:4px 8px;border-radius:6px;text-decoration:none;color:var(--yazi)}
+nav.icindekiler a.alt{padding-left:22px;font-size:13px;color:var(--soluk)}
+nav.icindekiler a:hover,nav.icindekiler a.aktif{background:var(--ana2);color:var(--ana)}
+main.icerik{min-width:0}
+.kapak{background:linear-gradient(135deg,#14213d,#1f5fbf);color:#fff;border-radius:16px;padding:30px 30px 26px;margin-bottom:22px}
+.kapak h1{margin:0 0 6px;font-size:30px;line-height:1.25}
+.kapak p{margin:6px 0 0;opacity:.92;max-width:820px}
+.rozetler{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.rozet{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);padding:3px 10px;border-radius:999px;font-size:12.5px}
+section.bolum{background:var(--kart);border:1px solid var(--cizgi);border-radius:14px;padding:22px 28px;margin-bottom:22px}
+section.bolum>h2{margin:0 0 10px;font-size:24px;color:#14213d;border-bottom:2px solid var(--ana2);padding-bottom:8px}
+.blok h3{font-size:19px;margin:24px 0 8px;color:#1b3a73}
+.blok h4{font-size:16px;margin:16px 0 6px}
+.blok.flas{animation:flas 1.6s ease}
+@keyframes flas{0%{box-shadow:0 0 0 4px rgba(255,224,102,.95);background:#fffbe6}100%{box-shadow:0 0 0 0 rgba(255,224,102,0);background:transparent}}
+.not{background:#f1f6ff;border-left:4px solid var(--ana);padding:10px 14px;border-radius:0 8px 8px 0;margin:12px 0;font-size:15px}
+.not.uyari{background:#fff6ec;border-color:var(--vurgu)}
+.not.ipucu{background:#effaf1;border-color:var(--yesil)}
+table.tablo{border-collapse:collapse;width:100%;margin:12px 0;font-size:14.5px}
+table.tablo th,table.tablo td{border:1px solid var(--cizgi);padding:7px 10px;text-align:left;vertical-align:top}
+table.tablo th{background:#f3f5fa}
+.formul{font-family:"Cambria Math","Times New Roman",serif;background:#fafbfe;border:1px dashed var(--cizgi);padding:6px 12px;border-radius:6px;display:inline-block;margin:4px 0}
+/* Kod hücresi */
+.hucre{border:1px solid #c9d3e6;border-radius:12px;overflow:hidden;margin:16px 0 10px;background:var(--kod)}
+.hucre.flas{animation:flas 1.6s ease}
+.hucre-ust{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#1b2540;color:#c8d3ea;font-size:13px;flex-wrap:wrap}
+.hucre-ust .ad{font-weight:600;margin-right:auto}
+.hucre-ust .ad span{opacity:.6;font-weight:400;margin-left:6px}
+.hucre-ust button{border:0;border-radius:6px;padding:5px 10px;font-size:12.5px;cursor:pointer;background:#2e3c62;color:#e6ecf8}
+.hucre-ust button.calis{background:#2f9e44;color:#fff;font-weight:600}
+.hucre-ust button:disabled{opacity:.5;cursor:wait}
+textarea.kod{display:block;width:100%;border:0;resize:vertical;background:var(--kod);color:var(--kodyazi);font:13.5px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;padding:12px 14px;outline:none;tab-size:4;white-space:pre;overflow:auto;min-height:120px}
+.cikti{background:#fff;border-top:1px solid #c9d3e6;display:none}
+.cikti.dolu{display:block}
+.cikti pre{margin:0;padding:12px 14px;font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;white-space:pre;overflow:auto;max-height:520px;color:#1d2433}
+.cikti pre.hatali{color:#c92a2a;background:#fff5f5}
+.cikti iframe{display:block;width:calc(100% - 16px);margin:8px auto;border:1px solid var(--cizgi);border-radius:6px;background:#fff}
+.cikti img{display:block;max-width:100%;margin:8px auto;border:1px solid var(--cizgi);border-radius:6px}
+.cikti .sure{font-size:11.5px;color:var(--soluk);padding:4px 14px 8px}
+.dosyalar{padding:4px 14px 10px;font-size:12.5px;color:var(--soluk)}
+.dosyalar button{border:1px solid var(--cizgi);background:#f6f8fc;border-radius:6px;padding:2px 8px;margin:2px;font-size:12px;cursor:pointer}
+.dene{font-size:14px;color:var(--soluk);margin:4px 0 14px}
+.dene b{color:var(--yazi)}
+/* Test */
+.soru{border:1px solid var(--cizgi);border-radius:10px;padding:12px 16px;margin:10px 0}
+.soru p{margin:0 0 6px;font-weight:600}
+.soru label{display:block;padding:3px 6px;border-radius:6px;cursor:pointer;font-size:15px}
+.soru label:hover{background:#f4f6fa}
+.soru.dogru{border-color:#8ce99a;background:#f4fcf5}
+.soru.yanlis{border-color:#ffa8a8;background:#fff6f6}
+.soru .aciklama{display:none;font-size:14px;color:var(--soluk);margin-top:6px}
+.soru.dogru .aciklama,.soru.yanlis .aciklama{display:block}
+#puan{font-weight:700;margin-left:10px}
+ol.sorular li,ol.alistirma li{margin:4px 0}
+footer{text-align:center;color:var(--soluk);font-size:13px;padding:20px}
+@media (max-width:960px){.duzen{grid-template-columns:1fr}nav.icindekiler{position:static;max-height:none}.kbd{display:none}}
+
+.ust-nav{color:#c9d6f2;text-decoration:none;font-size:13px;border:1px solid #3a4a6b;border-radius:8px;padding:6px 10px;white-space:nowrap}
+.ust-nav:hover{background:#22355f;color:#fff}
+.bolum-gezinti{display:flex;justify-content:space-between;gap:12px;margin:0 0 22px;flex-wrap:wrap}
+.bolum-gezinti a{flex:1;min-width:220px;background:#fff;border:1px solid #e3e6ee;border-radius:12px;padding:12px 16px;text-decoration:none;color:#1d2433}
+.bolum-gezinti a:hover{border-color:#1f5fbf;background:#f4f8ff}
+.bolum-gezinti small{display:block;color:#5b6476;font-size:12px}
+.bolum-gezinti .sonraki{text-align:right}
+</style>
+</head>
+<body>
+
+<header class="ust">
+  <div class="ust-ic">
+    <a class="ust-nav" href="index.html" title="Tüm bölümler">⌂ Tüm bölümler</a>
+    <div class="logo">Bölüm 8 · Projeler<small>İK verisiyle etkileşimli Python (Pyodide)</small></div>
+    <div class="arama">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="ara" type="search" autocomplete="off" placeholder="Bölümde ara: öneri, kosinüs, chatbot, TF-IDF, segment, PCA…" aria-label="Bölüm içinde ara">
+      <span class="kbd">/</span>
+      <div id="sonuclar" role="listbox"></div>
+    </div>
+    <div class="durum"><span id="nokta" class="nokta"></span><span id="durumYazi">Python yükleniyor…</span></div>
+    <button id="tumunu" class="dugme" disabled>▶ Tümünü çalıştır</button>
+    <label class="dugme ikincil" title="Kendi CSV/XLSX dosyanızı Python çalışma klasörüne yükleyin">⬆ Veri yükle<input id="yukle" type="file" multiple accept=".csv,.xlsx,.txt,.json"></label>
+  </div>
+</header>
+
+<div class="duzen">
+<nav class="icindekiler" id="toc"><h4>İçindekiler</h4></nav>
+
+<main class="icerik" id="icerik">
+<div class="kapak">
+  <h1>Projeler</h1>
+  <p>Öğrenilenleri üç uygulamalı projede birleştirmek. Kitaptaki müşteri odaklı projeler çalışan deneyimine uyarlanmıştır: film öneri sistemi → <b>eğitim öneri sistemi</b>, müşteri SSS chatbotu → <b>İK self-servis asistanı</b>, müşteri segmentasyonu → <b>çalışan segmentasyonu</b>.</p>
+  <div class="rozetler">
+    <span class="rozet">7 çalıştırılabilir kod hücresi</span>
+    <span class="rozet">pandas · scikit-learn · seaborn · HTML/JS arayüz</span>
+    <span class="rozet">Kurulum gerektirmez — tarayıcıda çalışır</span>
+  </div>
+</div>
+
+<section class="bolum" id="giris" data-baslik="Giriş">
+<h2>Giriş</h2>
+<div class="blok" id="b-giris" data-baslik="Projeler bölümüne giriş">
+<p>Kurumlar müşterilerini — İK açısından çalışanlarını — daha iyi anlamak ve onlarla daha etkili etkileşim kurmak için akıllı sistemlere giderek daha çok başvuruyor. Bu bölüm, makine öğrenmesi, doğal dil işleme ve veri analitiğinin yaygın iş sorunlarına nasıl uygulandığını üç gerçekçi projeyle gösterir:</p>
+<ol>
+<li><b>Öneri sistemi:</b> Kullanıcı tercihleri, kategoriler ve puanlarla ilgili içeriği önerir; içerik tabanlı ve işbirlikçi süzmenin deneyimi nasıl kişiselleştirdiğini gösterir. → İK karşılığı: <i>çalışanlara kurum içi eğitim önerisi</i>.</li>
+<li><b>SSS chatbotu:</b> Kullanıcıların düğmelerle etkileşip anında yanıt aldığı bir arayüz; sohbet arayüzleri ve kural tabanlı mantıkla destek hizmetinin otomasyonunu gösterir. → İK karşılığı: <i>izin, bordro, ihbar süresi gibi soruları yanıtlayan İK self-servis asistanı</i>.</li>
+<li><b>Segmentasyon sistemi:</b> K-ortalamalarla birbirinden ayrışan grupları belirler. → İK karşılığı: <i>yaş, ücret ve bağlılığa göre çalışan segmentleri ve segmente özel İK eylemleri</i>.</li>
+</ol>
+<p>Projeler; veri ön işleme, görselleştirme, makine öğrenmesi ve kullanıcı arayüzü tasarımında uygulamalı deneyim kazandırır.</p>
+<div class="not ipucu"><b>Nasıl kullanılır?</b> Gösterge yeşile döndüğünde hücreleri <b>▶ Çalıştır</b> ya da <b>Ctrl/⌘ + Enter</b> ile çalıştırın. Her projenin hücreleri birbirinin devamıdır; sırayla çalıştırın ya da <b>▶ Tümünü çalıştır</b>'ı kullanın. Asistan hücresi, sayfanın içinde tıklanabilir bir sohbet arayüzü üretir. Arama kutusuna <b>/</b> tuşuyla geçebilirsiniz.</div>
+<div class="not uyari"><b>Veri hakkında:</b> Kurs kataloğu gerçekçi örneklerdir; çalışan puanları ve segmentasyon verisi sentetiktir. Asistan yanıtlarındaki yasal bilgiler 4857 sayılı İş Kanunu'na dayanır; “örnek politika” olarak işaretlenenler hayalî bir şirkete aittir. Gerçek kullanımda güncel mevzuatı ve şirket politikanızı esas alın.</div>
+</div>
+</section>
+
+<section class="bolum" id="oneri" data-baslik="1. Eğitim öneri sistemi">
+<h2>1. Öneri sistemi: film önerisinden eğitim önerisine</h2>
+<div class="blok" id="b-oneri" data-baslik="Öneri sistemleri: içerik tabanlı, popülerliğe dayalı ve kişiselleştirilmiş öneri">
+<p>Seçeneklerin çok fazla olduğu ortamlarda öneri sistemleri kullanıcı deneyimini ve katılımı artırmanın temel aracıdır; Netflix, IMDb ve Amazon Prime Video bilinen örneklerdir. Kitaptaki sistem üç ölçütü birleştiren <b>karma (hibrit)</b> bir yaklaşım kullanır:</p>
+<ul>
+<li><b>Tür (kategori) uygunluğu:</b> Kullanıcının ilgilendiği temalara uygun içerik — içerik tabanlı süzme.</li>
+<li><b>En yüksek puanlılar:</b> Geniş bir kullanıcı kitlesinin beğendiği içerik — popülerliğe dayalı sıralama; sisteme güveni artırır.</li>
+<li><b>Kullanıcı puanları:</b> Kullanıcının geçmiş etkileşimleri ve geri bildirimleriyle kişiselleştirme.</li>
+</ul>
+<p>Kurumlarda yüzlerce e-öğrenme içeriği arasında çalışanların kendilerine uygun eğitimi bulması zordur. Aynı yaklaşım, öğrenme yönetim sistemlerinde (LMS) “size önerilen eğitimler” bölümünü besler.</p>
+</div>
+<div class="blok" id="b-movielens" data-baslik="MovieLens veri seti ve İK karşılığı: kurslar.csv ve puanlar.csv">
+<h3>Veri seti: MovieLens'ten eğitim kataloğuna</h3>
+<p>Kitap, Minnesota Üniversitesi GroupLens projesinin hazırladığı <b>MovieLens</b> veri setini (1M sürümü: yaklaşık 6.000 kullanıcıdan 1 milyon puan) kullanır: <code>movies.dat</code> (filmId, başlık, “|” ile ayrılmış türler), <code>ratings.dat</code> (kullanıcıId, filmId, 1–5 puan, Unix zaman damgası) ve bazı sürümlerde <code>users.dat</code> (yaş, cinsiyet, meslek, posta kodu). Dosyalar ISO-8859-1 kodlamasıyla ve “::” ayırıcısıyla okunup CSV'ye çevrilir.</p>
+<table class="tablo">
+<tr><th>MovieLens</th><th>Bu sayfadaki İK karşılığı</th></tr>
+<tr><td><code>movies.csv</code>: movieId, title (yıl), genres</td><td><code>kurslar.csv</code>: kursId, baslik (yıl), kategoriler (ör. <code>Veri|Programlama|İK</code>)</td></tr>
+<tr><td><code>ratings.csv</code>: userId, movieId, rating, timestamp</td><td><code>puanlar.csv</code>: calisanId, kursId, puan (1–5), zaman</td></tr>
+</table>
+</div>
+<div class="blok" id="b-kod-oneri-veri" data-baslik="Kod: Eğitim kataloğu ve çalışan puanlarını oluşturma">
+<h3>Uygulama 1: Veri setini oluşturmak</h3>
+<p>25 kurstan oluşan bir katalog ve dört ilgi profilinden (analitik, yönetici, İK uzmanı, genel) gelen 400 çalışanın verdiği yaklaşık 2.500 puan üretiliyor. Çalışanlar ilgi alanlarına uygun kursları daha sık alıyor ve daha yüksek puanlıyor.</p>
+<div class="hucre" id="h-oneri_veri">
+<div class="hucre-ust"><span class="ad">🐍 Öneri sistemi: veri setini oluştur<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="40" aria-label="Öneri sistemi: veri setini oluştur kodu">import numpy as np
+import pandas as pd
+
+# MovieLens'in İK karşılığı: kurum içi eğitim kataloğu (kurslar.csv) ve çalışan puanları (puanlar.csv)
+kurs_listesi = [
+    ("Etkili İletişim (2019)", "İletişim|Kişisel Gelişim"),
+    ("Zaman Yönetimi (2018)", "Kişisel Gelişim|Verimlilik"),
+    ("Excel ile Veri Analizi (2020)", "Veri|Ofis Araçları"),
+    ("Python ile İK Analitiği (2024)", "Veri|Programlama|İK"),
+    ("Power BI ile İK Panoları (2023)", "Veri|Raporlama|İK"),
+    ("Yetkinlik Bazlı Mülakat (2021)", "İK|İşe Alım"),
+    ("İşe Alımda Yapay Zekâ (2025)", "İK|İşe Alım|Yapay Zekâ"),
+    ("Performans Yönetimi Temelleri (2019)", "İK|Liderlik"),
+    ("Koçluk Becerileri (2022)", "Liderlik|İletişim"),
+    ("İlk Kez Yönetici Olmak (2021)", "Liderlik|Kişisel Gelişim"),
+    ("Çatışma Yönetimi (2020)", "İletişim|Liderlik"),
+    ("İş Sağlığı ve Güvenliği Temel (2018)", "İSG|Mevzuat"),
+    ("KVKK ve Kişisel Verilerin Korunması (2022)", "Mevzuat|Veri"),
+    ("4857 Sayılı İş Kanunu Uygulamaları (2021)", "Mevzuat|İK"),
+    ("Bordro ve SGK İşlemleri (2023)", "Mevzuat|Bordro|İK"),
+    ("Ücret Yönetimi ve Kademelendirme (2024)", "İK|Ücret|Veri"),
+    ("Çeşitlilik ve Kapsayıcılık (2023)", "İK|Kurum Kültürü"),
+    ("Stres ve Tükenmişlikle Başa Çıkma (2020)", "Kişisel Gelişim|Sağlık"),
+    ("Sunum Teknikleri (2017)", "İletişim|Ofis Araçları"),
+    ("Proje Yönetimi Temelleri (2019)", "Verimlilik|Liderlik"),
+    ("Çevik (Agile) Çalışma (2022)", "Verimlilik|Takım Çalışması"),
+    ("Takım Çalışması Atölyesi (2018)", "Takım Çalışması|İletişim"),
+    ("SQL'e Giriş (2021)", "Veri|Programlama"),
+    ("Üretken Yapay Zekâ ile Verimlilik (2025)", "Yapay Zekâ|Verimlilik|Ofis Araçları"),
+    ("Değişim Yönetimi (2024)", "Liderlik|Kurum Kültürü"),
+]
+kurslar = pd.DataFrame(kurs_listesi, columns=['baslik', 'kategoriler'])
+kurslar.insert(0, 'kursId', range(1, len(kurslar) + 1))
+
+# 400 çalışan; her biri ilgi profiline göre 3–10 kurs alıp 1–5 puan veriyor
+np.random.seed(8)
+profiller = {'Analitik': ['Veri', 'Programlama', 'Raporlama', 'Yapay Zekâ'],
+             'Yönetici': ['Liderlik', 'İletişim', 'Kurum Kültürü'],
+             'İK uzmanı': ['İK', 'İşe Alım', 'Mevzuat', 'Bordro', 'Ücret'],
+             'Genel': ['Kişisel Gelişim', 'Verimlilik', 'Ofis Araçları', 'Takım Çalışması']}
+kalite = np.random.normal(0, 0.45, len(kurslar))            # her kursun kendi kalitesi
+satirlar = []
+for calisan in range(1, 401):
+    profil = np.random.choice(list(profiller), p=[.25, .2, .25, .3])
+    ilgi = kurslar['kategoriler'].apply(lambda k: len(set(k.split('|')) &amp; set(profiller[profil])))
+    olas = (ilgi + 0.3) / (ilgi + 0.3).sum()
+    for kurs in np.random.choice(kurslar.index, np.random.randint(3, 11), replace=False, p=olas):
+        puan = np.clip(np.round(3.2 + 0.5 * ilgi[kurs] + kalite[kurs] + np.random.normal(0, 0.7)), 1, 5)
+        satirlar.append((calisan, kurs + 1, int(puan), 1700000000 + np.random.randint(0, 6e7)))
+puanlar = pd.DataFrame(satirlar, columns=['calisanId', 'kursId', 'puan', 'zaman'])
+
+kurslar.to_csv('kurslar.csv', index=False)
+puanlar.to_csv('puanlar.csv', index=False)
+print("kurslar.csv:\n", kurslar.head(8).to_string(index=False))
+print("\npuanlar.csv:\n", puanlar.head(8).to_string(index=False))
+print(f"\n{puanlar.calisanId.nunique()} çalışan, {len(kurslar)} kurs, {len(puanlar)} puan")
+</textarea>
+<div class="cikti"></div>
+</div>
+</div>
+<div class="blok" id="b-kod-oneri" data-baslik="Kod: En yüksek puanlı, kategoriye göre benzer (CountVectorizer + kosinüs) ve en yeni kurslar">
+<h3>Uygulama 2: Üç öneri işlevi</h3>
+<table class="tablo">
+<tr><th>Öneri türü</th><th>Yöntem</th><th>Kütüphane</th></tr>
+<tr><td>En yüksek puanlı</td><td>Gruplama (ortalama ve sayı) + en az <i>N</i> puan süzgeci + sıralama</td><td>pandas</td></tr>
+<tr><td>Kategoriye göre benzer</td><td><code>CountVectorizer</code> ile kategorileri ikili vektöre çevirme + kosinüs benzerliği</td><td>scikit-learn</td></tr>
+<tr><td>En yeni</td><td>Başlıktan yılı düzenli ifadeyle çıkarma + sıralama</td><td>re, pandas</td></tr>
+</table>
+<p><b>Kosinüs benzerliği</b> vektörlerin uzunluğuna değil yönüne bakar; bu yüzden kategori sayısı farklı kursları karşılaştırmaya uygundur. En az <i>N</i> puan koşulu, yalnızca iki kişinin 5 verdiği bir kursun listenin başına yerleşmesini önler.</p>
+<div class="hucre" id="h-oneri_sistem">
+<div class="hucre-ust"><span class="ad">🐍 Eğitim öneri sistemi<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="40" aria-label="Eğitim öneri sistemi kodu">import re
+import pandas as pd
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.feature_extraction.text import CountVectorizer
+
+# Veriyi yükle
+kurslar = pd.read_csv('kurslar.csv')     # sütunlar: kursId, baslik, kategoriler
+puanlar = pd.read_csv('puanlar.csv')     # sütunlar: calisanId, kursId, puan, zaman
+df = pd.merge(puanlar, kurslar, on='kursId')
+
+# Ön işleme: başlıktaki yılı düzenli ifadeyle çıkar
+def yil_cikar(baslik):
+    eslesme = re.search(r"\((\d{4})\)", baslik)
+    return int(eslesme.group(1)) if eslesme else None
+kurslar['yil'] = kurslar['baslik'].apply(yil_cikar)
+
+# 1) En yüksek puanlı kurslar (en az belirli sayıda puan alanlar arasından)
+def en_iyi_kurslar(df, min_puan_sayisi=50, ilk_n=8):
+    istatistik = df.groupby('baslik').agg({'puan': ['mean', 'count']})
+    istatistik.columns = ['ort_puan', 'puan_sayisi']
+    suzulmus = istatistik[istatistik['puan_sayisi'] &gt;= min_puan_sayisi]
+    return suzulmus.sort_values(by='ort_puan', ascending=False).head(ilk_n).round(2)
+
+# 2) Kategori benzerliğine göre öneri (içerik tabanlı süzme)
+cv = CountVectorizer(tokenizer=lambda x: x.split('|'), token_pattern=None, lowercase=False)
+kategori_matrisi = cv.fit_transform(kurslar['kategoriler'])
+kategori_benzerlik = cosine_similarity(kategori_matrisi)
+
+def kategoriye_gore_benzer(kurs_basligi, ilk_n=5):
+    if kurs_basligi not in kurslar['baslik'].values:
+        return f"'{kurs_basligi}' katalogda bulunamadı."
+    idx = kurslar[kurslar['baslik'] == kurs_basligi].index[0]
+    skorlar = sorted(enumerate(kategori_benzerlik[idx]), key=lambda x: x[1], reverse=True)
+    skorlar = [s for s in skorlar if s[0] != idx][:ilk_n]       # kursun kendisini dışarıda bırak
+    oneri = kurslar.iloc[[i for i, _ in skorlar]][['baslik', 'kategoriler', 'yil']].copy()
+    oneri['benzerlik'] = [round(s, 2) for _, s in skorlar]
+    return oneri
+
+# 3) En yeni kurslar
+def en_yeni_kurslar(kurslar_df, ilk_n=5):
+    return kurslar_df.dropna(subset=['yil']).sort_values(by='yil', ascending=False).head(ilk_n)[['baslik', 'kategoriler', 'yil']]
+
+print("En yüksek puanlı kurslar:")
+print(en_iyi_kurslar(df).to_string())
+print("\n'Python ile İK Analitiği (2024)' kursuna kategori olarak benzeyenler:")
+print(kategoriye_gore_benzer('Python ile İK Analitiği (2024)').to_string(index=False))
+print("\nEn yeni kurslar:")
+print(en_yeni_kurslar(kurslar).to_string(index=False))
+print("\nKategori sözlüğü:", list(cv.get_feature_names_out()))
+</textarea>
+<div class="cikti"></div>
+</div>
+<div class="not uyari"><b>Kitaptaki koda göre değişiklikler:</b> (1) <code>CountVectorizer(tokenizer=...)</code> yeni scikit-learn sürümlerinde uyarı verir; <code>token_pattern=None</code> eklendi. <code>lowercase=False</code> ile de “İK” gibi kategoriler Türkçe harf dönüşümünden etkilenmeden korunur. (2) Özgün işlev en benzer listeden yalnızca ilk sıradakini atıyordu (<code>[1:top_n+1]</code>); aynı benzerliğe sahip kurslar arasında kursun kendisi ilk sırada olmayabileceği için burada kursun kendisi doğrudan dışlanıyor.</div>
+</div>
+<div class="blok" id="b-kod-oneri-kisisel" data-baslik="Kod: Kişiselleştirilmiş hibrit öneri — öge tabanlı işbirlikçi süzme + içerik + popülerlik">
+<h3>Uygulama 3: Kişiselleştirme katmanı (ek)</h3>
+<p>Kitapta tanımlanan ama kodlanmayan üçüncü bileşen: Çalışanın kendi puanlarına dayanan öneri. <b>Öge tabanlı işbirlikçi süzme</b>, “bu kursu beğenenler şu kursları da beğendi” mantığıyla kurslar arası benzerliği puan örüntülerinden hesaplar. Sonuç; içerik benzerliği ve genel popülerlikle ağırlıklı olarak birleştirilir (hibrit model). Çalışanın ortalamasının altında puanladığı kurslar olumsuz sinyal olarak kullanılır.</p>
+<div class="hucre" id="h-oneri_kisisel">
+<div class="hucre-ust"><span class="ad">🐍 Kişiselleştirilmiş hibrit öneri<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="35" aria-label="Kişiselleştirilmiş hibrit öneri kodu">import numpy as np
+import pandas as pd
+from sklearn.metrics.pairwise import cosine_similarity
+
+if 'kategori_benzerlik' not in globals():
+    raise NameError("Önce 'Eğitim öneri sistemi' hücresini çalıştırın.")
+
+# Kişiselleştirme katmanı: öge tabanlı işbirlikçi süzme + içerik ve popülerlikle karma (hibrit) öneri
+matris = puanlar.pivot_table(index='calisanId', columns='kursId', values='puan').fillna(0)
+kurs_kurs = pd.DataFrame(cosine_similarity(matris.T), index=matris.columns, columns=matris.columns)
+
+def calisana_oner(calisan_id, ilk_n=5, agirlik=(0.6, 0.3, 0.1)):
+    aldiklari = puanlar[puanlar.calisanId == calisan_id].set_index('kursId')['puan']
+    adaylar = [k for k in matris.columns if k not in aldiklari.index]
+    merkezli = aldiklari - aldiklari.mean()                       # beğeni = ortalamanın üstü
+    # (a) işbirlikçi: bu kursu beğenenler, çalışanın beğendiği kursları da beğenmiş mi?
+    isbirlikci = kurs_kurs.loc[adaylar, aldiklari.index] @ merkezli
+    # (b) içerik: çalışanın beğendiği kursların kategorilerine benzerlik
+    ic = pd.Series(kategori_benzerlik[np.ix_([a - 1 for a in adaylar], [k - 1 for k in aldiklari.index])] @ merkezli.values,
+                   index=adaylar)
+    # (c) popülerlik: genel ortalama puan
+    pop = puanlar.groupby('kursId')['puan'].mean().reindex(adaylar)
+    olcekle = lambda s: (s - s.min()) / (s.max() - s.min() + 1e-9)
+    skor = agirlik[0] * olcekle(isbirlikci) + agirlik[1] * olcekle(ic) + agirlik[2] * olcekle(pop)
+    sonuc = kurslar.set_index('kursId').loc[skor.nlargest(ilk_n).index, ['baslik', 'kategoriler']]
+    sonuc['skor'] = skor.nlargest(ilk_n).round(3).values
+    return aldiklari, sonuc
+
+for cid in [7, 42]:
+    aldiklari, oneri = calisana_oner(cid)
+    print(f"Çalışan {cid} — aldığı kurslar ve verdiği puanlar:")
+    print(kurslar.set_index('kursId').loc[aldiklari.index, ['baslik']].assign(puan=aldiklari.values).to_string())
+    print(f"\nÇalışan {cid} için önerilen kurslar:")
+    print(oneri.to_string(), "\n" + "-" * 70)
+</textarea>
+<div class="cikti"></div>
+</div>
+<div class="not"><b>Geliştirme önerileri:</b> bağlam farkındalığı (rol, kariyer hedefi, yetkinlik açığı), grup önerileri (ekip için ortak eğitim), açıklanabilirlik (“Python ile İK Analitiği'ni beğendiğiniz için”), yorumlarda duygu analizi ve derin öğrenme tabanlı modeller. İK'da önerilerin <b>adil</b> olması da önemlidir: Model belirli gruplara yalnızca belirli (ör. liderlik dışı) eğitimleri öneriyorsa bu, kariyer fırsatlarında eşitsizliği büyütebilir.</div>
+</div>
+</section>
+
+<section class="bolum" id="chatbot" data-baslik="2. İK self-servis asistanı">
+<h2>2. Destek chatbotu: müşteri SSS'sinden İK self-servis asistanına</h2>
+<div class="blok" id="b-chatbot" data-baslik="Düğme tabanlı SSS chatbotu: arayüz, önceden tanımlı yanıtlar, sohbet geçmişi">
+<p>Kitaptaki proje, Python'un <b>Tkinter</b> kütüphanesiyle basit bir masaüstü arayüzü kurar. Kullanıcı soru yazmaz; sık sorulan soruları temsil eden düğmelere tıklar ve önceden tanımlı yanıtı görür. Temel özellikler:</p>
+<ul>
+<li><b>Grafik arayüz:</b> Pencere içinde bir sohbet alanı; kullanıcının sorusu ve botun yanıtı birlikte gösterilir.</li>
+<li><b>Düğme tabanlı girdi:</b> Yazma gerektirmez; yaygın sorular düğme olarak listelenir.</li>
+<li><b>Önceden tanımlı yanıtlar:</b> Her soru bir sözlükte bir yanıta eşlenir.</li>
+<li><b>Sohbet geçmişi:</b> Sorular ve yanıtlar sırayla görünür.</li>
+<li><b>Ölçeklenebilirlik:</b> Sözlüğe yeni soru eklemek yeni bir düğme oluşturur.</li>
+</ul>
+<p>Kitaptaki son sürümde her soru tıklanınca yanıtı açılıp kapanan bir “akordiyon” yapısındadır: <code>tk.Frame</code> kapsayıcı, <code>tk.Button</code> soru düğmesi ve başlangıçta gizli <code>tk.Label</code> yanıttır. <code>BooleanVar</code> görünürlüğü izler; <code>toggle()</code> işlevi <code>pack()</code> ve <code>pack_forget()</code> ile yanıtı gösterir ya da gizler.</p>
+<p>İK'da çalışanlar izin hakkı, bordro tarihi, ihbar süresi gibi aynı soruları tekrar tekrar sorar. Bir self-servis asistanı bu yükü azaltır ve İK ekibinin stratejik işlere zaman ayırmasını sağlar.</p>
+</div>
+<div class="blok" id="b-kod-chatbot" data-baslik="Kod: Tarayıcıda çalışan İK SSS asistanı — düğmeli sohbet, açılır SSS ve serbest soru">
+<h3>Uygulama 1: Tarayıcıda çalışan asistan</h3>
+<p>Tkinter bir masaüstü kütüphanesi olduğu için tarayıcıda çalışmaz. Aynı tasarım burada Python'un ürettiği bir HTML arayüzüyle gerçekleştiriliyor: Soru–yanıt sözlüğü yine Python'da tanımlanır, Python bunu bir sayfaya gömer ve sayfa hücre çıktısında açılır. Arayüzde iki görünüm vardır: <b>Düğmeli sohbet</b> (kitabın ilk tarifi: tıklanan soru ve yanıt sohbet geçmişine eklenir) ve <b>Açılır SSS</b> (kitabın kodundaki açılıp kapanan yapı). Ek olarak alttaki kutuya serbest soru yazılabilir.</p>
+<div class="hucre" id="h-chatbot">
+<div class="hucre-ust"><span class="ad">🐍 İK SSS asistanı (arayüz)<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="40" aria-label="İK SSS asistanı (arayüz) kodu">import json
+
+# İK Self-Servis SSS Asistanı — kitaptaki Tkinter arayüzünün tarayıcı sürümü
+# Yanıtlar örnek amaçlıdır; şirkete özgü olanlar "örnek politika"dır, yasal olanlar 4857 sayılı İş Kanunu'na dayanır.
+sss = {
+    "İK birimine nasıl ulaşırım?":
+        "İK Self-Servis portalından talep açabilir, ik@ornek.com adresine yazabilir ya da hafta içi 09.00–18.00 arasında 1234 dahili hattı arayabilirsiniz. (Örnek politika)",
+    "Yıllık izin hakkım kaç gün?":
+        "4857 sayılı İş Kanunu md. 53'e göre kıdemi 1–5 yıl olanlar için en az 14, 5–15 yıl olanlar için en az 20, 15 yıl ve üzeri için en az 26 iş günü. 18 yaş altı ve 50 yaş üstü çalışanlar en az 20 gün izin alır.",
+    "İzin talebimi nasıl oluştururum?":
+        "Self-Servis portalında İzinlerim &gt; Yeni Talep adımlarını izleyin; talep yöneticinizin onayına gider. En az 7 gün önceden talep etmeniz beklenir. (Örnek politika)",
+    "Maaşım ne zaman yatar?":
+        "Ücretler her ayın son iş günü banka hesabınıza yatırılır; bordronuz aynı gün portalda yayımlanır. (Örnek politika)",
+    "Fazla mesai nasıl ücretlendirilir?":
+        "İş Kanunu md. 41'e göre haftalık 45 saati aşan çalışma fazla çalışmadır ve her saati normal saat ücretinin %50 fazlasıyla ödenir. Yıllık fazla çalışma 270 saati aşamaz.",
+    "Bordromu nereden görebilirim?":
+        "Self-Servis portalında Bordrolarım menüsünden son 24 aya ait bordrolarınızı PDF olarak indirebilirsiniz. (Örnek politika)",
+    "Eğitim talebinde nasıl bulunurum?":
+        "Öğrenme platformunda katalogdan kurs seçip Kayıt Ol'a tıklayın; ücretli dış eğitimler için yöneticinizin ve İK'nın onayı gerekir. (Örnek politika)",
+    "Uzaktan çalışma politikası nedir?":
+        "Pozisyonu uygun olan çalışanlar haftada en fazla 2 gün uzaktan çalışabilir; plan yöneticiyle birlikte belirlenir. (Örnek politika)",
+    "İstifa edersem ihbar süresi ne kadar?":
+        "İş Kanunu md. 17'ye göre: 6 aydan az kıdemde 2 hafta, 6 ay–1,5 yıl 4 hafta, 1,5–3 yıl 6 hafta, 3 yıldan fazla kıdemde 8 hafta.",
+    "Doğum izni ne kadar?":
+        "İş Kanunu md. 74'e göre kadın çalışanların doğumdan önce 8, sonra 8 hafta olmak üzere toplam 16 hafta analık izni vardır; çoğul gebelikte doğum öncesi süreye 2 hafta eklenir.",
+}
+
+html = """&lt;!DOCTYPE html&gt;&lt;html lang="tr"&gt;&lt;head&gt;&lt;meta charset="utf-8"&gt;&lt;style&gt;
+body{font-family:system-ui,Segoe UI,Arial,sans-serif;margin:0;background:#f6f7fb;color:#1d2433}
+.ust{background:#14213d;color:#fff;padding:12px 16px;font-weight:700}.ust small{font-weight:400;opacity:.75;display:block}
+.izgara{display:grid;grid-template-columns:1fr 1.15fr;gap:12px;padding:12px}
+.kutu{background:#fff;border:1px solid #e3e6ee;border-radius:10px;padding:10px;height:390px;overflow:auto}
+h3{margin:2px 0 8px;font-size:14px;color:#1b3a73}
+details{border:1px solid #e3e6ee;border-radius:8px;margin:6px 0;background:#fcfdff}
+summary{cursor:pointer;padding:8px 10px;font-weight:600;font-size:13.5px}
+details p{margin:0;padding:0 10px 10px;font-size:13px;color:#44506a}
+.sss button{display:block;width:100%;text-align:left;margin:5px 0;padding:8px 10px;border:1px solid #c9d3e6;border-radius:8px;background:#eef3fc;cursor:pointer;font-size:13px}
+.sss button:hover{background:#dfe9fb}
+.sohbet{display:flex;flex-direction:column;gap:8px}
+.k{align-self:flex-end;background:#1f5fbf;color:#fff;padding:7px 11px;border-radius:12px 12px 2px 12px;max-width:85%;font-size:13px}
+.b{align-self:flex-start;background:#f1f3f8;padding:7px 11px;border-radius:12px 12px 12px 2px;max-width:90%;font-size:13px}
+.form{display:flex;gap:6px;margin-top:8px}input{flex:1;padding:8px;border:1px solid #c9d3e6;border-radius:8px}
+.form button{border:0;background:#2f9e44;color:#fff;border-radius:8px;padding:8px 12px;cursor:pointer}
+.sekme{display:flex;gap:6px;margin-bottom:8px}.sekme button{border:1px solid #c9d3e6;background:#fff;border-radius:999px;padding:3px 10px;cursor:pointer;font-size:12px}
+.sekme button.on{background:#1f5fbf;color:#fff}
+&lt;/style&gt;&lt;/head&gt;&lt;body&gt;
+&lt;div class="ust"&gt;İK Self-Servis Asistanı&lt;small&gt;Bir soruya tıklayın ya da kendi sorunuzu yazın&lt;/small&gt;&lt;/div&gt;
+&lt;div class="izgara"&gt;
+ &lt;div class="kutu"&gt;&lt;div class="sekme"&gt;&lt;button id="t1" class="on"&gt;Düğmeli sohbet&lt;/button&gt;&lt;button id="t2"&gt;Açılır SSS&lt;/button&gt;&lt;/div&gt;
+  &lt;div id="sss" class="sss"&gt;&lt;/div&gt;&lt;div id="akordiyon" style="display:none"&gt;&lt;/div&gt;&lt;/div&gt;
+ &lt;div class="kutu" style="display:flex;flex-direction:column"&gt;&lt;h3&gt;Sohbet geçmişi&lt;/h3&gt;
+  &lt;div id="sohbet" class="sohbet" style="flex:1;overflow:auto"&gt;&lt;/div&gt;
+  &lt;div class="form"&gt;&lt;input id="q" placeholder="Ör. kaç gün iznim var?" autocomplete="off"&gt;&lt;button id="gonder"&gt;Sor&lt;/button&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;script&gt;
+const SSS = __SSS__;
+const norm = s =&gt; s.toLocaleLowerCase('tr').replace(/[^a-zçğıöşü0-9 ]/g,' ').split(/\\s+/).filter(w =&gt; w.length &gt; 2);
+const ES = {tatil:'izin', iznim:'izin', evden:'uzakt', haber:'ihbar', ayrıl:'istif', kurs:'eğiti'};
+const kok = w =&gt; { const g = w.slice(0, 5); return ES[g] || g; };   // basit gövdeleme + eş anlamlılar
+const sohbet = document.getElementById('sohbet');
+function ekle(metin, sinif){ const d=document.createElement('div'); d.className=sinif; d.textContent=metin; sohbet.appendChild(d); sohbet.scrollTop=sohbet.scrollHeight; }
+function yanitla(soru){
+  ekle(soru,'k');
+  if (SSS[soru]) { setTimeout(()=&gt;ekle(SSS[soru],'b'),250); return; }
+  const q = new Set(norm(soru).map(kok)); let enIyi=null, skor=0;
+  for (const [s,y] of Object.entries(SSS)) {
+    const t = new Set(norm(s+' '+y).map(kok)); let o=0; q.forEach(w=&gt;{ if(t.has(w)) o++; });
+    const p = o / Math.max(1,q.size); if (p &gt; skor) { skor=p; enIyi=s; }
+  }
+  setTimeout(()=&gt; skor &gt;= 0.34 ? ekle('“'+enIyi+'” sorusunu kastettiğinizi düşünüyorum: '+SSS[enIyi],'b')
+                               : ekle('Bu soruya yanıtım yok. Sizi bir İK temsilcisine aktarıyorum (ik@ornek.com).','b'), 250);
+}
+const sssKutu=document.getElementById('sss'), ak=document.getElementById('akordiyon');
+Object.entries(SSS).forEach(([s,y])=&gt;{
+  const b=document.createElement('button'); b.textContent=s; b.onclick=()=&gt;yanitla(s); sssKutu.appendChild(b);
+  const d=document.createElement('details'); d.innerHTML='&lt;summary&gt;&lt;/summary&gt;&lt;p&gt;&lt;/p&gt;'; d.querySelector('summary').textContent=s; d.querySelector('p').textContent=y; ak.appendChild(d);
+});
+const q=document.getElementById('q');
+function gonder(){ if(q.value.trim()) yanitla(q.value.trim()); q.value=''; }
+document.getElementById('gonder').onclick=gonder;
+q.addEventListener('keydown', e=&gt;{ if(e.key==='Enter'){ e.preventDefault(); gonder(); } });
+const t1=document.getElementById('t1'), t2=document.getElementById('t2');
+t1.onclick=()=&gt;{t1.classList.add('on');t2.classList.remove('on');sssKutu.style.display='';ak.style.display='none';};
+t2.onclick=()=&gt;{t2.classList.add('on');t1.classList.remove('on');sssKutu.style.display='none';ak.style.display='';};
+ekle('Merhaba! Ben İK asistanıyım. Soldan bir soru seçin ya da aşağıya yazın.','b');
+&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;"""
+
+html = html.replace('__SSS__', json.dumps(sss, ensure_ascii=False))
+with open('ik_asistani.html', 'w', encoding='utf-8') as f:
+    f.write(html)
+html_goster(html, yukseklik=470)
+print(f"{len(sss)} soru-yanıt çiftiyle asistan oluşturuldu; 'ik_asistani.html' olarak da kaydedildi.")
+</textarea>
+<div class="cikti"></div>
+</div>
+<div class="not"><b>Deneyin:</b> Asistanın altındaki kutuya “kaç gün tatil yapabilirim” ya da “evden çalışabilir miyim” yazın. Sözlüğe yeni bir soru–yanıt çifti ekleyip hücreyi yeniden çalıştırırsanız, yeni düğme kendiliğinden oluşur. Kitaptaki Tkinter sürümünü kendi bilgisayarınızda çalıştırmak isterseniz kodu Jupyter yerine bir <code>.py</code> dosyası olarak çalıştırın.</div>
+</div>
+<div class="blok" id="b-kod-chatbot2" data-baslik="Kod: Serbest metin sorularını TF-IDF ve kosinüs benzerliğiyle en yakın SSS'ye eşleme">
+<h3>Uygulama 2: Serbest metinle soru sormak (ek)</h3>
+<p>Kitapta önerilen geliştirmelerden biri olan doğal dil desteğinin basit bir sürümü: Çalışanın kendi cümlesi, karakter n-gram'larına dayalı <b>TF-IDF</b> vektörüne çevrilip SSS'lerle <b>kosinüs benzerliği</b> hesaplanır. Benzerlik eşiğin altındaysa soru bir İK temsilcisine aktarılır (insana devretme). Türkçe eklerin etkisini azaltmak için sözcükler 5 harflik gövdelere kısaltılır; “tatil → izin”, “evden → uzaktan” gibi eş anlamlılar bir sözlükle eşlenir.</p>
+<div class="hucre" id="h-chatbot_eslesme">
+<div class="hucre-ust"><span class="ad">🐍 Serbest metin eşleştirme (TF-IDF)<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="32" aria-label="Serbest metin eşleştirme (TF-IDF) kodu">import re
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+if 'sss' not in globals():
+    raise NameError("Önce 'İK SSS asistanı' hücresini çalıştırın.")
+
+# Serbest metin sorularını en yakın SSS'ye eşleyen basit bir NLP katmanı (TF-IDF + kosinüs benzerliği)
+# Çalışanların gündelik dilini SSS'deki terimlere bağlayan eş anlamlılar sözlüğü
+ES_ANLAM = {'tatil': 'izin', 'iznim': 'izin', 'evden': 'uzaktan', 'haber': 'ihbar', 'ayrıl': 'istifa',
+            'maaşl': 'maaş', 'ücret': 'maaş', 'kurs': 'eğitim', 'hamil': 'doğum', 'mesai': 'fazla mesai'}
+
+def on_isle(metin):
+    sozcukler = re.findall(r'\w+', metin.replace('İ', 'i').replace('I', 'ı').lower())
+    govdeler = [s[:5] for s in sozcukler if len(s) &gt; 2]          # 5 harflik gövde: "iznim" ~ "izin"
+    return ' '.join(ES_ANLAM.get(g, g) for g in govdeler)
+
+sorular = list(sss)
+vektorlestirici = TfidfVectorizer(analyzer='char_wb', ngram_range=(3, 4))
+belge_matrisi = vektorlestirici.fit_transform([on_isle(s + ' ' + y) for s, y in sss.items()])
+
+def sor(metin, esik=0.30):
+    benzerlik = cosine_similarity(vektorlestirici.transform([on_isle(metin)]), belge_matrisi)[0]
+    en = benzerlik.argmax()
+    if benzerlik[en] &lt; esik:
+        return f"[eşleşme yok, {benzerlik[en]:.2f}] Sizi bir İK temsilcisine aktarıyorum."
+    return f"[{benzerlik[en]:.2f} → {sorular[en]}] {sss[sorular[en]]}"
+
+for soru in ["kaç gün tatil yapabilirim", "maaşlar hangi gün yatıyor", "evden çalışabilir miyim",
+             "işten ayrılırken kaç hafta önceden haber vermeliyim", "şirket arabası alabilir miyim"]:
+    print(f"S: {soru}\nY: {sor(soru)}\n")
+</textarea>
+<div class="cikti"></div>
+</div>
+<div class="not uyari"><b>Sınırlılık:</b> Bu yöntem anlamı değil yüzeysel benzerliği ölçer; eşik ayarı kritiktir (çok düşük eşik ilgisiz soruları yanlış yanıtlar, çok yüksek eşik her şeyi insana devreder). Gerçek sistemlerde bağlam farkındalığı, çok adımlı konuşma, İKBS entegrasyonu (“kalan izin günüm kaç?”), duygu tespiti, çok dillilik ve insana devretme eklenir. Yasal konularda yanıtların bir İK uzmanı tarafından düzenli olarak denetlenmesi gerekir.</div>
+</div>
+</section>
+
+<section class="bolum" id="segment" data-baslik="3. Çalışan segmentasyonu">
+<h2>3. Segmentasyon sistemi: müşteri segmentlerinden çalışan segmentlerine</h2>
+<div class="blok" id="b-segment" data-baslik="Segmentasyon sistemi: K-ortalamalar, dirsek yöntemi ve PCA">
+<p><b>Segmentasyon sistemi</b>, bir kitleyi ortak özelliklere göre — demografik (yaş, gelir), davranışsal (satın alma geçmişi), coğrafi ya da psikografik (yaşam tarzı) — ayrışan gruplara bölen analitik bir araçtır. Amaç, herkese aynı biçimde davranmak yerine her gruba uygun strateji geliştirmektir. Perakendeci müşterilerini “fiyata duyarlı”, “sık alışveriş yapan” ve “premium” diye ayırır; İK da çalışanlarını ihtiyaç ve risklerine göre ayırarak farklı elde tutma, gelişim ve ücret politikaları uygular.</p>
+<ol>
+<li>Veri temizlenir ve <b>standartlaştırılır</b> (yaş, ücret ve puan farklı ölçeklerdedir).</li>
+<li>Farklı K değerleri <b>dirsek yöntemiyle</b> (küme içi kareler toplamı, WCSS) değerlendirilir.</li>
+<li>Seçilen K ile <b>K-ortalamalar</b> uygulanır ve her kişi bir kümeye atanır.</li>
+<li>Kümeler <b>temel bileşenler analizi (PCA)</b> ile iki boyuta indirilerek görselleştirilir. PCA yalnızca görselleştirme içindir; kümeleme tam öznitelik uzayında yapılır.</li>
+<li>Her kümenin ortalamaları incelenerek segmentlere anlam verilir.</li>
+</ol>
+</div>
+<div class="blok" id="b-kod-seg1" data-baslik="Kod: Çalışan verisi, standartlaştırma, dirsek yöntemi ve siluet skoru ile K seçimi">
+<h3>Uygulama 1: Veri ve K seçimi</h3>
+<p>Kitaptaki “yaş, yıllık gelir, harcama puanı” müşteri verisinin İK karşılığı: 300 çalışanın yaşı, yıllık ücreti (bin TL) ve bağlılık puanı (1–100). Dirsek yöntemine ek olarak, kümelerin ne kadar iyi ayrıştığını ölçen <b>siluet skoru</b> da hesaplanıp K seçimi otomatikleştiriliyor.</p>
+<div class="hucre" id="h-segment_dirsek">
+<div class="hucre-ust"><span class="ad">🐍 Çalışan segmentasyonu: K seçimi<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="40" aria-label="Çalışan segmentasyonu: K seçimi kodu">import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+
+# Adım 1: 300 çalışanlık örnek veri (yaş, yıllık ücret, bağlılık puanı)
+np.random.seed(42)
+gruplar = [  # (yaş, ücret bin TL, bağlılık) ortalamaları ve kişi sayıları
+    ((26, 420, 78), 70),   # genç, düşük ücret, yüksek bağlılık
+    ((29, 560, 38), 60),   # genç, orta ücret, düşük bağlılık
+    ((44, 900, 80), 55),   # deneyimli, yüksek ücret, yüksek bağlılık
+    ((47, 620, 35), 60),   # deneyimli, orta ücret, düşük bağlılık
+    ((56, 1150, 60), 55),  # kıdemli yönetici
+]
+satir = [np.column_stack([np.random.normal(m[0], 3.5, k), np.random.normal(m[1], 70, k), np.random.normal(m[2], 8, k)])
+         for m, k in gruplar]
+df = pd.DataFrame(np.vstack(satir), columns=['Yas', 'Yillik_Ucret_binTL', 'Baglilik_1_100'])
+df = df.clip(lower=[20, 300, 1], upper=[65, 1500, 100], axis=1).round(0).astype(int)
+df.insert(0, 'CalisanID', range(1, len(df) + 1))
+ozellikler = ['Yas', 'Yillik_Ucret_binTL', 'Baglilik_1_100']
+
+# Adım 2: Ön işleme — farklı ölçekleri standartlaştır
+X_olcekli = StandardScaler().fit_transform(df[ozellikler])
+
+# Adım 3: Dirsek yöntemi (WCSS) ve siluet skoru ile K seçimi
+wcss, siluet = [], []
+for k in range(1, 11):
+    km = KMeans(n_clusters=k, random_state=42, n_init=10).fit(X_olcekli)
+    wcss.append(km.inertia_)
+    siluet.append(silhouette_score(X_olcekli, km.labels_) if k &gt; 1 else np.nan)
+
+fig, e = plt.subplots(1, 2, figsize=(11, 3.8))
+e[0].plot(range(1, 11), wcss, marker='o'); e[0].set_title('Dirsek yöntemi'); e[0].set_xlabel('Küme sayısı (K)'); e[0].set_ylabel('WCSS'); e[0].grid(True)
+e[1].plot(range(2, 11), siluet[1:], marker='o', color='tab:green'); e[1].set_title('Siluet skoru (yüksek = iyi)'); e[1].set_xlabel('Küme sayısı (K)'); e[1].grid(True)
+plt.tight_layout()
+plt.show()
+en_iyi_k = int(np.nanargmax(siluet)) + 1
+print("Siluet skorları:", {k: round(s, 3) for k, s in zip(range(2, 11), siluet[1:])})
+print("Siluet skoruna göre önerilen K:", en_iyi_k)
+</textarea>
+<div class="cikti"></div>
+</div>
+<div class="not uyari"><b>Kitaptaki koda göre değişiklik:</b> Kitaptaki veri tümüyle rastgele (<code>randint</code>) üretildiği için gerçekte hiçbir doğal küme içermez; K-ortalamalar yine de 5 küme “bulur”, dirsek grafiği belirgin bir kırılma göstermez ve K=5 varsayılır. Burada veride gizli beş çalışan profili bulunuyor; siluet skoru doğru K'yı veriden buluyor. Rastgele veride siluet skoru düşük çıkar ve kümelerin anlamsız olduğunu haber verir. <code>np.random.randint</code> kullanılan satırları geri getirip deneyebilirsiniz.</div>
+</div>
+<div class="blok" id="b-kod-seg2" data-baslik="Kod: K-ortalamalar, PCA ile görselleştirme, segment özetleri ve İK eylemleri">
+<h3>Uygulama 2: Kümeleme, görselleştirme ve yorum</h3>
+<p>K-ortalamalar seçilen K ile uygulanır, kümeler PCA ile iki boyutta çizilir; her kümenin ortalamasından otomatik bir segment adı türetilir ve segmente uygun İK eylemi önerilir.</p>
+<div class="hucre" id="h-segment_kume">
+<div class="hucre-ust"><span class="ad">🐍 Çalışan segmentasyonu: kümeleme ve yorum<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="40" aria-label="Çalışan segmentasyonu: kümeleme ve yorum kodu">import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
+
+if 'X_olcekli' not in globals():
+    raise NameError("Önce 'Çalışan segmentasyonu: K seçimi' hücresini çalıştırın.")
+
+# Adım 4: K-ortalamaları seçilen K ile uygula
+K = en_iyi_k
+kmeans = KMeans(n_clusters=K, random_state=42, n_init=10)
+df['Kume'] = kmeans.fit_predict(X_olcekli)
+
+# Adım 5: Kümeleri PCA ile iki boyutta göster (kümeleme tam öznitelik uzayında yapıldı)
+pca = PCA(n_components=2)
+bilesen = pca.fit_transform(X_olcekli)
+df['PCA1'], df['PCA2'] = bilesen[:, 0], bilesen[:, 1]
+plt.figure(figsize=(8, 6))
+sns.scatterplot(data=df, x='PCA1', y='PCA2', hue='Kume', palette='Set2', s=60)
+plt.title(f'Çalışan segmentleri (PCA ile; açıklanan varyans %{100 * pca.explained_variance_ratio_.sum():.0f})')
+plt.xlabel('PCA bileşeni 1'); plt.ylabel('PCA bileşeni 2'); plt.legend(title='Küme'); plt.grid(True)
+plt.show()
+
+# Adım 6: Özet ve segmentlere İK dilinde ad verme
+ozet = df.groupby('Kume')[ozellikler].mean().round(1)
+ozet['Kisi'] = df['Kume'].value_counts().sort_index()
+def adlandir(s):
+    yas = 'Genç' if s.Yas &lt; 35 else ('Deneyimli' if s.Yas &lt; 52 else 'Kıdemli')
+    ucret = 'yüksek ücretli' if s.Yillik_Ucret_binTL &gt; 800 else ('orta ücretli' if s.Yillik_Ucret_binTL &gt; 500 else 'düşük ücretli')
+    bag = 'bağlı' if s.Baglilik_1_100 &gt;= 60 else 'BAĞLILIĞI DÜŞÜK'
+    return f"{yas}, {ucret}, {bag}"
+ozet['Segment'] = ozet.apply(adlandir, axis=1)
+print(ozet.to_string())
+
+eylem = {'BAĞLILIĞI DÜŞÜK': 'elde tutma görüşmesi, kariyer planı, ücret gözden geçirme',
+         'bağlı': 'gelişim fırsatları, mentorluk rolleri'}
+print("\nÖnerilen İK eylemleri:")
+for k, s in ozet['Segment'].items():
+    print(f"  Küme {k} ({s}): {eylem['BAĞLILIĞI DÜŞÜK' if 'DÜŞÜK' in s else 'bağlı']}")
+</textarea>
+<div class="cikti"></div>
+</div>
+<div class="not"><b>Geliştirme önerileri:</b> tahmine dayalı modellerle birleştirme (her segmentin ayrılma riski), gerçek zamanlı güncelleme, İKBS ile entegrasyon, coğrafi segmentasyon ve davranışsal göstergeler (eğitim katılımı, izin kullanımı). Segmentler <b>karar destek</b> içindir: Bireyler hakkında tek başına segment etiketine dayanarak karar verilmemeli; yaş gibi korunan özelliklerin segmentasyonda kullanılması ayrımcılık riski açısından ayrıca değerlendirilmelidir.</div>
+</div>
+</section>
+
+<section class="bolum" id="sonuc" data-baslik="Sonuç">
+<h2>Sonuç</h2>
+<div class="blok" id="b-sonuc" data-baslik="Bölüm özeti">
+<p>Bu bölümde veri bilimi ve yapay zekânın gerçek iş sorunlarına uygulanması üç temel projeyle — öneri sistemi, SSS chatbotu ve segmentasyon sistemi — İK bağlamında gösterildi. Eğitim öneri sistemi, kategori benzerliği, popülerlik ve çalışanın kendi puanlarını birleştirerek öğrenme deneyiminin nasıl kişiselleştirilebileceğini; İK self-servis asistanı, sohbet arayüzlerinin ve basit doğal dil işlemenin rutin soruları nasıl otomatikleştirebileceğini; çalışan segmentasyonu ise denetimsiz öğrenmenin farklı çalışan gruplarını anlamada ve hedefli İK politikaları geliştirmede nasıl kullanılabileceğini gösterdi. Bu projeler teknik becerileri güçlendirirken, akıllı sistemlerin çalışan deneyimini iyileştirip kuruma değer katmasına bütüncül bir bakış sunar.</p>
+</div>
+</section>
+
+<section class="bolum" id="test" data-baslik="Kendinizi sınayın">
+<h2>Kendinizi sınayın</h2>
+<div class="blok" id="b-test" data-baslik="Çoktan seçmeli sorular (10 soru)">
+<p>Kitabın bu bölümünde test bulunmadığından, bölüm içeriğine dayalı 10 soru hazırlanmıştır.</p>
+<div id="testAlani"></div>
+<p><button class="dugme" id="testKontrol">Yanıtlarımı kontrol et</button> <button class="dugme ikincil" id="testSifirla">Sıfırla</button><span id="puan"></span></p>
+</div>
+<div class="blok" id="b-alistirma" data-baslik="Proje genişletme alıştırmaları">
+<h3>Proje genişletme alıştırmaları</h3>
+<ol class="alistirma">
+<li>Öneri sistemine çalışanın <b>rolüne</b> göre bir süzgeç ekleyin (ör. yöneticilere liderlik eğitimlerini öne çıkarın).</li>
+<li>Hibrit modeldeki ağırlıkları (0,6 / 0,3 / 0,1) değiştirip önerilerin nasıl değiştiğini gözleyin; yalnızca popülerliğe dayalı önerinin sakıncalarını tartışın.</li>
+<li>Önerilerin “isabetini” ölçmek için her çalışanın son puanını saklayıp modelin bunu ilk 5 öneride yakalayıp yakalamadığını (hit rate) hesaplayın.</li>
+<li>Asistana beş yeni soru ekleyin (ör. yemek kartı, servis güzergâhı, evlilik izni) ve eş anlamlılar sözlüğünü genişletin.</li>
+<li>Asistanın yanıtlayamadığı soruları bir listeye kaydedip en sık sorulanları raporlayan bir işlev yazın.</li>
+<li>Segmentasyona “son terfiden bu yana geçen süre” ve “eğitim saati” değişkenlerini ekleyin; K ve segmentler nasıl değişiyor?</li>
+<li>Kitaptaki rastgele (<code>randint</code>) veriyle segmentasyonu tekrarlayın ve siluet skorunu bu sayfadaki veriyle karşılaştırın.</li>
+</ol>
+</div>
+</section>
+
+<nav class="bolum-gezinti"><a href="bolum7_veri_gorsellestirme.html"><small>← Önceki bölüm</small>Bölüm 7 · Veri Görselleştirme</a><a class="sonraki" href="index.html"><small>Giriş sayfası →</small>Tüm bölümler</a></nav>
+<footer>Kaynak: “Projects” bölümünün kodlarından İK verisine uyarlanmış Türkçe etkileşimli sürüm · Python tarayıcıda <a href="https://pyodide.org" target="_blank" rel="noopener">Pyodide</a> ile çalışır.</footer>
+
+</main>
+</div>
+
+<script type="text/plain" id="yardimciKod"># ik_yardimci.py — mlxtend yüklenemediğinde kullanılan saf-Python yedek
+# (TransactionEncoder, apriori, fpgrowth, association_rules için küçük eşdeğerler)
+from itertools import combinations
+import pandas as pd
+
+
+class TransactionEncoder:
+    def fit(self, transactions):
+        self.columns_ = sorted({i for t in transactions for i in t})
+        return self
+
+    def transform(self, transactions):
+        import numpy as np
+        idx = {c: k for k, c in enumerate(self.columns_)}
+        arr = np.zeros((len(transactions), len(self.columns_)), dtype=bool)
+        for r, t in enumerate(transactions):
+            for i in t:
+                arr[r, idx[i]] = True
+        return arr
+
+
+def apriori(df, min_support=0.5, use_colnames=True, max_len=None):
+    n = len(df)
+    cols = list(df.columns)
+    sets = [set(df.index[df[c]]) for c in cols]
+    names = cols if use_colnames else list(range(len(cols)))
+    sonuc = []
+    seviye = []
+    for k, s in enumerate(sets):
+        sup = len(s) / n
+        if sup >= min_support:
+            seviye.append(((k,), s))
+            sonuc.append((sup, frozenset([names[k]])))
+    boy = 1
+    while seviye and (max_len is None or boy < max_len):
+        yeni = {}
+        for a in range(len(seviye)):
+            for b in range(a + 1, len(seviye)):
+                ia, sa = seviye[a]
+                ib, sb = seviye[b]
+                if ia[:-1] != ib[:-1]:
+                    continue
+                aday = tuple(sorted(set(ia) | set(ib)))
+                if aday in yeni:
+                    continue
+                ortak = sa & sb
+                sup = len(ortak) / n
+                if sup >= min_support:
+                    yeni[aday] = ortak
+        seviye = sorted(yeni.items())
+        for aday, s in seviye:
+            sonuc.append((len(s) / n, frozenset(names[i] for i in aday)))
+        boy += 1
+    return pd.DataFrame(sonuc, columns=["support", "itemsets"])
+
+
+def fpgrowth(df, min_support=0.5, use_colnames=True, max_len=None):
+    # Sonuç kümesi Apriori ile aynıdır; yalnızca arama stratejisi farklıdır.
+    return apriori(df, min_support=min_support, use_colnames=use_colnames, max_len=max_len)
+
+
+def association_rules(frequent_itemsets, metric="confidence", min_threshold=0.8):
+    sup = {fs: s for s, fs in zip(frequent_itemsets["support"], frequent_itemsets["itemsets"])}
+    satirlar = []
+    for fs, s in sup.items():
+        if len(fs) < 2:
+            continue
+        for r in range(1, len(fs)):
+            for ant in combinations(sorted(fs), r):
+                ant = frozenset(ant)
+                con = fs - ant
+                sa, sc = sup.get(ant), sup.get(con)
+                if sa is None or sc is None:
+                    continue
+                conf = s / sa
+                lift = conf / sc
+                lev = s - sa * sc
+                conv = float("inf") if conf == 1 else (1 - sc) / (1 - conf)
+                satirlar.append(dict(antecedents=ant, consequents=con,
+                                     **{"antecedent support": sa, "consequent support": sc},
+                                     support=s, confidence=conf, lift=lift,
+                                     leverage=lev, conviction=conv))
+    out = pd.DataFrame(satirlar)
+    if out.empty:
+        return out
+    return out[out[metric] >= min_threshold].reset_index(drop=True)
+</script>
+<script type="text/plain" id="snsYedekKod"># sns_yedek.py — seaborn kurulamazsa kullanılan küçük matplotlib yedeği
+# (bu sayfadaki histplot, scatterplot, regplot, boxplot çağrılarını karşılar)
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+def _veri(x, data):
+    if data is not None and isinstance(x, str):
+        return np.asarray(data[x], dtype=float)
+    return np.asarray(x, dtype=float)
+
+
+def histplot(data=None, x=None, kde=False, color=None, label=None, alpha=0.6, bins='auto', ax=None, **k):
+    ax = ax or plt.gca()
+    v = _veri(x if x is not None else data, data if x is not None else None)
+    v = v[~np.isnan(v)]
+    n, kenar, _ = ax.hist(v, bins=bins, color=color, alpha=alpha, label=label, edgecolor='white')
+    if kde and len(v) > 1:
+        from scipy.stats import gaussian_kde
+        xs = np.linspace(v.min(), v.max(), 200)
+        ax.plot(xs, gaussian_kde(v)(xs) * len(v) * (kenar[1] - kenar[0]), color=color)
+    ax.set_ylabel('Count')
+    return ax
+
+
+def scatterplot(x=None, y=None, data=None, ax=None, **k):
+    ax = ax or plt.gca()
+    ax.scatter(_veri(x, data), _veri(y, data), **{kk: vv for kk, vv in k.items() if kk in ('color', 's', 'alpha', 'label')})
+    if isinstance(x, str): ax.set_xlabel(x)
+    if isinstance(y, str): ax.set_ylabel(y)
+    return ax
+
+
+def regplot(x=None, y=None, data=None, scatter=True, color=None, ax=None, **k):
+    ax = ax or plt.gca()
+    xv, yv = _veri(x, data), _veri(y, data)
+    if scatter:
+        ax.scatter(xv, yv, color=color)
+    b, a = np.polyfit(xv, yv, 1)
+    xs = np.linspace(xv.min(), xv.max(), 100)
+    ax.plot(xs, a + b * xs, color=color)
+    return ax
+
+
+def boxplot(x=None, y=None, data=None, ax=None, **k):
+    ax = ax or plt.gca()
+    gruplar = sorted(data[x].unique())
+    ax.boxplot([data.loc[data[x] == g, y] for g in gruplar], positions=range(len(gruplar)))
+    ax.set_xticks(range(len(gruplar)), [str(g) for g in gruplar])
+    ax.set_xlabel(x); ax.set_ylabel(y)
+    return ax
+</script>
+
+<script>
+/* ===================== 1. Kod hücreleri ===================== */
+const hucreler = [...document.querySelectorAll('.hucre')];
+hucreler.forEach(h => {
+  const ta = h.querySelector('textarea');
+  ta.dataset.ozgun = ta.value;
+  const boyutla = () => { ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight + 4, 640) + 'px'; };
+  boyutla(); ta.addEventListener('input', boyutla);
+  ta.addEventListener('keydown', e => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const s = ta.selectionStart, en = ta.selectionEnd;
+      ta.setRangeText('    ', s, en, 'end');
+    } else if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault(); calistir(h);
+    }
+  });
+  h.querySelector('.calis').addEventListener('click', () => calistir(h));
+  h.querySelector('.sifirla').addEventListener('click', () => { ta.value = ta.dataset.ozgun; boyutla(); });
+  h.querySelector('.kopyala').addEventListener('click', async e => {
+    try { await navigator.clipboard.writeText(ta.value); e.target.textContent = '✓ Kopyalandı'; }
+    catch { ta.select(); document.execCommand('copy'); e.target.textContent = '✓ Kopyalandı'; }
+    setTimeout(() => e.target.textContent = '⧉ Kopyala', 1400);
+  });
+});
+
+/* ===================== 2. Pyodide ===================== */
+let py = null, hazir = false, kuyruk = Promise.resolve();
+const nokta = document.getElementById('nokta'), durumYazi = document.getElementById('durumYazi');
+const tumunuBtn = document.getElementById('tumunu');
+function durum(yazi, sinif) { durumYazi.textContent = yazi; nokta.className = 'nokta ' + (sinif || ''); }
+
+const KURULUM = `
+import sys, io, os, base64, warnings
+warnings.filterwarnings('ignore')
+os.chdir('/home/pyodide')
+if '/home/pyodide' not in sys.path:
+    sys.path.insert(0, '/home/pyodide')
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+plt.rcParams.update({'figure.dpi': 100, 'axes.grid': False, 'font.size': 10})
+_SEKILLER = []
+def _goster(*a, **k):
+    for n in plt.get_fignums():
+        f = plt.figure(n)
+        b = io.BytesIO()
+        f.savefig(b, format='png', bbox_inches='tight')
+        _SEKILLER.append(base64.b64encode(b.getvalue()).decode())
+    plt.close('all')
+plt.show = _goster
+def _sekilleri_al():
+    _goster()
+    s = list(_SEKILLER)
+    _SEKILLER.clear()
+    return s
+_HTMLLER = []
+def html_goster(html, yukseklik=450):
+    """Bir HTML belgesini (folium haritası, plotly grafiği) hücre çıktısında gösterir."""
+    _HTMLLER.append((str(html), int(yukseklik)))
+def _htmlleri_al():
+    s = list(_HTMLLER)
+    _HTMLLER.clear()
+    return s
+def _dosyalar():
+    return sorted(f for f in os.listdir('.') if f.lower().endswith(('.csv', '.xlsx', '.txt', '.json', '.html')))
+`;
+
+async function baslat() {
+  try {
+    durum('Pyodide indiriliyor…');
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/pyodide/v0.27.7/full/pyodide.js';
+    await new Promise((ok, red) => { s.onload = ok; s.onerror = () => red(new Error('Pyodide betiği yüklenemedi')); document.head.appendChild(s); });
+    py = await loadPyodide();
+    durum('Temel paketler yükleniyor…');
+    await py.loadPackage(['numpy', 'pandas', 'matplotlib'], { messageCallback: () => {} });
+    py.FS.writeFile('/home/pyodide/ik_yardimci.py', document.getElementById('yardimciKod').textContent);
+    py.FS.writeFile('/home/pyodide/sns_yedek.py', document.getElementById('snsYedekKod').textContent);
+    await py.runPythonAsync(KURULUM);
+    durum('seaborn kuruluyor…');
+    await py.loadPackage('micropip', { messageCallback: () => {} });
+    try {
+      await py.runPythonAsync("import micropip\nawait micropip.install('seaborn')\nimport seaborn");
+    } catch (e) {
+      console.warn('seaborn kurulamadı, yedek kullanılacak', e);
+      py.runPython("import sys, sns_yedek\nsys.modules['seaborn'] = sns_yedek");
+    }
+    hazir = true; tumunuBtn.disabled = false;
+    durum('Python hazır', 'hazir');
+  } catch (e) {
+    console.error(e);
+    durum('Python yüklenemedi (internet bağlantısını kontrol edin)', 'hata');
+  }
+}
+
+function calistir(h) {
+  kuyruk = kuyruk.then(() => calistirIc(h));
+  return kuyruk;
+}
+
+async function calistirIc(h) {
+  const btn = h.querySelector('.calis'), cikti = h.querySelector('.cikti');
+  const kod = h.querySelector('textarea').value;
+  if (!hazir) {
+    cikti.className = 'cikti dolu';
+    cikti.innerHTML = '<pre>Python ortamı henüz hazır değil; lütfen üst çubuktaki gösterge yeşile dönene kadar bekleyin.</pre>';
+    return;
+  }
+  btn.disabled = true; btn.textContent = '⏳ Çalışıyor';
+  cikti.className = 'cikti dolu'; cikti.innerHTML = '<pre>Gerekli paketler yükleniyor…</pre>';
+  let metin = '';
+  const t0 = performance.now();
+  let hata = null;
+  try {
+    await py.loadPackagesFromImports(kod, { messageCallback: () => {}, errorCallback: m => console.warn(m) });
+    py.setStdout({ batched: s => { metin += s + '\n'; } });
+    py.setStderr({ batched: s => { metin += s + '\n'; } });
+    cikti.innerHTML = '<pre>Çalıştırılıyor…</pre>';
+    await py.runPythonAsync(kod);
+  } catch (e) {
+    hata = String(e.message || e);
+    const i = hata.lastIndexOf('File "<exec>"');
+    if (i > 0) hata = 'Traceback (son çağrılar):\n  ' + hata.slice(i);
+  }
+  let sekiller = [];
+  try { sekiller = py.runPython('_sekilleri_al()').toJs(); } catch (e) {}
+  cikti.innerHTML = '';
+  metin = metin.split('\n').filter(l => !/^(Loading|Loaded) [\w\-, .]+$|already loaded from default channel|^No new packages to load/.test(l)).join('\n');
+  if (metin.trim()) { const p = document.createElement('pre'); p.textContent = metin.replace(/\n+$/, ''); cikti.appendChild(p); }
+  if (hata) { const p = document.createElement('pre'); p.className = 'hatali'; p.textContent = hata; cikti.appendChild(p); }
+  sekiller.forEach((b, i) => { const img = new Image(); img.src = 'data:image/png;base64,' + b; img.alt = 'Grafik ' + (i + 1); cikti.appendChild(img); });
+  let htmller = [];
+  try { htmller = py.runPython('_htmlleri_al()').toJs(); } catch (e) {}
+  htmller.forEach(([icerik, yuk]) => {
+    const fr = document.createElement('iframe');
+    fr.setAttribute('sandbox', 'allow-scripts allow-popups');
+    fr.style.height = yuk + 'px'; fr.srcdoc = icerik; fr.loading = 'lazy';
+    cikti.appendChild(fr);
+  });
+  dosyaListesi(cikti);
+  const sure = document.createElement('div'); sure.className = 'sure';
+  sure.textContent = (hata ? '✗ Hata · ' : '✓ Tamamlandı · ') + ((performance.now() - t0) / 1000).toFixed(1) + ' sn';
+  cikti.appendChild(sure);
+  if (!cikti.childNodes.length) cikti.className = 'cikti';
+  btn.disabled = false; btn.textContent = '▶ Çalıştır';
+}
+
+function dosyaListesi(cikti) {
+  let liste = [];
+  try { liste = py.runPython('_dosyalar()').toJs(); } catch (e) { return; }
+  if (!liste.length) return;
+  const d = document.createElement('div'); d.className = 'dosyalar';
+  d.append('Çalışma klasöründeki dosyalar: ');
+  liste.forEach(ad => {
+    const b = document.createElement('button'); b.textContent = '⬇ ' + ad; b.title = ad + ' dosyasını indir';
+    b.onclick = () => {
+      const veri = py.FS.readFile('/home/pyodide/' + ad);
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([veri])); a.download = ad; a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    };
+    d.appendChild(b);
+  });
+  cikti.appendChild(d);
+}
+
+tumunuBtn.addEventListener('click', async () => {
+  tumunuBtn.disabled = true;
+  for (const h of hucreler) await calistir(h);
+  tumunuBtn.disabled = false;
+});
+
+document.getElementById('yukle').addEventListener('change', async e => {
+  if (!hazir) { alert('Python ortamı henüz hazır değil.'); e.target.value = ''; return; }
+  const adlar = [];
+  for (const f of e.target.files) {
+    py.FS.writeFile('/home/pyodide/' + f.name, new Uint8Array(await f.arrayBuffer()));
+    adlar.push(f.name);
+  }
+  e.target.value = '';
+  durum('Yüklendi: ' + adlar.join(', '), 'hazir');
+  setTimeout(() => durum('Python hazır', 'hazir'), 4000);
+});
+
+baslat();
+
+/* ===================== 3. İçindekiler ===================== */
+const toc = document.getElementById('toc');
+document.querySelectorAll('section.bolum').forEach(sec => {
+  const a = document.createElement('a'); a.href = '#' + sec.id; a.textContent = sec.dataset.baslik; a.dataset.hedef = sec.id; toc.appendChild(a);
+  sec.querySelectorAll('.blok h3').forEach(h3 => {
+    const blok = h3.closest('.blok');
+    const b = document.createElement('a'); b.href = '#' + blok.id; b.className = 'alt'; b.textContent = h3.textContent; b.dataset.hedef = blok.id; toc.appendChild(b);
+  });
+});
+const tocLinkler = [...toc.querySelectorAll('a')];
+const gozlem = new IntersectionObserver(girdiler => {
+  girdiler.forEach(g => {
+    if (g.isIntersecting) {
+      tocLinkler.forEach(a => a.classList.toggle('aktif', a.dataset.hedef === g.target.id));
+    }
+  });
+}, { rootMargin: '-90px 0px -70% 0px' });
+document.querySelectorAll('section.bolum, .blok').forEach(el => gozlem.observe(el));
+
+/* ===================== 4. Arama motoru ===================== */
+// Türkçe duyarlı, aksan-toleranslı normalleştirme (karakter sayısı korunur → vurgulama konumları tutar)
+const HARF = { 'ı': 'i', 'ş': 's', 'ğ': 'g', 'ü': 'u', 'ö': 'o', 'ç': 'c', 'â': 'a', 'î': 'i', 'û': 'u' };
+function norm(s) {
+  return [...s].map(c => { const k = c.toLocaleLowerCase('tr'); return k.length === 1 ? (HARF[k] || k) : c.toLowerCase(); }).join('');
+}
+// Dizin: her blok için başlık, bölüm adı, metin ve kod
+const dizin = [...document.querySelectorAll('.blok')].map(blok => {
+  const kopya = blok.cloneNode(true);
+  kopya.querySelectorAll('.hucre, .cikti, script').forEach(x => x.remove());
+  kopya.querySelectorAll('td, th, li, p, h3, h4').forEach(x => x.append(' '));
+  const metin = kopya.textContent.replace(/\s+/g, ' ').trim();
+  const kod = [...blok.querySelectorAll('textarea')].map(t => t.value).join('\n');
+  const bolum = blok.closest('section').dataset.baslik;
+  return { blok, id: blok.id, baslik: blok.dataset.baslik, bolum, metin, kod,
+           nBaslik: norm(blok.dataset.baslik), nMetin: norm(metin), nKod: norm(kod) };
+});
+
+const araKutu = document.getElementById('ara'), sonucKutu = document.getElementById('sonuclar');
+let filtre = 'tumu', secili = -1, sonGorunen = [];
+
+function escapeHtml(s) { return s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+
+function ozetle(kaynak, nKaynak, terimler) {
+  // ilk eşleşmenin çevresinden ~160 karakterlik parça, terimler vurgulu
+  let ilk = -1;
+  for (const t of terimler) { const i = nKaynak.indexOf(t); if (i >= 0 && (ilk < 0 || i < ilk)) ilk = i; }
+  if (ilk < 0) ilk = 0;
+  const bas = Math.max(0, ilk - 60), son = Math.min(kaynak.length, ilk + 120);
+  const parca = kaynak.slice(bas, son), nParca = nKaynak.slice(bas, son);
+  const isaret = new Array(parca.length).fill(false);
+  terimler.forEach(t => { let i = nParca.indexOf(t); while (i >= 0) { for (let k = i; k < i + t.length; k++) isaret[k] = true; i = nParca.indexOf(t, i + 1); } });
+  let html = '', acik = false;
+  for (let i = 0; i < parca.length; i++) {
+    if (isaret[i] && !acik) { html += '<mark>'; acik = true; }
+    if (!isaret[i] && acik) { html += '</mark>'; acik = false; }
+    html += escapeHtml(parca[i]);
+  }
+  if (acik) html += '</mark>';
+  return (bas > 0 ? '… ' : '') + html.replace(/\n/g, ' ') + (son < kaynak.length ? ' …' : '');
+}
+
+function ara(sorgu) {
+  const terimler = norm(sorgu).split(/\s+/).filter(t => t.length > 1 || /\d/.test(t));
+  if (!terimler.length) return [];
+  const sonuc = [];
+  for (const d of dizin) {
+    let puan = 0, metinde = true, kodda = true;
+    for (const t of terimler) {
+      const b = d.nBaslik.includes(t), m = d.nMetin.includes(t), k = d.nKod.includes(t);
+      if (!b && !m && !k) { puan = -1; break; }
+      if (b) puan += 10;
+      if (m) puan += 3 + Math.min(5, d.nMetin.split(t).length - 1);
+      if (k) puan += 2 + Math.min(3, d.nKod.split(t).length - 1);
+      metinde = metinde && (b || m); kodda = kodda && k;
+    }
+    if (puan < 0) continue;
+    if (filtre === 'metin' && !metinde) continue;
+    if (filtre === 'kod' && !kodda) continue;
+    const kodaGore = filtre === 'kod' || (!metinde && kodda);
+    sonuc.push({ d, puan, kodaGore, ozet: kodaGore ? ozetle(d.kod, d.nKod, terimler) : ozetle(d.metin, d.nMetin, terimler) });
+  }
+  return sonuc.sort((a, b) => b.puan - a.puan);
+}
+
+function sonuclariGoster() {
+  const q = araKutu.value.trim();
+  if (!q) { sonucKutu.classList.remove('acik'); temizleVurgu(); return; }
+  sonGorunen = ara(q); secili = sonGorunen.length ? 0 : -1;
+  let html = `<div class="sonuc-ust"><span>${sonGorunen.length} sonuç · “${escapeHtml(q)}”</span>
+    <span class="filtre">${['tumu:Tümü', 'metin:Metin', 'kod:Kod'].map(x => { const [k, e] = x.split(':'); return `<button data-f="${k}" class="${filtre === k ? 'aktif' : ''}">${e}</button>`; }).join('')}</span></div>`;
+  if (!sonGorunen.length) html += '<div class="sonuc"><span class="ozet">Eşleşme bulunamadı. Farklı ya da daha kısa bir terim deneyin (ör. “oneri”, “asistan”, “kume”).</span></div>';
+  sonGorunen.forEach((s, i) => {
+    html += `<div class="sonuc${i === secili ? ' secili' : ''}" data-i="${i}" role="option">
+      <span class="yol">${escapeHtml(s.d.bolum)}</span>
+      <b>${escapeHtml(s.d.baslik)}${s.kodaGore ? '<span class="etiket">kod</span>' : ''}</b>
+      <span class="ozet">${s.ozet}</span></div>`;
+  });
+  sonucKutu.innerHTML = html; sonucKutu.classList.add('acik');
+}
+
+function temizleVurgu() {
+  document.querySelectorAll('mark.ara').forEach(m => { const p = m.parentNode; p.replaceChild(document.createTextNode(m.textContent), m); p.normalize(); });
+}
+function vurgula(kok, terimler) {
+  const yuruyucu = document.createTreeWalker(kok, NodeFilter.SHOW_TEXT, {
+    acceptNode: n => n.parentElement.closest('textarea, script, .cikti, mark') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
+  const dugumler = []; while (yuruyucu.nextNode()) dugumler.push(yuruyucu.currentNode);
+  let ilk = null;
+  dugumler.forEach(n => {
+    const s = n.nodeValue, ns = norm(s);
+    const araliklar = [];
+    terimler.forEach(t => { let i = ns.indexOf(t); while (i >= 0) { araliklar.push([i, i + t.length]); i = ns.indexOf(t, i + t.length); } });
+    if (!araliklar.length) return;
+    araliklar.sort((a, b) => a[0] - b[0]);
+    const birlesik = [];
+    araliklar.forEach(r => { const son = birlesik[birlesik.length - 1]; if (son && r[0] <= son[1]) son[1] = Math.max(son[1], r[1]); else birlesik.push([...r]); });
+    const frag = document.createDocumentFragment(); let k = 0;
+    birlesik.forEach(([a, b]) => {
+      if (a > k) frag.appendChild(document.createTextNode(s.slice(k, a)));
+      const m = document.createElement('mark'); m.className = 'ara'; m.textContent = s.slice(a, b); frag.appendChild(m);
+      if (!ilk) ilk = m; k = b;
+    });
+    if (k < s.length) frag.appendChild(document.createTextNode(s.slice(k)));
+    n.parentNode.replaceChild(frag, n);
+  });
+  return ilk;
+}
+
+function git(i) {
+  const s = sonGorunen[i]; if (!s) return;
+  const terimler = norm(araKutu.value.trim()).split(/\s+/).filter(t => t.length > 1 || /\d/.test(t));
+  temizleVurgu();
+  const ilk = vurgula(s.d.blok, terimler);
+  const hedef = s.kodaGore ? (s.d.blok.querySelector('.hucre') || s.d.blok) : (ilk || s.d.blok);
+  hedef.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  const parlat = s.kodaGore ? hedef : s.d.blok;
+  parlat.classList.remove('flas'); void parlat.offsetWidth; parlat.classList.add('flas');
+  sonucKutu.classList.remove('acik');
+  history.replaceState(null, '', '#' + s.d.id);
+}
+
+let zamanlayici;
+araKutu.addEventListener('input', () => { clearTimeout(zamanlayici); zamanlayici = setTimeout(sonuclariGoster, 120); });
+araKutu.addEventListener('focus', () => { if (araKutu.value.trim()) sonuclariGoster(); });
+araKutu.addEventListener('keydown', e => {
+  const ogeler = sonucKutu.querySelectorAll('.sonuc[data-i]');
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault(); if (!ogeler.length) return;
+    secili = (secili + (e.key === 'ArrowDown' ? 1 : -1) + ogeler.length) % ogeler.length;
+    ogeler.forEach((o, i) => o.classList.toggle('secili', i === secili));
+    ogeler[secili].scrollIntoView({ block: 'nearest' });
+  } else if (e.key === 'Enter') { e.preventDefault(); git(Math.max(0, secili)); }
+  else if (e.key === 'Escape') { araKutu.value = ''; sonucKutu.classList.remove('acik'); temizleVurgu(); araKutu.blur(); }
+});
+sonucKutu.addEventListener('mousedown', e => {
+  const f = e.target.closest('button[data-f]');
+  if (f) { e.preventDefault(); filtre = f.dataset.f; sonuclariGoster(); return; }
+  const o = e.target.closest('.sonuc[data-i]'); if (o) { e.preventDefault(); git(+o.dataset.i); }
+});
+document.addEventListener('click', e => { if (!e.target.closest('.arama')) sonucKutu.classList.remove('acik'); });
+document.addEventListener('keydown', e => {
+  if (e.key === '/' && !e.target.closest('input, textarea')) { e.preventDefault(); araKutu.focus(); araKutu.select(); }
+});
+
+/* ===================== 5. Test ===================== */
+const SORULAR = [["Kitaptaki öneri sistemi hangi yaklaşımları birleştirir?", ["Yalnızca işbirlikçi süzme", "İçerik tabanlı süzme ve popülerliğe dayalı sıralama (hibrit)", "Yalnızca rastgele öneri", "Yalnızca derin öğrenme"], 1, "Tür/kategori benzerliği + en yüksek puanlılar + kullanıcı puanları."], ["Kategori metinlerini ikili vektörlere çevirmek için hangi araç kullanıldı?", ["StandardScaler", "CountVectorizer", "PCA", "KMeans"], 1, "“Veri|Programlama|İK” → her kategori için 0/1."], ["Kosinüs benzerliğinin metin/kategori karşılaştırmasında tercih edilme nedeni nedir?", ["Vektörlerin büyüklüğüne değil yönüne bakması", "Yalnızca sayıları karşılaştırması", "Negatif değer üretmesi", "Kümeleme yapması"], 0, "Kategori sayısı farklı kursları adil karşılaştırır."], ["En yüksek puanlı kursları listelerken en az N puan koşulu neden konur?", ["Hesaplamayı hızlandırmak için", "Az sayıda kişinin verdiği yüksek puanların sıralamayı çarpıtmasını önlemek için", "Yeni kursları öne çıkarmak için", "Kategorileri birleştirmek için"], 1, "2 kişinin 5 verdiği kurs, 100 kişinin 4,6 verdiği kursun önüne geçmemeli."], ["Öge tabanlı işbirlikçi süzme hangi mantığa dayanır?", ["Kursların kategori adlarına", "“Bu kursu beğenenler şunları da beğendi” örüntüsüne", "Kursların yayın yılına", "Çalışanın yaşına"], 1, "Kurs benzerliği, puan örüntülerinden hesaplanır."], ["Kitaptaki chatbot hangi Python kütüphanesiyle masaüstü arayüzü kurar?", ["Flask", "Tkinter", "Django", "Plotly"], 1, "Tkinter Python’un standart arayüz kütüphanesidir; tarayıcıda çalışmaz."], ["Kitaptaki chatbotta bir yanıtın gösterilip gizlenmesini hangi işlev sağlar?", ["toggle() — pack() ve pack_forget() ile", "mainloop()", "geometry()", "configure()"], 0, "BooleanVar görünürlüğü izler."], ["Serbest metin eşleştiricide benzerlik eşiğin altındaysa ne yapılmalıdır?", ["En yakın yanıt yine de verilmeli", "Soru bir İK temsilcisine aktarılmalı (insana devretme)", "Soru silinmeli", "Rastgele bir yanıt verilmeli"], 1, "Yanlış yanıt, yanıtsızlıktan daha zararlıdır."], ["K-ortalamalardan önce özellikleri standartlaştırmak neden gereklidir?", ["Ücret gibi büyük ölçekli değişkenler uzaklık hesabına hâkim olmasın diye", "Kümeleri renklendirmek için", "Eksik değerleri doldurmak için", "PCA zorunlu kıldığı için"], 0, "Yaş (20–65) ve ücret (300–1.500 bin TL) farklı ölçeklerdedir."], ["Segmentasyon projesinde PCA ne amaçla kullanılmıştır?", ["Kümeleri oluşturmak için", "Kümelenmiş veriyi iki boyutta görselleştirmek için", "K sayısını belirlemek için", "Veriyi temizlemek için"], 1, "Kümeleme tam öznitelik uzayında yapılır; PCA yalnızca çizim içindir."]];
+const testAlani = document.getElementById('testAlani');
+SORULAR.forEach(([s, sec, dogru, aciklama], i) => {
+  const d = document.createElement('div'); d.className = 'soru'; d.dataset.dogru = dogru;
+  d.innerHTML = `<p>${i + 1}. ${s}</p>` + sec.map((x, j) =>
+    `<label><input type="radio" name="s${i}" value="${j}"> ${'abcd'[j]}) ${x}</label>`).join('') +
+    `<div class="aciklama">Doğru yanıt: <b>${'abcd'[dogru]}) ${sec[dogru]}</b> — ${aciklama}</div>`;
+  testAlani.appendChild(d);
+});
+document.getElementById('testKontrol').onclick = () => {
+  let p = 0;
+  testAlani.querySelectorAll('.soru').forEach((d, i) => {
+    const s = d.querySelector('input:checked');
+    const ok = s && +s.value === +d.dataset.dogru;
+    d.classList.toggle('dogru', !!ok); d.classList.toggle('yanlis', !ok);
+    if (ok) p++;
+  });
+  document.getElementById('puan').textContent = `Puanınız: ${p} / ${SORULAR.length}`;
+};
+document.getElementById('testSifirla').onclick = () => {
+  testAlani.querySelectorAll('.soru').forEach(d => d.classList.remove('dogru', 'yanlis'));
+  testAlani.querySelectorAll('input').forEach(x => x.checked = false);
+  document.getElementById('puan').textContent = '';
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bölüm 4 · Veri Toplama ve Ön İşleme — İK Verisiyle Etkileşimli Python</title>
+<style>
+:root{
+  --bg:#f6f7fb; --kart:#ffffff; --yazi:#1d2433; --soluk:#5b6476; --cizgi:#e3e6ee;
+  --ana:#1f5fbf; --ana2:#e8f0fc; --vurgu:#d9480f; --yesil:#2b8a3e; --kod:#0f1729; --kodyazi:#e6edf7;
+  --isaret:#ffe066;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:84px}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--yazi);line-height:1.65;font-size:16px}
+a{color:var(--ana)}
+/* Üst çubuk */
+header.ust{position:sticky;top:0;z-index:50;background:#14213d;color:#fff;box-shadow:0 2px 10px rgba(0,0,0,.15)}
+.ust-ic{max-width:1320px;margin:0 auto;padding:10px 18px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.logo{font-weight:700;font-size:15px;white-space:nowrap}
+.logo small{display:block;font-weight:400;opacity:.7;font-size:12px}
+.arama{position:relative;flex:1;min-width:240px;max-width:560px}
+.arama input{width:100%;padding:9px 12px 9px 36px;border-radius:8px;border:1px solid #3a4a6b;background:#1e2d50;color:#fff;font-size:15px;outline:none}
+.arama input:not(:placeholder-shown)~.kbd{display:none}
+.arama input:focus{border-color:#8fb3ff;background:#22355f}
+.arama input::placeholder{color:#a9b6d3}
+.arama svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);opacity:.75}
+.kbd{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;border:1px solid #5a6a8b;border-radius:4px;padding:0 5px;color:#c4cee4}
+#sonuclar{position:absolute;top:calc(100% + 6px);left:0;right:0;background:#fff;color:var(--yazi);border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,.25);max-height:70vh;overflow:auto;display:none}
+#sonuclar.acik{display:block}
+.sonuc-ust{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid var(--cizgi);font-size:13px;color:var(--soluk);gap:8px;flex-wrap:wrap}
+.filtre button{border:1px solid var(--cizgi);background:#fff;border-radius:999px;padding:2px 10px;font-size:12px;cursor:pointer;margin-left:4px}
+.filtre button.aktif{background:var(--ana);color:#fff;border-color:var(--ana)}
+.sonuc{padding:9px 12px;border-bottom:1px solid #f0f2f6;cursor:pointer}
+.sonuc:hover,.sonuc.secili{background:var(--ana2)}
+.sonuc b{display:block;font-size:14px}
+.sonuc .yol{font-size:11px;color:var(--soluk);text-transform:uppercase;letter-spacing:.03em}
+.sonuc .ozet{font-size:13px;color:var(--soluk)}
+.sonuc .etiket{font-size:10px;background:#eef1f7;border-radius:4px;padding:1px 6px;margin-left:6px;color:#44506a;vertical-align:middle}
+.sonuc mark,.icerik mark.ara{background:var(--isaret);color:inherit;padding:0 1px;border-radius:2px}
+.durum{display:flex;align-items:center;gap:8px;font-size:13px;white-space:nowrap}
+.nokta{width:10px;height:10px;border-radius:50%;background:#f0ad4e;box-shadow:0 0 0 3px rgba(240,173,78,.25)}
+.nokta.hazir{background:#40c057;box-shadow:0 0 0 3px rgba(64,192,87,.25)}
+.nokta.hata{background:#fa5252}
+.dugme{border:0;border-radius:8px;padding:8px 13px;font-size:14px;cursor:pointer;background:var(--ana);color:#fff;font-weight:600}
+.dugme:hover{filter:brightness(1.08)}
+.dugme:disabled{opacity:.5;cursor:not-allowed}
+.dugme.ikincil{background:#e9edf5;color:#22304d}
+.ust .dugme.ikincil{background:#2b3c63;color:#fff}
+label.dugme input{display:none}
+/* Yerleşim */
+.duzen{max-width:1320px;margin:0 auto;display:grid;grid-template-columns:270px 1fr;gap:26px;padding:22px 18px 80px}
+nav.icindekiler{position:sticky;top:84px;align-self:start;max-height:calc(100vh - 100px);overflow:auto;font-size:14px;background:var(--kart);border:1px solid var(--cizgi);border-radius:12px;padding:14px 10px}
+nav.icindekiler h4{margin:0 8px 8px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--soluk)}
+nav.icindekiler a{display:block;padding:4px 8px;border-radius:6px;text-decoration:none;color:var(--yazi)}
+nav.icindekiler a.alt{padding-left:22px;font-size:13px;color:var(--soluk)}
+nav.icindekiler a:hover,nav.icindekiler a.aktif{background:var(--ana2);color:var(--ana)}
+main.icerik{min-width:0}
+.kapak{background:linear-gradient(135deg,#14213d,#1f5fbf);color:#fff;border-radius:16px;padding:30px 30px 26px;margin-bottom:22px}
+.kapak h1{margin:0 0 6px;font-size:30px;line-height:1.25}
+.kapak p{margin:6px 0 0;opacity:.92;max-width:820px}
+.rozetler{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.rozet{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);padding:3px 10px;border-radius:999px;font-size:12.5px}
+section.bolum{background:var(--kart);border:1px solid var(--cizgi);border-radius:14px;padding:22px 28px;margin-bottom:22px}
+section.bolum>h2{margin:0 0 10px;font-size:24px;color:#14213d;border-bottom:2px solid var(--ana2);padding-bottom:8px}
+.blok h3{font-size:19px;margin:24px 0 8px;color:#1b3a73}
+.blok h4{font-size:16px;margin:16px 0 6px}
+.blok.flas{animation:flas 1.6s ease}
+@keyframes flas{0%{box-shadow:0 0 0 4px rgba(255,224,102,.95);background:#fffbe6}100%{box-shadow:0 0 0 0 rgba(255,224,102,0);background:transparent}}
+.not{background:#f1f6ff;border-left:4px solid var(--ana);padding:10px 14px;border-radius:0 8px 8px 0;margin:12px 0;font-size:15px}
+.not.uyari{background:#fff6ec;border-color:var(--vurgu)}
+.not.ipucu{background:#effaf1;border-color:var(--yesil)}
+table.tablo{border-collapse:collapse;width:100%;margin:12px 0;font-size:14.5px}
+table.tablo th,table.tablo td{border:1px solid var(--cizgi);padding:7px 10px;text-align:left;vertical-align:top}
+table.tablo th{background:#f3f5fa}
+.formul{font-family:"Cambria Math","Times New Roman",serif;background:#fafbfe;border:1px dashed var(--cizgi);padding:6px 12px;border-radius:6px;display:inline-block;margin:4px 0}
+/* Kod hücresi */
+.hucre{border:1px solid #c9d3e6;border-radius:12px;overflow:hidden;margin:16px 0 10px;background:var(--kod)}
+.hucre.flas{animation:flas 1.6s ease}
+.hucre-ust{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#1b2540;color:#c8d3ea;font-size:13px;flex-wrap:wrap}
+.hucre-ust .ad{font-weight:600;margin-right:auto}
+.hucre-ust .ad span{opacity:.6;font-weight:400;margin-left:6px}
+.hucre-ust button{border:0;border-radius:6px;padding:5px 10px;font-size:12.5px;cursor:pointer;background:#2e3c62;color:#e6ecf8}
+.hucre-ust button.calis{background:#2f9e44;color:#fff;font-weight:600}
+.hucre-ust button:disabled{opacity:.5;cursor:wait}
+textarea.kod{display:block;width:100%;border:0;resize:vertical;background:var(--kod);color:var(--kodyazi);font:13.5px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;padding:12px 14px;outline:none;tab-size:4;white-space:pre;overflow:auto;min-height:120px}
+.cikti{background:#fff;border-top:1px solid #c9d3e6;display:none}
+.cikti.dolu{display:block}
+.cikti pre{margin:0;padding:12px 14px;font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;white-space:pre;overflow:auto;max-height:520px;color:#1d2433}
+.cikti pre.hatali{color:#c92a2a;background:#fff5f5}
+.cikti iframe{display:block;width:calc(100% - 16px);margin:8px auto;border:1px solid var(--cizgi);border-radius:6px;background:#fff}
+.cikti img{display:block;max-width:100%;margin:8px auto;border:1px solid var(--cizgi);border-radius:6px}
+.cikti .sure{font-size:11.5px;color:var(--soluk);padding:4px 14px 8px}
+.dosyalar{padding:4px 14px 10px;font-size:12.5px;color:var(--soluk)}
+.dosyalar button{border:1px solid var(--cizgi);background:#f6f8fc;border-radius:6px;padding:2px 8px;margin:2px;font-size:12px;cursor:pointer}
+.dene{font-size:14px;color:var(--soluk);margin:4px 0 14px}
+.dene b{color:var(--yazi)}
+/* Test */
+.soru{border:1px solid var(--cizgi);border-radius:10px;padding:12px 16px;margin:10px 0}
+.soru p{margin:0 0 6px;font-weight:600}
+.soru label{display:block;padding:3px 6px;border-radius:6px;cursor:pointer;font-size:15px}
+.soru label:hover{background:#f4f6fa}
+.soru.dogru{border-color:#8ce99a;background:#f4fcf5}
+.soru.yanlis{border-color:#ffa8a8;background:#fff6f6}
+.soru .aciklama{display:none;font-size:14px;color:var(--soluk);margin-top:6px}
+.soru.dogru .aciklama,.soru.yanlis .aciklama{display:block}
+#puan{font-weight:700;margin-left:10px}
+ol.sorular li,ol.alistirma li{margin:4px 0}
+footer{text-align:center;color:var(--soluk);font-size:13px;padding:20px}
+@media (max-width:960px){.duzen{grid-template-columns:1fr}nav.icindekiler{position:static;max-height:none}.kbd{display:none}}
+
+.ust-nav{color:#c9d6f2;text-decoration:none;font-size:13px;border:1px solid #3a4a6b;border-radius:8px;padding:6px 10px;white-space:nowrap}
+.ust-nav:hover{background:#22355f;color:#fff}
+.bolum-gezinti{display:flex;justify-content:space-between;gap:12px;margin:0 0 22px;flex-wrap:wrap}
+.bolum-gezinti a{flex:1;min-width:220px;background:#fff;border:1px solid #e3e6ee;border-radius:12px;padding:12px 16px;text-decoration:none;color:#1d2433}
+.bolum-gezinti a:hover{border-color:#1f5fbf;background:#f4f8ff}
+.bolum-gezinti small{display:block;color:#5b6476;font-size:12px}
+.bolum-gezinti .sonraki{text-align:right}
+</style>
+</head>
+<body>
+
+<header class="ust">
+  <div class="ust-ic">
+    <a class="ust-nav" href="index.html" title="Tüm bölümler">⌂ Tüm bölümler</a>
+    <div class="logo">Bölüm 4 · Veri Toplama ve Ön İşleme<small>İK verisiyle etkileşimli Python (Pyodide)</small></div>
+    <div class="arama">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="ara" type="search" autocomplete="off" placeholder="Bölümde ara: JSON, XML, ayrıştırma, Parquet, PDKS, gecikme…" aria-label="Bölüm içinde ara">
+      <span class="kbd">/</span>
+      <div id="sonuclar" role="listbox"></div>
+    </div>
+    <div class="durum"><span id="nokta" class="nokta"></span><span id="durumYazi">Python yükleniyor…</span></div>
+    <button id="tumunu" class="dugme" disabled>▶ Tümünü çalıştır</button>
+    <label class="dugme ikincil" title="Kendi CSV/XLSX dosyanızı Python çalışma klasörüne yükleyin">⬆ Veri yükle<input id="yukle" type="file" multiple accept=".csv,.xlsx,.txt,.json"></label>
+  </div>
+</header>
+
+<div class="duzen">
+<nav class="icindekiler" id="toc"><h4>İçindekiler</h4></nav>
+
+<main class="icerik" id="icerik">
+<div class="kapak">
+  <h1>Veri Toplama ve Veri Ön İşleme</h1>
+  <p>İK verisinin nereden ve hangi biçimde geldiğini tanımak; CSV, JSON, XML, HTML ve kartlı geçiş günlüklerini ayrıştırıp tek tabloya dönüştürmek, normalleştirmek, özetlemek, veritabanına yüklemek ve gerçek zamanlı akıştaki sorunları ele almak. Kitaptaki tüm örnekler aday başvuruları, iş ilanları, PDKS kayıtları ve bordro verilerine uyarlanmıştır.</p>
+  <div class="rozetler">
+    <span class="rozet">11 çalıştırılabilir kod hücresi</span>
+    <span class="rozet">pandas · json · xml · BeautifulSoup · re · SQLite · Parquet</span>
+    <span class="rozet">Kurulum gerektirmez — tarayıcıda çalışır</span>
+  </div>
+</div>
+
+<section class="bolum" id="giris" data-baslik="Giriş">
+<h2>Giriş</h2>
+<div class="blok" id="b-giris" data-baslik="Veri toplama ve veri ön işleme nedir?">
+<p><b>Veri toplama</b>, veritabanları, web kazıma, sensörler, anketler ya da API'ler gibi kaynaklardan ham veriyi elde etmektir. Veri; tablolar gibi yapılandırılmış ya da metin, görsel ve video gibi yapılandırılmamış olabilir. Amaç, incelenen olguyu doğru temsil eden, yeterli ve ilgili veriyi elde etmektir.</p>
+<p><b>Veri ön işleme</b>, toplanan veriyi analize hazırlayan sonraki adımdır: eksik değerleri ele almak, yinelenenleri kaldırmak, hataları düzeltmek, normalleştirmek ya da standartlaştırmak, kategorik değişkenleri kodlamak ve gerektiğinde boyut indirgemek. İyi bir ön işleme analizi çarpıtabilecek sorunları azaltır ve makine öğrenmesi modellerinin başarısını artırır.</p>
+<p>İK'da veri; İKBS, bordro, PDKS (personel devam kontrol sistemi), işe alım sistemi (ATS), öğrenme yönetim sistemi, anketler ve iş ilanı siteleri gibi çok sayıda kaynaktan, farklı biçimlerde gelir. Bu yüzden toplama ve ön işleme, İK analitiği projelerinde zamanın büyük kısmını alır.</p>
+</div>
+<div class="blok" id="b-yapi" data-baslik="Bölümün yapısı ve amaçları">
+<h3>Bölümün yapısı ve amaçları</h3>
+<p>Bölüm; <a href="#turler">veri türleri</a>, <a href="#toplama">veri toplama yöntemleri</a>, <a href="#setler">veri setleri</a>, <a href="#bicimler">veri biçimleri</a>, <a href="#ayristirma">veri ayrıştırma</a>, <a href="#donusum">veri dönüştürme</a> ve <a href="#gercek">gerçek zamanlı sorunlar</a> başlıklarından oluşur.</p>
+<div class="not ipucu"><b>Nasıl kullanılır?</b> Gösterge yeşile döndüğünde hücreleri <b>▶ Çalıştır</b> ya da <b>Ctrl/⌘ + Enter</b> ile çalıştırın. “Örnek dosyaları oluştur” hücresi, ayrıştırma hücresinin okuyacağı CSV, JSON ve XML dosyalarını üretir; normalleştirme hücresi de özetleme hücresinin okuyacağı dosyayı üretir — sırayla çalıştırın. Üretilen dosyaları çıktının altından indirebilir, kendi dosyalarınızı <b>⬆ Veri yükle</b> ile yükleyebilirsiniz. Arama kutusuna <b>/</b> tuşuyla geçebilirsiniz.</div>
+<div class="not uyari"><b>Veri hakkında:</b> Tüm kişi adları, ilanlar ve İK verileri uydurma ya da sentetiktir. Gerçek aday ve çalışan verisi toplarken KVKK kapsamında aydınlatma, açık rıza ve veri minimizasyonu ilkelerine uyun.</div>
+</div>
+</section>
+
+<section class="bolum" id="turler" data-baslik="1. Veri türleri">
+<h2>1. Veri türleri</h2>
+<div class="blok" id="b-turler" data-baslik="Veri türleri: yapıya, kaynağa, niteliğe, zamana, toplama yöntemine ve erişime göre">
+<table class="tablo">
+<tr><th>Ölçüt</th><th>Türler</th><th>İK örneği</th></tr>
+<tr><td>Yapıya göre</td><td><b>Yapılandırılmış</b> (tablo, sabit şema, SQL ile sorgulanır) · <b>Yarı yapılandırılmış</b> (JSON, XML, HTML; etiketli ama esnek) · <b>Yapılandırılmamış</b> (metin, görsel, ses, video)</td><td>Bordro tablosu · ATS'den gelen JSON başvuru · çıkış mülakatı notları, mülakat kayıtları</td></tr>
+<tr><td>Kaynağa göre</td><td><b>Birincil</b> (belirli bir amaçla ilk elden toplanan) · <b>İkincil</b> (başkasınca başka amaçla toplanmış, yeniden kullanılan)</td><td>Kurum içi bağlılık anketi · TÜİK Hanehalkı İşgücü Araştırması, sektör ücret raporları</td></tr>
+<tr><td>Niteliğe göre</td><td><b>Nicel</b> (ölçülebilir; kesikli ya da sürekli) · <b>Nitel</b> (betimleyici; tematik analiz gerektirir)</td><td>Devamsızlık günü, maaş · açık uçlu anket yanıtları</td></tr>
+<tr><td>Zamana göre</td><td><b>Zaman serisi</b> (düzenli aralıklarla) · <b>Kesitsel</b> (tek bir anda alınmış anlık görüntü)</td><td>Aylık işten ayrılma oranı · yıl sonu personel envanteri</td></tr>
+<tr><td>Toplama yöntemine göre</td><td><b>Gözlemsel</b> (müdahalesiz; gözlemci yanlılığına açık) · <b>Deneysel</b> (kontrollü; nedensellik sınanabilir)</td><td>PDKS giriş-çıkış verisi · iki farklı oryantasyon programının rastgele atamayla karşılaştırılması</td></tr>
+<tr><td>Erişime göre</td><td><b>Açık veri</b> (herkese açık, yeniden kullanım lisanslı) · <b>Kurumsal/özel veri</b> (sahipli, fikrî mülkiyetle korunan)</td><td>SGK ve TÜİK istatistikleri · şirketin personel ve ücret verisi</td></tr>
+</table>
+<div class="not">Veri türünü doğru belirlemek; toplama, ön işleme, analiz ve yorum yöntemlerinin seçimini doğrudan etkiler.</div>
+</div>
+<div class="blok" id="b-yapili" data-baslik="Yapılandırılmış ve yapılandırılmamış veri: özellikler, avantajlar, dezavantajlar">
+<h3>Yapılandırılmış ve yapılandırılmamış veri</h3>
+<table class="tablo">
+<tr><th>Boyut</th><th>Yapılandırılmış veri</th><th>Yapılandırılmamış veri</th></tr>
+<tr><td>Tanım</td><td>Önceden tanımlı şemaya sahip, satır–sütun düzeninde</td><td>Önceden tanımlı biçimi ya da yapısı yok</td></tr>
+<tr><td>Saklama</td><td>İlişkisel veritabanları, tablolar (MySQL, Excel)</td><td>Veri gölleri, NoSQL veritabanları, dosya sistemleri</td></tr>
+<tr><td>Erişim ve analiz</td><td>SQL ile kolay sorgulanır; geleneksel istatistik ve raporlamaya uygun</td><td>Doğal dil işleme, görüntü tanıma gibi özel araçlar gerektirir</td></tr>
+<tr><td>Araçlar</td><td>SQL, Excel, pandas</td><td>NLP kütüphaneleri, duygu analizi araçları</td></tr>
+<tr><td>Avantajlar</td><td>Kullanım kolaylığı, sorgu performansı, bütünlük ve tutarlılık</td><td>Zengin bilgi, esneklik, çok büyük hacimlere uygunluk</td></tr>
+<tr><td>Dezavantajlar</td><td>Karmaşık ve çeşitli veri türlerinde esnek değil; çok büyük ve çeşitli kaynaklarda ölçeklemek zor</td><td>İşlemesi karmaşık, sorgulaması yavaş, kalite yönetimi zor</td></tr>
+<tr><td>İK örneği</td><td>İKBS'deki personel kayıtları, bordro</td><td>Özgeçmiş PDF'leri, çalışan yorumları (Glassdoor), mülakat ses kayıtları</td></tr>
+</table>
+</div>
+<div class="blok" id="b-kod-turler" data-baslik="Kod: Yapılandırılmış, yarı yapılandırılmış ve yapılandırılmamış İK verisi">
+<h3>Uygulama: Üç yapı türünü tanımak</h3>
+<p>Aynı hücrede üç tür veri işleniyor: personel tablosunun sütun türleri (alıştırma 1), işe alım sisteminden gelen iç içe bir JSON başvurunun alanları ve çıkış mülakatı notlarının basit bir anahtar sözcük sözlüğüyle yapılandırılmış hâle getirilmesi.</p>
+<div class="hucre" id="h-veri_turleri">
+<div class="hucre-ust"><span class="ad">🐍 Veri türleri: yapılandırılmış, yarı yapılandırılmış, yapılandırılmamış<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="39" aria-label="Veri türleri: yapılandırılmış, yarı yapılandırılmış, yapılandırılmamış kodu">import json
+import pandas as pd
+
+# 1) YAPILANDIRILMIŞ veri: satır–sütun, sabit şema (İKBS personel tablosu)
+personel = pd.DataFrame({
+    'Sicil_No': [1001, 1002, 1003],
+    'Ad_Soyad': ['Ayşe Yılmaz', 'Mehmet Kaya', 'Zeynep Demir'],
+    'Departman': ['İK', 'BT', 'Finans'],
+    'Ise_Giris': pd.to_datetime(['2019-03-01', '2021-07-15', '2016-11-02']),
+    'Brut_Maas': [62000.0, 78000.0, 85000.0],
+    'Tam_Zamanli': [True, True, False],
+})
+print("YAPILANDIRILMIŞ — sütun türleri (alıştırma 1):")
+print(personel.dtypes.to_string(), "\n")
+
+# 2) YARI YAPILANDIRILMIŞ veri: etiket/anahtar var ama şema esnek (işe alım sisteminden JSON)
+basvuru_json = '''{"aday_id": 57, "ad": "Can Öztürk",
+  "pozisyon": {"kod": "BT-12", "ad": "Veri Analisti"},
+  "beceriler": ["Python", "SQL", "Power BI"],
+  "mulakatlar": [{"tur": "İK", "puan": 4}, {"tur": "Teknik", "puan": 5}]}'''
+basvuru = json.loads(basvuru_json)
+print("YARI YAPILANDIRILMIŞ — iç içe alanlar:")
+print("  Pozisyon:", basvuru['pozisyon']['ad'], "| Beceri sayısı:", len(basvuru['beceriler']),
+      "| Ort. mülakat puanı:", sum(m['puan'] for m in basvuru['mulakatlar']) / len(basvuru['mulakatlar']), "\n")
+
+# 3) YAPILANDIRILMAMIŞ veri: serbest metin (çıkış mülakatı notları)
+cikis_notlari = [
+    "Ücretim piyasanın altında kaldı, ayrıca terfi beklentim karşılanmadı.",
+    "Yöneticimle iletişim sorunları yaşadım; esnek çalışma imkânı da yoktu.",
+    "Daha iyi bir ücret teklifi aldım. Ekip arkadaşlarımı özleyeceğim.",
+]
+temalar = {'Ücret': ['ücret', 'maaş'], 'Kariyer': ['terfi', 'kariyer'],
+           'Yönetici': ['yönetici'], 'Esneklik': ['esnek', 'uzaktan']}
+print("YAPILANDIRILMAMIŞ — basit anahtar sözcük kodlamasıyla yapılandırma:")
+kodlu = pd.DataFrame([{t: int(any(k in not_.lower() for k in ks)) for t, ks in temalar.items()}
+                      for not_ in cikis_notlari])
+print(kodlu.to_string())
+print("\nEn sık ayrılma teması:", kodlu.sum().idxmax())
+</textarea>
+<div class="cikti"></div>
+</div>
+</div>
+</section>
+
+<section class="bolum" id="toplama" data-baslik="2. Veri toplama">
+<h2>2. Veri toplama yöntemleri</h2>
+<div class="blok" id="b-toplama" data-baslik="Veri toplama yöntemleri: web kazıma, API, veritabanı, sensör, anket, günlük, elle giriş">
+<p>Yöntem; gereken verinin türüne, ölçeğine ve kaynaklara göre seçilir. Birden çok yöntemi birleştirmek genellikle en kapsamlı veri setini verir.</p>
+<table class="tablo">
+<tr><th>Yöntem</th><th>Açıklama</th><th>İK örneği</th></tr>
+<tr><td>Web kazıma</td><td>Web sayfalarını programla alıp HTML'den istenen bilgiyi çıkarmak (BeautifulSoup, Scrapy). Sitenin kullanım koşullarına uyulmalı, sunucu aşırı istekle yorulmamalıdır.</td><td>İş ilanı sitelerinden pozisyon, şehir ve ücret aralıklarını toplamak</td></tr>
+<tr><td>API'ler</td><td>Uygulamaların birbirine yapılandırılmış veri (çoğunlukla JSON ya da XML) aktarması; kazımaya gerek kalmadan gerçek zamanlı veri</td><td>ATS, İKBS ya da LinkedIn API'sinden aday verisi çekmek</td></tr>
+<tr><td>Veritabanları</td><td>İlişkisel (MySQL, PostgreSQL) ve NoSQL (MongoDB, Cassandra) depolar; SQL ile sorgulanır</td><td>Bordro ve personel veritabanı</td></tr>
+<tr><td>Sensörler / IoT</td><td>Fiziksel ortamdan sürekli akan veri</td><td>Kartlı geçiş okuyucuları, iş güvenliği sensörleri, giyilebilir cihazlar</td></tr>
+<tr><td>Anketler</td><td>Çevrim içi, telefonla ya da yüz yüze birincil veri</td><td>Bağlılık, nabız ve çıkış anketleri</td></tr>
+<tr><td>Günlükler ve olay izleme</td><td>Kullanıcı etkileşimleri ve sistem olaylarının kaydı</td><td>Öğrenme platformunda ders tamamlama günlükleri</td></tr>
+<tr><td>Elle veri girişi</td><td>Kâğıt ya da dijital olmayan kaynaklardan aktarım; çift giriş ya da doğrulamayla hata azaltılmalı</td><td>Eski özlük dosyalarının dijitalleştirilmesi</td></tr>
+<tr><td>Kitle kaynak</td><td>Çok sayıda kişiden internet üzerinden veri (etiketleme, duygu analizi)</td><td>Çalışan yorumlarının birden çok kodlayıcıyla etiketlenmesi</td></tr>
+<tr><td>Mobil veri toplama</td><td>Akıllı telefon ve tabletlerle, çevrimdışı da çalışabilen saha toplama (ODK, SurveyCTO)</td><td>Şantiye ya da sahada çalışanlarla anket</td></tr>
+<tr><td>Uydu ve uzaktan algılama</td><td>Geniş ölçekli coğrafi gözlem</td><td>Yeni tesis yeri seçiminde bölgesel yerleşim ve ulaşım analizi</td></tr>
+</table>
+</div>
+</section>
+
+<section class="bolum" id="setler" data-baslik="3. Veri setleri">
+<h2>3. Veri setleri</h2>
+<div class="blok" id="b-setler" data-baslik="Veri seti türleri: kaynağa, veri türüne, alana ve makine öğrenmesi görevine göre">
+<ul>
+<li><b>Kaynağa ve erişime göre:</b> <i>Açık</i> veri setleri (UCI Machine Learning Repository, Kaggle, Google Dataset Search, AWS Open Data; öğrenme ve karşılaştırma için) · <i>kurumsal</i> veri setleri (izin ya da satın alma gerektirir; müşteri, hasta, personel verisi) · <i>benzetim (sentetik)</i> veri setleri (gerçek veri az ya da kısıtlıyken; bu sayfadaki tüm veriler gibi).</li>
+<li><b>Veri türüne göre:</b> yapılandırılmış (finansal işlemler, satış kayıtları), yapılandırılmamış (e-posta, görüntü, ses, video), yarı yapılandırılmış (web günlükleri, API yanıtları, üst verili sosyal medya gönderileri).</li>
+<li><b>Alana göre:</b> görüntü (MNIST, CIFAR, ImageNet, COCO), metin (IMDB yorumları, 20 Newsgroups, SQuAD, Vikipedi), zaman serisi (hisse fiyatları, hava durumu, IoT), ses (LibriSpeech, UrbanSound8K, Common Voice), video (UCF101, Kinetics), çizge (Cora, Open Graph Benchmark).</li>
+<li><b>Makine öğrenmesi görevine göre:</b> sınıflandırma (hedef kategorik: ayrılacak mı?), regresyon (hedef sürekli: maaş tahmini), kümeleme (etiket yok: çalışan segmentasyonu), pekiştirmeli öğrenme (durum, eylem, ödül), anomali tespiti (dolandırıcılık, olağan dışı masraf beyanı).</li>
+</ul>
+<table class="tablo">
+<tr><th>Alan</th><th>Örnek veri seti</th><th>Amaç</th></tr>
+<tr><td>İK</td><td>IBM HR Analytics Employee Attrition (Kaggle)</td><td>İşten ayrılma tahmini</td></tr>
+<tr><td>İşgücü piyasası</td><td>TÜİK Hanehalkı İşgücü Araştırması mikro verisi</td><td>İstihdam, işsizlik ve ücret analizi</td></tr>
+<tr><td>Sağlık</td><td>MIMIC-III</td><td>Klinik hasta verisi</td></tr>
+<tr><td>Finans</td><td>Yahoo Finance</td><td>Hisse verisi</td></tr>
+<tr><td>Eğitim</td><td>Öğrenci başarı veri setleri</td><td>Okul bırakma tahmini</td></tr>
+</table>
+<div class="not uyari"><b>Veri seti seçerken:</b> veri kalitesini, boyutunu, biçimini ve lisansını değerlendirin; amacı (model eğitimi, karşılaştırma, canlı kullanım) netleştirin; özellikle hassas veride (sağlık, yüz görüntüsü, ücret, sendika üyeliği) etik ve hukuki boyutu denetleyin.</div>
+</div>
+<div class="blok" id="b-kod-setler" data-baslik="Kod: Sınıflandırma, regresyon, kümeleme veri setleri ve eğitim/test bölmesi">
+<h3>Uygulama: Görevlere göre İK veri setleri ve eğitim/test bölmesi (ek)</h3>
+<p>Aynı çalışan verisinde <code>ayrildi</code> bir sınıflandırma, <code>maas</code> bir regresyon hedefidir; hedefsiz kullanım kümelemedir. Model sınamak için ayrılan kısma <b>test verisi</b> denir; <code>stratify</code> ile ayrılma oranı eğitim ve test setlerinde korunur.</p>
+<div class="hucre" id="h-veri_setleri">
+<div class="hucre-ust"><span class="ad">🐍 Veri setleri: görevler ve eğitim/test bölmesi<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="27" aria-label="Veri setleri: görevler ve eğitim/test bölmesi kodu">import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+
+# Makine öğrenmesi görevine göre İK veri setleri
+np.random.seed(1)
+n = 400
+df = pd.DataFrame({
+    'kidem': np.random.exponential(5, n).round(1),
+    'memnuniyet': np.random.normal(3.5, 0.8, n).clip(1, 5).round(1),
+    'egitim_saati': np.random.randint(0, 80, n),
+})
+df['maas'] = (35000 + 2500 * df.kidem + np.random.normal(0, 5000, n)).round(-2)          # regresyon hedefi
+df['ayrildi'] = (np.random.rand(n) &lt; 1 / (1 + np.exp(2 * (df.memnuniyet - 3)))).astype(int)  # sınıflandırma hedefi
+
+print("Görev            Hedef değişken   Tür")
+print("Sınıflandırma    ayrildi          kategorik (0/1)")
+print("Regresyon        maas             sürekli")
+print("Kümeleme         (yok)            etiketsiz — doğal grupları bulmak")
+print(f"\nAyrılma oranı: %{100 * df.ayrildi.mean():.1f}")
+
+# Eğitim ve test setleri: sınıf oranını korumak için katmanlı (stratified) bölme
+X, y = df.drop(columns=['ayrildi']), df['ayrildi']
+X_egitim, X_test, y_egitim, y_test = train_test_split(X, y, test_size=0.25, stratify=y, random_state=42)
+print(f"\nEğitim seti: {len(X_egitim)} satır (ayrılma %{100 * y_egitim.mean():.1f})")
+print(f"Test seti  : {len(X_test)} satır (ayrılma %{100 * y_test.mean():.1f})")
+</textarea>
+<div class="cikti"></div>
+</div>
+</div>
+</section>
+
+<section class="bolum" id="bicimler" data-baslik="4. Veri biçimleri">
+<h2>4. Veri biçimleri</h2>
+<div class="blok" id="b-bicim" data-baslik="Veri biçimleri: CSV, JSON, XML, Parquet, HDF5, SQL ve diğerleri">
+<ul>
+<li><b>Yapılandırılmış:</b> CSV (virgülle ayrılmış düz metin), TSV (sekmeyle ayrılmış), XLS/XLSX (Excel; formül ve grafik), SQL veritabanları (MySQL, PostgreSQL, SQLite), Parquet (büyük veri için sütun tabanlı).</li>
+<li><b>Yarı yapılandırılmış:</b> JSON (API'lerde anahtar–değer), XML (web servisleri, yapılandırma), YAML (insanın okuyabileceği yapılandırma), Avro (şemalı büyük veri biçimi).</li>
+<li><b>Yapılandırılmamış:</b> TXT, PDF, DOC/DOCX, günlük (log) dosyaları, HTML.</li>
+<li><b>Büyük veri ve ikili:</b> HDF5 (bilimsel hesaplama), ORC (sütun tabanlı analitik), Feather (hızlı veri çerçevesi), Pickle (Python nesneleri — güvenilmeyen kaynaktan açılmamalı).</li>
+<li><b>Coğrafi:</b> GeoJSON, Shapefile (.shp), KML.</li>
+<li><b>Görüntü, ses, video:</b> PNG/JPEG/TIFF, WAV/MP3, MP4/AVI.</li>
+</ul>
+<table class="tablo">
+<tr><th>Biçim</th><th>Tür</th><th>En uygun kullanım</th><th>Şema zorunluluğu*</th></tr>
+<tr><td>CSV</td><td>Tablo</td><td>Basit yapılandırılmış veri</td><td>Hayır</td></tr>
+<tr><td>JSON</td><td>Yarı yapılandırılmış</td><td>API'ler, iç içe kayıtlar</td><td>Hayır</td></tr>
+<tr><td>Parquet</td><td>Sütun tabanlı</td><td>Büyük veri, Spark</td><td>Evet</td></tr>
+<tr><td>HDF5</td><td>Bilimsel</td><td>Büyük ölçekli sayısal diziler</td><td>Evet</td></tr>
+<tr><td>SQL/SQLite</td><td>Veritabanı</td><td>İlişkisel yapılandırılmış veri</td><td>Evet</td></tr>
+<tr><td>TXT</td><td>Yapılandırılmamış</td><td>Ham metin, NLP</td><td>Hayır</td></tr>
+<tr><td>JPEG/PNG · MP3/WAV · MP4</td><td>Görüntü · ses · video</td><td>Bilgisayarlı görü · konuşma · video analitiği</td><td>Hayır</td></tr>
+</table>
+<p>*<b>Şema</b>, verinin alanlarını, türlerini ve ilişkilerini tanımlar; saklama ve erişimde tutarlılık ve doğrulama sağlar. Biçimlerin yararları: hesaplamanın kolaylaşması, düzenli ve sunulabilir veri, program boyunca tutarlı değişkenler ve okunabilirlik.</p>
+</div>
+<div class="blok" id="b-kod-bicim" data-baslik="Kod: CSV, JSON, XML ve Parquet'e dönüştürme; SQLite'a yükleme ve SQL sorgusu">
+<h3>Uygulama: Biçimler arası dönüştürme ve veritabanına yükleme (ek)</h3>
+<p>1.000 çalışanlık bir tablo dört biçimde kaydedilip dosya boyutları ve tür bilgisinin korunup korunmadığı karşılaştırılıyor. Ardından tablo, dönüştürme sürecinin son adımı olan <b>yükleme</b> için tarayıcı içinde bir SQLite veritabanına yazılıp SQL ile sorgulanıyor.</p>
+<div class="hucre" id="h-format_donustur">
+<div class="hucre-ust"><span class="ad">🐍 Biçim dönüştürme ve SQLite&#x27;a yükleme<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="40" aria-label="Biçim dönüştürme ve SQLite&#x27;a yükleme kodu">import os
+import json
+import sqlite3
+import numpy as np
+import pandas as pd
+import pyarrow  # Parquet için
+
+# 1.000 çalışanlık örnek veri
+np.random.seed(0)
+n = 1000
+df = pd.DataFrame({
+    'sicil': np.arange(10001, 10001 + n),
+    'departman': np.random.choice(['Satış', 'Üretim', 'BT', 'Finans', 'İK'], n),
+    'kidem': np.random.exponential(6, n).round(1),
+    'maas': np.random.lognormal(np.log(55000), 0.35, n).round(-2),
+    'ise_giris': pd.Timestamp('2026-01-01') - pd.to_timedelta(np.random.randint(30, 8000, n), unit='D'),
+})
+
+# Biçim dönüştürme: aynı veriyi farklı biçimlerde kaydet
+df.to_csv('calisanlar.csv', index=False)
+df.to_json('calisanlar.json', orient='records', force_ascii=False, date_format='iso')
+df.to_xml('calisanlar.xml', index=False, parser='etree')
+df.to_parquet('calisanlar.parquet', index=False)
+
+print("Biçim       Boyut (KB)   Şema/tür bilgisi korunuyor mu?")
+for ad, sema in [('csv', 'Hayır (her şey metin)'), ('json', 'Kısmen'), ('xml', 'Hayır'), ('parquet', 'Evet (sütun türleri)')]:
+    print(f"{ad:&lt;10}  {os.path.getsize('calisanlar.' + ad) / 1024:&gt;8.1f}   {sema}")
+
+geri = pd.read_parquet('calisanlar.parquet')
+print("\nParquet'ten geri okunan türler:", dict(geri.dtypes.astype(str)))
+print("CSV'den geri okunan 'ise_giris' türü:", pd.read_csv('calisanlar.csv')['ise_giris'].dtype)
+
+# Yükleme (ETL'in "L" adımı): SQLite veritabanına yaz ve SQL ile sorgula
+baglanti = sqlite3.connect('ik.db')
+df.to_sql('calisan', baglanti, if_exists='replace', index=False)
+sorgu = """
+SELECT departman, COUNT(*) AS kisi, ROUND(AVG(maas)) AS ort_maas, ROUND(AVG(kidem), 1) AS ort_kidem
+FROM calisan GROUP BY departman ORDER BY ort_maas DESC
+"""
+print("\nSQL sorgusu sonucu:")
+print(pd.read_sql_query(sorgu, baglanti).to_string(index=False))
+baglanti.close()
+</textarea>
+<div class="cikti"></div>
+</div>
+<div class="not"><b>Yorum:</b> Parquet en küçük dosyayı üretir ve tarih gibi sütun türlerini korur; CSV'den geri okunan tarih metin olarak gelir ve yeniden dönüştürülmesi gerekir. Büyük İK veri ambarlarında bu fark hem depolama maliyetinde hem de işleme hızında hissedilir.</div>
+</div>
+</section>
+
+<section class="bolum" id="ayristirma" data-baslik="5. Veri ayrıştırma">
+<h2>5. Veri ayrıştırma (parsing)</h2>
+<div class="blok" id="b-ayr" data-baslik="Veri ayrıştırma nedir? Adımları ve araçları">
+<p><b>Veri ayrıştırma</b>, ham veriyi yapılandırılmış, okunabilir ve kullanılabilir bir biçime çevirmektir: metin, JSON, XML, CSV ya da HTML akışını çözümleyip bir programın ya da veritabanının işleyebileceği biçime dönüştürür.</p>
+<ol>
+<li><b>Girdi:</b> web sayfaları (HTML), API yanıtları (JSON, XML), günlükler, dosyalar (CSV, TXT, Excel).</li>
+<li><b>Sözcüksel çözümleme (belirteçleme):</b> Veri; sözcük, sayı ya da sembol gibi küçük parçalara (belirteçlere) ayrılır.</li>
+<li><b>Sözdizimi çözümlemesi:</b> Önceden tanımlı kurallar uygulanarak yapı denetlenir ve hiyerarşik ya da tablo biçiminde düzenlenir.</li>
+<li><b>Çıkarma ve dönüştürme:</b> İlgisiz veri ayıklanır, önemli alanlar çıkarılır, yapılandırılmış biçime getirilir.</li>
+<li><b>Çıktı:</b> Veritabanına kaydetme, uygulamalarda kullanma ya da analiz.</li>
+</ol>
+<table class="tablo">
+<tr><th>Biçim</th><th>Araç / kütüphane</th><th>Dil</th></tr>
+<tr><td>CSV</td><td>csv, pandas</td><td>Python</td></tr>
+<tr><td>JSON</td><td>json, pandas</td><td>Python</td></tr>
+<tr><td>XML</td><td>ElementTree, lxml</td><td>Python</td></tr>
+<tr><td>HTML</td><td>BeautifulSoup, Selenium, Scrapy</td><td>Python</td></tr>
+<tr><td>Günlükler</td><td>Düzenli ifadeler (regex), Logstash</td><td>Çeşitli</td></tr>
+</table>
+</div>
+<div class="blok" id="b-ayr-tur" data-baslik="Ayrıştırıcı türleri, dilbilgisi ve veri güdümlü ayrıştırma, kullanım alanları">
+<h3>Ayrıştırıcı türleri ve yaklaşımlar</h3>
+<p><b>Ayrıştırıcı türleri:</b> JSON ayrıştırıcı (API yanıtları), XML ayrıştırıcı (web servisleri), HTML ayrıştırıcı (BeautifulSoup, Cheerio), CSV ayrıştırıcı ve günlük dosyası ayrıştırıcı (sistem izleme, hata ayıklama). Ayrıştırılan veri Python sözlükleri ya da tablolar gibi yapılandırılmış nesnelere dönüştürülür.</p>
+<ul>
+<li><b>Dilbilgisi güdümlü ayrıştırma:</b> Biçimsel dilbilgisi kurallarıyla yapılandırılmamış cümleleri parçalayıp yapılandırır. Kurallara uymayan girdilerde kırılgandır; bu, kısıtları gevşetip kapsam dışındaki cümleleri sonraki analize bırakarak aşılır.</li>
+<li><b>Veri güdümlü ayrıştırma:</b> Olasılıksal modeller, istatistiksel ayrıştırıcılar ve ağaç bankaları (treebank) kullanır; geniş dil kapsamı sağlar, gündelik dili ve alana özgü etiketsiz veriyi işleyebilir.</li>
+</ul>
+<p><b>Kullanım alanları:</b> iş akışlarının otomasyonu, finans (kredi raporu, gelir doğrulama), lojistik (fatura ve gönderi bilgisi), emlak (e-postalardan müşteri adayı bilgisi). İK'da en yaygın kullanım <b>özgeçmiş ayrıştırma</b>dır: ATS'ler PDF/DOCX özgeçmişlerden ad, iletişim, eğitim, deneyim ve becerileri çıkarır.</p>
+</div>
+<div class="blok" id="b-kod-dosya" data-baslik="Kod: Üç kanaldan aday başvurusu — CSV, JSON ve XML dosyalarını oluşturma">
+<h3>Uygulama 1: Örnek dosyaları oluşturmak</h3>
+<p>Kitaptaki <code>data.csv</code>, <code>data.json</code> ve <code>data.xml</code> dosyalarının İK karşılığı: üç farklı kanaldan gelen aday başvuruları.</p>
+<div class="hucre" id="h-dosya_olustur">
+<div class="hucre-ust"><span class="ad">🐍 Örnek dosyaları oluştur (CSV, JSON, XML)<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="36" aria-label="Örnek dosyaları oluştur (CSV, JSON, XML) kodu">import json
+
+# Üç farklı kanaldan gelen aday başvuruları: kariyer sitesi (CSV), işe alım sistemi (JSON), kurum içi portal (XML)
+csv_metni = """ad,yas,sehir,pozisyon
+Ayşe,30,İstanbul,İK Uzmanı
+Mehmet,25,Ankara,Bordro Uzmanı
+"""
+json_veri = [
+    {"ad": "Zeynep", "yas": 35, "sehir": "İzmir", "pozisyon": "İşe Alım Uzmanı"},
+    {"ad": "Can", "yas": 40, "sehir": "Bursa", "pozisyon": "İK İş Ortağı"},
+]
+xml_metni = """&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;adaylar&gt;
+  &lt;aday&gt;
+    &lt;ad&gt;Elif&lt;/ad&gt;
+    &lt;yas&gt;28&lt;/yas&gt;
+    &lt;sehir&gt;Sakarya&lt;/sehir&gt;
+    &lt;pozisyon&gt;Eğitim Uzmanı&lt;/pozisyon&gt;
+  &lt;/aday&gt;
+  &lt;aday&gt;
+    &lt;ad&gt;Burak&lt;/ad&gt;
+    &lt;yas&gt;33&lt;/yas&gt;
+    &lt;sehir&gt;Kocaeli&lt;/sehir&gt;
+    &lt;pozisyon&gt;Ücret Uzmanı&lt;/pozisyon&gt;
+  &lt;/aday&gt;
+&lt;/adaylar&gt;
+"""
+with open('adaylar.csv', 'w', encoding='utf-8') as f:
+    f.write(csv_metni)
+with open('adaylar.json', 'w', encoding='utf-8') as f:
+    json.dump(json_veri, f, ensure_ascii=False, indent=2)
+with open('adaylar.xml', 'w', encoding='utf-8') as f:
+    f.write(xml_metni)
+print("adaylar.csv, adaylar.json ve adaylar.xml oluşturuldu.\n")
+print(open('adaylar.json', encoding='utf-8').read())
+</textarea>
+<div class="cikti"></div>
+</div>
+</div>
+<div class="blok" id="b-kod-ayr" data-baslik="Kod: CSV, JSON ve XML ayrıştırıcıları ve tek tabloda birleştirme">
+<h3>Uygulama 2: CSV, JSON ve XML'i ayrıştırıp birleştirmek</h3>
+<p>Üç ayrıştırıcı işlev aynı biçimde (sözlük listesi) çıktı üretir. Ardından üç kaynak, geldiği kanal bilgisiyle tek bir aday tablosunda birleştirilir ve yaş sütununun türü düzeltilir.</p>
+<div class="hucre" id="h-ayristir">
+<div class="hucre-ust"><span class="ad">🐍 Ayrıştırıcılar: CSV, JSON, XML<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="40" aria-label="Ayrıştırıcılar: CSV, JSON, XML kodu">import csv
+import json
+import xml.etree.ElementTree as ET
+import pandas as pd
+
+# CSV dosyasını ayrıştırıp sözlük listesi döndürür
+def csv_ayristir(dosya_yolu):
+    with open(dosya_yolu, mode='r', encoding='utf-8') as dosya:
+        okuyucu = csv.DictReader(dosya)
+        return [satir for satir in okuyucu]
+
+# JSON dosyasını ayrıştırıp yüklenen yapıyı (çoğunlukla liste/sözlük) döndürür
+def json_ayristir(dosya_yolu):
+    with open(dosya_yolu, mode='r', encoding='utf-8') as dosya:
+        return json.load(dosya)
+
+# XML dosyasını ayrıştırıp sözlük listesi döndürür
+def xml_ayristir(dosya_yolu):
+    kok = ET.parse(dosya_yolu).getroot()
+    return [{oge.tag: oge.text for oge in cocuk} for cocuk in kok]
+
+csv_veri = csv_ayristir('adaylar.csv')
+json_veri = json_ayristir('adaylar.json')
+xml_veri = xml_ayristir('adaylar.xml')
+print("CSV verisi :", csv_veri)
+print("JSON verisi:", json_veri)
+print("XML verisi :", xml_veri)
+
+# Dikkat: CSV ve XML'den gelen yaş METİN ('30'), JSON'dan gelen SAYI (35)
+print("\nYaş türleri -&gt;", type(csv_veri[0]['yas']).__name__, type(json_veri[0]['yas']).__name__,
+      type(xml_veri[0]['yas']).__name__)
+
+# Üç kaynağı tek tabloda birleştir, türleri düzelt (alıştırma 5)
+tum = pd.concat([pd.DataFrame(csv_veri).assign(kaynak='Kariyer sitesi (CSV)'),
+                 pd.DataFrame(json_veri).assign(kaynak='İşe alım sistemi (JSON)'),
+                 pd.DataFrame(xml_veri).assign(kaynak='Kurum içi portal (XML)')], ignore_index=True)
+tum['yas'] = pd.to_numeric(tum['yas'])
+print("\nBirleştirilmiş aday tablosu:\n", tum.to_string())
+print("\nOrtalama aday yaşı:", tum['yas'].mean())
+</textarea>
+<div class="cikti"></div>
+</div>
+<div class="not uyari"><b>Kitaptaki koda göre düzeltme:</b> Özgün işlevler <code>file_path</code> parametresini alıyor ama kullanmıyordu (dosya yolları işlevin içine sabit yazılmıştı); bu yüzden farklı bir dosya verildiğinde yine aynı dosyayı okuyordu. Burada işlevler kendilerine verilen yolu kullanır. Ayrıca CSV ve XML'den gelen yaşın <b>metin</b>, JSON'dan gelenin <b>sayı</b> olduğu gösterilip birleştirmeden sonra tür düzeltiliyor.</div>
+</div>
+<div class="blok" id="b-kod-json" data-baslik="Kod: İç içe API yanıtını json_normalize ile düzleştirme">
+<h3>Uygulama 3: İç içe API yanıtını tabloya çevirmek (alıştırma 2 ve 5)</h3>
+<p>İşe alım sistemi API'lerinin yanıtları çoğunlukla iç içedir (aday → iletişim → şehir; aday → mülakatlar listesi). <code>pd.json_normalize</code> iç içe alanları <code>iletisim_sehir</code> gibi sütunlara düzleştirir; <code>record_path</code> ise liste alanlarını ayrı bir tabloya açar.</p>
+<div class="hucre" id="h-json_normalize">
+<div class="hucre-ust"><span class="ad">🐍 JSON: iç içe API yanıtını düzleştirme<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="32" aria-label="JSON: iç içe API yanıtını düzleştirme kodu">import pandas as pd
+
+# Bir işe alım sistemi API'sinin döndürdüğü iç içe JSON yanıtı (sözlük listesi)
+api_yaniti = {
+    "sayfa": 1,
+    "toplam": 3,
+    "adaylar": [
+        {"id": 501, "ad": "Selin", "iletisim": {"eposta": "selin@ornek.com", "sehir": "Ankara"},
+         "pozisyon": {"kod": "IK-03", "ad": "İK Uzmanı"},
+         "mulakatlar": [{"asama": "Ön görüşme", "puan": 4}, {"asama": "Yetkinlik", "puan": 5}]},
+        {"id": 502, "ad": "Kerem", "iletisim": {"eposta": "kerem@ornek.com", "sehir": "İzmir"},
+         "pozisyon": {"kod": "BT-12", "ad": "Veri Analisti"},
+         "mulakatlar": [{"asama": "Ön görüşme", "puan": 3}]},
+        {"id": 503, "ad": "Nur", "iletisim": {"eposta": None, "sehir": "İstanbul"},
+         "pozisyon": {"kod": "IK-03", "ad": "İK Uzmanı"},
+         "mulakatlar": []},
+    ],
+}
+
+# 1) Belirli alanları çekmek (alıştırma 2)
+for a in api_yaniti['adaylar']:
+    print(f"{a['id']} {a['ad']:&lt;6} -&gt; {a['pozisyon']['ad']}, {a['iletisim']['sehir']}")
+
+# 2) İç içe alanları düzleştirerek DataFrame'e çevirmek
+adaylar = pd.json_normalize(api_yaniti['adaylar'], sep='_')
+print("\nDüzleştirilmiş aday tablosu:\n", adaylar.drop(columns='mulakatlar').to_string())
+
+# 3) Liste alanlarını ayrı bir tabloya açmak (her mülakat bir satır)
+mulakat = pd.json_normalize(api_yaniti['adaylar'], record_path='mulakatlar', meta=['id', 'ad'])
+print("\nMülakat tablosu:\n", mulakat.to_string())
+print("\nAday başına ortalama mülakat puanı:\n", mulakat.groupby('ad')['puan'].mean().to_string())
+</textarea>
+<div class="cikti"></div>
+</div>
+</div>
+<div class="blok" id="b-kod-html" data-baslik="Kod: BeautifulSoup ile iş ilanı sayfasından pozisyon, şehir ve ücret aralığı çıkarma">
+<h3>Uygulama 4: HTML'den iş ilanı bilgisi çıkarmak (alıştırma 3)</h3>
+<p>Kitaptaki “ürün adı ve fiyatı çıkarma” alıştırmasının İK karşılığı: Bir kariyer sayfasının HTML'inden pozisyon, şehir, ücret aralığı ve nitelik sayısı çıkarılıyor. “55.000 – 70.000 TL” gibi metinler düzenli ifadeyle sayıya çevriliyor; ücret yazılmayan ilanlar boş kalıyor.</p>
+<div class="hucre" id="h-html">
+<div class="hucre-ust"><span class="ad">🐍 HTML: iş ilanlarını ayrıştırma<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="40" aria-label="HTML: iş ilanlarını ayrıştırma kodu">import re
+import pandas as pd
+from bs4 import BeautifulSoup
+
+# Bir kariyer sayfasından alınmış örnek HTML (web kazıma sonrası elde edilen ham içerik)
+html = """
+&lt;html&gt;&lt;body&gt;
+&lt;h1&gt;Açık Pozisyonlar&lt;/h1&gt;
+&lt;div class="ilan" data-id="101"&gt;
+  &lt;h2 class="baslik"&gt;İK İş Ortağı&lt;/h2&gt;
+  &lt;span class="sehir"&gt;İstanbul&lt;/span&gt;
+  &lt;span class="ucret"&gt;55.000 – 70.000 TL&lt;/span&gt;
+  &lt;ul class="nitelik"&gt;&lt;li&gt;5+ yıl deneyim&lt;/li&gt;&lt;li&gt;İngilizce&lt;/li&gt;&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class="ilan" data-id="102"&gt;
+  &lt;h2 class="baslik"&gt;Bordro Uzmanı&lt;/h2&gt;
+  &lt;span class="sehir"&gt;Ankara&lt;/span&gt;
+  &lt;span class="ucret"&gt;42.000 – 50.000 TL&lt;/span&gt;
+  &lt;ul class="nitelik"&gt;&lt;li&gt;3+ yıl deneyim&lt;/li&gt;&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class="ilan" data-id="103"&gt;
+  &lt;h2 class="baslik"&gt;İşe Alım Uzmanı&lt;/h2&gt;
+  &lt;span class="sehir"&gt;İzmir&lt;/span&gt;
+  &lt;span class="ucret"&gt;Görüşmede belirlenecek&lt;/span&gt;
+  &lt;ul class="nitelik"&gt;&lt;li&gt;2+ yıl deneyim&lt;/li&gt;&lt;li&gt;LinkedIn Recruiter&lt;/li&gt;&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/body&gt;&lt;/html&gt;
+"""
+corba = BeautifulSoup(html, 'html.parser')
+
+kayitlar = []
+for ilan in corba.select('div.ilan'):
+    ucret_metni = ilan.select_one('.ucret').get_text(strip=True)
+    sayilar = [int(s.replace('.', '')) for s in re.findall(r'\d[\d.]*', ucret_metni)]
+    kayitlar.append({
+        'ilan_id': int(ilan['data-id']),
+        'pozisyon': ilan.select_one('.baslik').get_text(strip=True),
+        'sehir': ilan.select_one('.sehir').get_text(strip=True),
+        'ucret_alt': sayilar[0] if len(sayilar) == 2 else None,
+        'ucret_ust': sayilar[1] if len(sayilar) == 2 else None,
+        'nitelik_sayisi': len(ilan.select('.nitelik li')),
+    })
+ilanlar = pd.DataFrame(kayitlar)
+ilanlar['ucret_orta'] = (ilanlar['ucret_alt'] + ilanlar['ucret_ust']) / 2
+print(ilanlar.to_string(index=False))
+print("\nÜcret bilgisi verilmeyen ilan sayısı:", ilanlar['ucret_alt'].isna().sum())
+</textarea>
+<div class="cikti"></div>
+</div>
+<div class="not"><b>Not:</b> Tarayıcı içindeki Python, güvenlik kuralları nedeniyle başka sitelere doğrudan istek gönderemez; bu yüzden HTML hücreye gömülüdür. Kendi bilgisayarınızda <code>requests.get(url).text</code> ile alınan sayfa aynı kodla ayrıştırılabilir. Web kazımada sitenin kullanım koşullarına ve <code>robots.txt</code> dosyasına uyun.</div>
+</div>
+<div class="blok" id="b-kod-log" data-baslik="Kod: Kartlı geçiş (PDKS) günlüklerini düzenli ifadeyle ayrıştırma, çalışma saati ve geç kalma">
+<h3>Uygulama 5: PDKS günlüklerini ayrıştırmak (ek)</h3>
+<p>Günlük dosyası ayrıştırmanın tüm adımları tek örnekte: satırlar belirteçlere ayrılıyor (sözcüksel çözümleme), düzenli ifade kalıbıyla yapı denetleniyor ve hatalı satır ayıklanıyor (sözdizimi), alanlar çıkarılıp zaman türüne çevriliyor (dönüştürme) ve sonunda her çalışanın günlük çalışma süresi ile geç kalıp kalmadığı hesaplanıyor (çıktı).</p>
+<div class="hucre" id="h-log">
+<div class="hucre-ust"><span class="ad">🐍 Günlük ayrıştırma: PDKS kayıtları<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="40" aria-label="Günlük ayrıştırma: PDKS kayıtları kodu">import re
+import pandas as pd
+
+# Personel devam kontrol sistemi (PDKS) kartlı geçiş günlükleri — ham metin
+gunluk = """2026-11-02 08:52:11 GIRIS kart=1001 kapi=A
+2026-11-02 09:17:40 GIRIS kart=1002 kapi=B
+2026-11-02 08:58:03 GIRIS kart=1003 kapi=A
+2026-11-02 17:35:22 CIKIS kart=1001 kapi=A
+2026-11-02 18:10:09 CIKIS kart=1003 kapi=A
+2026-11-02 16:02:51 CIKIS kart=1002 kapi=B
+HATA okuyucu=B zaman_asimi
+2026-11-03 08:49:30 GIRIS kart=1001 kapi=A
+2026-11-03 09:31:12 GIRIS kart=1002 kapi=A
+2026-11-03 17:45:00 CIKIS kart=1001 kapi=A
+2026-11-03 17:59:47 CIKIS kart=1002 kapi=A
+"""
+
+# 1) Sözcüksel çözümleme (belirteçleme): satırı parçalara ayır
+print("Belirteçler:", gunluk.splitlines()[0].split(), "\n")
+
+# 2) Sözdizimi kuralı: düzenli ifade ile kalıbı tanımla, uymayan satırları ayıkla
+kalip = re.compile(r'(?P&lt;tarih&gt;\d{4}-\d{2}-\d{2}) (?P&lt;saat&gt;\d{2}:\d{2}:\d{2}) '
+                   r'(?P&lt;olay&gt;GIRIS|CIKIS) kart=(?P&lt;sicil&gt;\d+) kapi=(?P&lt;kapi&gt;\w)')
+satirlar, hatali = [], []
+for satir in gunluk.strip().splitlines():
+    eslesme = kalip.match(satir)
+    (satirlar.append(eslesme.groupdict()) if eslesme else hatali.append(satir))
+print("Kalıba uymayan satırlar:", hatali)
+
+# 3) Çıkarma ve dönüştürme: tabloya çevir, zaman türüne dönüştür
+df = pd.DataFrame(satirlar)
+df['zaman'] = pd.to_datetime(df['tarih'] + ' ' + df['saat'])
+gunluk_ozet = df.pivot_table(index=['sicil', 'tarih'], columns='olay', values='zaman', aggfunc='first').reset_index()
+gunluk_ozet['calisma_saati'] = ((gunluk_ozet['CIKIS'] - gunluk_ozet['GIRIS']).dt.total_seconds() / 3600).round(2)
+gunluk_ozet['gec_kaldi'] = gunluk_ozet['GIRIS'].dt.time &gt; pd.Timestamp('09:00').time()
+
+# 4) Çıktı
+print("\nGünlük devam özeti:")
+print(gunluk_ozet[['sicil', 'tarih', 'GIRIS', 'CIKIS', 'calisma_saati', 'gec_kaldi']].to_string(index=False))
+</textarea>
+<div class="cikti"></div>
+</div>
+</div>
+</section>
+
+<section class="bolum" id="donusum" data-baslik="6. Veri dönüştürme">
+<h2>6. Veri dönüştürme</h2>
+<div class="blok" id="b-don" data-baslik="Veri dönüştürme adımları ve türleri">
+<p><b>Veri dönüştürme</b>, veriyi bir biçimden, yapıdan ya da değer sisteminden diğerine çevirmektir; veri analizi, bütünleştirme ve makine öğrenmesi için verinin temiz, tutarlı ve işlenebilir olmasını sağlar.</p>
+<ol>
+<li><b>Çıkarma:</b> Veritabanı, API ya da dosyalardan veriyi almak.</li>
+<li><b>Arındırma:</b> Tutarsızlıkları düzeltmek, yinelenenleri kaldırmak, eksikleri ele almak.</li>
+<li><b>Normalleştirme:</b> Ortak biçime getirmek (ör. tarih biçimi).</li>
+<li><b>Toplulaştırma:</b> Özetlemek ya da gruplamak (toplam, ortalama).</li>
+<li><b>Zenginleştirme:</b> Başka kaynaklardan bilgi eklemek (birleştirme).</li>
+<li><b>Kodlama:</b> Kategorik veriyi sayısala çevirmek.</li>
+<li><b>Biçimlendirme:</b> Dosya biçimini değiştirmek (CSV → JSON, XML → SQL).</li>
+<li><b>Yükleme:</b> Hedef sisteme (veritabanı, veri ambarı) kaydetmek.</li>
+</ol>
+<p><b>Türleri:</b> <i>yapısal dönüştürme</i> (biçim değiştirme, sütunları yeniden sıralama, “Ad Soyad”ı bölme), <i>arındırma ve standartlaştırma</i> (yinelenenler, boş değere “Bilinmiyor” yazma, birim dönüştürme), <i>toplulaştırma</i> (departman başına toplam maaş), <i>normalleştirme ve ölçekleme</i> (0–1 aralığı, YYYY-AA-GG tarih), <i>kodlama</i> (Erkek = 0, Kadın = 1; metni sayısal temsile çevirme).</p>
+</div>
+<div class="blok" id="b-kod-norm" data-baslik="Kod: Min-Max ile Yaş, Maaş ve Puan sütunlarını normalleştirme">
+<h3>Uygulama 1: Normalleştirme (alıştırma 4)</h3>
+<p>Kitaptaki <code>salary.csv</code> dosyası Türkçe adlarla oluşturulur; <code>MinMaxScaler</code> yalnızca sayısal sütunları (Yaş, Maaş, Puan) 0–1 aralığına taşır. Böylece farklı birimlerdeki değişkenler karşılaştırılabilir hâle gelir.</p>
+<div class="hucre" id="h-normallestir">
+<div class="hucre-ust"><span class="ad">🐍 Normalleştirme: maaş dosyası<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="28" aria-label="Normalleştirme: maaş dosyası kodu">import pandas as pd
+from sklearn.preprocessing import MinMaxScaler
+
+csv_metni = """Ad,Yas,Maas,Puan
+Ahmet,25,50000,85
+Selin,30,60000,78
+Can,35,70000,92
+Derya,40,80000,88
+Ece,28,55000,81
+"""
+with open('maas.csv', 'w', encoding='utf-8') as f:
+    f.write(csv_metni)
+
+def veri_normallestir(dosya_yolu):
+    try:
+        df = pd.read_csv(dosya_yolu)
+        olcekleyici = MinMaxScaler()
+        sayisal = df.select_dtypes(include='number').columns       # yalnızca sayısal sütunlar
+        df[sayisal] = olcekleyici.fit_transform(df[sayisal])
+        return df
+    except Exception as hata:
+        return f"Hata: {hata}"
+
+# Tarayıcıda input() yerine dosya yolunu doğrudan veriyoruz
+dosya_yolu = 'maas.csv'
+print("Normalleştirilmiş veri:")
+print(veri_normallestir(dosya_yolu).round(4).to_string(index=False))
+</textarea>
+<div class="cikti"></div>
+</div>
+<div class="not uyari"><b>Kitaptaki koda göre değişiklik:</b> Özgün kod dosya yolunu <code>input()</code> ile soruyordu; tarayıcıdaki Python'da bu bir açılır pencere açacağı için yol doğrudan değişkene yazıldı. Ayrıca kitapta normalleştirmenin “aykırı değerleri önlediği” söyleniyor; aslında Min-Max ölçekleme aykırı değerlere <b>duyarlıdır</b> — tek bir uç maaş, diğer tüm değerleri 0'a yakın sıkıştırır.</div>
+</div>
+<div class="blok" id="b-kod-ozet" data-baslik="Kod: Toplulaştırma ve veri setini özetleme">
+<h3>Uygulama 2: Toplulaştırma ve özetleme (alıştırma 6)</h3>
+<p>Kitaptaki toplulaştırma işlevi Yaş, Maaş ve Puan ortalamalarını hesaplar; ek olarak her sütun için farklı istatistikler, <code>describe()</code> çıktısı ve satır/sütun/eksik hücre sayısı veren bir özet betiği eklendi.</p>
+<div class="hucre" id="h-ozetle">
+<div class="hucre-ust"><span class="ad">🐍 Toplulaştırma ve özet<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="21" aria-label="Toplulaştırma ve özet kodu">import pandas as pd
+
+def veri_ozetle(dosya_yolu):
+    try:
+        df = pd.read_csv(dosya_yolu)
+        # Toplulaştırma: Yaş, Maaş ve Puan ortalamaları
+        return df.agg({'Yas': 'mean', 'Maas': 'mean', 'Puan': 'mean'})
+    except Exception as hata:
+        return f"Hata: {hata}"
+
+print("Toplulaştırılmış veri:")
+print(veri_ozetle('maas.csv'))
+
+# Veri setini özetleyen betik (alıştırma 6): her sütun için birden çok istatistik
+df = pd.read_csv('maas.csv')
+print("\nAyrıntılı özet:")
+print(df.agg({'Yas': ['min', 'max', 'mean'], 'Maas': ['min', 'max', 'mean', 'sum'], 'Puan': ['mean', 'std']}).round(2))
+print("\ndescribe():")
+print(df.describe().round(2).to_string())
+print(f"\nSatır: {df.shape[0]} | Sütun: {df.shape[1]} | Eksik hücre: {df.isna().sum().sum()}")
+</textarea>
+<div class="cikti"></div>
+</div>
+</div>
+</section>
+
+<section class="bolum" id="gercek" data-baslik="7. Gerçek zamanlı sorunlar">
+<h2>7. Gerçek zamanlı veri toplama ve dönüştürmede sorunlar</h2>
+<div class="blok" id="b-gercek" data-baslik="Gerçek zamanlı veri sorunları: gecikme, kalite, hacim, bant genişliği, güvenlik, yineleme">
+<p>Gerçek zamanlı veri toplama, veriyi üretildiği anda toplayıp işlemektir. Zamanında içgörü sağlar ama şu sorunları getirir:</p>
+<table class="tablo">
+<tr><th>Sorun</th><th>Açıklama</th><th>İK örneği</th></tr>
+<tr><td>Gecikme</td><td>Toplama, iletim ve işleme gecikmeleri (ağ tıkanıklığı, donanım, verimsiz algoritma)</td><td>Şubedeki kart okuyucunun verisi merkeze dakikalar sonra ulaşır</td></tr>
+<tr><td>Doğruluk ve kalite</td><td>Gürültülü, eksik ya da hatalı veri; kaynaklar arası zaman uyumsuzluğu</td><td>Okunamayan kart, saat ayarı bozuk okuyucu</td></tr>
+<tr><td>Yüksek hacim</td><td>Sürekli akan büyük veriyi saklamak ve işlemek kaynak ister</td><td>Binlerce çalışanın saniyelik giriş-çıkış olayları</td></tr>
+<tr><td>Sınırlı bant genişliği</td><td>Uzak bölgelerde veri kaybı ya da sıkıştırma gereği</td><td>Saha ve şantiye ekiplerinin mobil verisi</td></tr>
+<tr><td>Ölçeklenebilirlik</td><td>Kaynak sayısı arttıkça darboğazlar</td><td>Yeni fabrikaların sisteme eklenmesi</td></tr>
+<tr><td>Güvenlik ve gizlilik</td><td>Şifreleme, güvenli iletim, mahremiyet</td><td>Konum ve biyometrik veride KVKK yükümlülükleri</td></tr>
+<tr><td>Yineleme</td><td>Akışta aynı olayın birden çok kez gelmesi</td><td>Ağ tekrarıyla iki kez kaydedilen giriş</td></tr>
+<tr><td>Donanım arızaları</td><td>Sensör ya da cihaz arızası veri akışını keser</td><td>Okuyucu zaman aşımı</td></tr>
+<tr><td>Maliyet</td><td>Altyapının kurulum ve işletim maliyeti</td><td>Anlık İK panosu için akış altyapısı</td></tr>
+<tr><td>Bütünleştirme karmaşıklığı</td><td>Var olan sistemlerle uyumsuzluk ve hatalar</td><td>PDKS'nin bordro yazılımıyla eşleşmemesi</td></tr>
+</table>
+</div>
+<div class="blok" id="b-kod-akis" data-baslik="Kod: Akan kartlı geçiş olaylarını geldikçe temizleme — yineleme, geçersiz kayıt, gecikme, sıra bozukluğu">
+<h3>Uygulama: Kayıtları geldikçe temizlemek (alıştırma 7)</h3>
+<p>Bir sabah boyunca gelen kartlı geçiş olayları benzetimle üretiliyor: bazıları ağ tekrarıyla iki kez, bazıları sicil bilgisi olmadan, bazıları dakikalarca gecikmeyle geliyor. <code>kayit_isle()</code> her olayı <b>geldiği anda</b> denetler: yinelenenleri olay kimliğine göre atar, geçersizleri ayıklar, geç ulaşanları işaretler; sonunda olaylar gerçek zamanlarına göre yeniden sıralanır.</p>
+<div class="hucre" id="h-gercek_zamanli">
+<div class="hucre-ust"><span class="ad">🐍 Gerçek zamanlı akış: geldikçe temizleme<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="40" aria-label="Gerçek zamanlı akış: geldikçe temizleme kodu">import random
+import pandas as pd
+
+# Gerçek zamanlı akış simülasyonu: kartlı geçiş olayları gecikmeli, yinelenen ve hatalı gelebilir
+random.seed(3)
+temel = pd.Timestamp('2026-11-09 08:30:00')
+olaylar = []
+for i in range(1, 41):
+    zaman = temel + pd.Timedelta(minutes=random.randint(0, 90))
+    olay = {'olay_id': i, 'sicil': random.choice([1001, 1002, 1003, 1004, None]),
+            'zaman': zaman, 'olay': 'GIRIS',
+            'alindi': zaman + pd.Timedelta(seconds=random.choice([1, 2, 3, 5, 240]))}  # bazıları geç ulaşıyor
+    olaylar.append(olay)
+    if random.random() &lt; 0.15:                      # ağ tekrarı: aynı olay iki kez geliyor
+        olaylar.append(dict(olay))
+olaylar.sort(key=lambda o: o['alindi'])             # olaylar ULAŞMA sırasına göre işlenir
+
+# Kayıtları geldikçe temizleyen işlev (alıştırma 7)
+gorulen, temiz, sayac = set(), [], {'yinelenen': 0, 'gecersiz': 0, 'gec_ulasan': 0}
+def kayit_isle(o, gecikme_esigi=pd.Timedelta(seconds=60)):
+    if o['olay_id'] in gorulen:
+        sayac['yinelenen'] += 1; return
+    gorulen.add(o['olay_id'])
+    if o['sicil'] is None:
+        sayac['gecersiz'] += 1; return
+    if o['alindi'] - o['zaman'] &gt; gecikme_esigi:
+        sayac['gec_ulasan'] += 1                     # yine de kaydet, ama işaretle
+        o = {**o, 'gec_ulasti': True}
+    temiz.append(o)
+
+for o in olaylar:
+    kayit_isle(o)
+
+akis = pd.DataFrame(temiz).fillna({'gec_ulasti': False})
+print(f"Gelen olay: {len(olaylar)} | Kabul edilen: {len(akis)} | Sorunlar: {sayac}")
+sira_disi = (akis['zaman'].diff().dt.total_seconds() &lt; 0).sum()
+print(f"Ulaşma sırasına göre zaman sırası bozuk olay sayısı: {sira_disi}")
+akis = akis.sort_values('zaman')                     # olay zamanına göre yeniden sırala
+gecikme = (akis['alindi'] - akis['zaman']).dt.total_seconds()
+print(f"Gecikme (sn): medyan {gecikme.median():.0f}, en yüksek {gecikme.max():.0f}")
+print("\nSicile göre ilk giriş saati:")
+print(akis.groupby('sicil')['zaman'].min().dt.strftime('%H:%M').to_string())
+</textarea>
+<div class="cikti"></div>
+</div>
+</div>
+</section>
+
+<section class="bolum" id="sonuc" data-baslik="Sonuç">
+<h2>Sonuç</h2>
+<div class="blok" id="b-sonuc" data-baslik="Bölüm özeti">
+<p>Bu bölümde veriyle çalışmanın temel adımları İK örnekleriyle ele alındı. Veri türleri ve veri setleri özellikleri ve analitik bağlamdaki önemleriyle incelendi; CSV, JSON, XML, HTML ve günlük dosyaları ayrıştırılarak ham ya da yarı yapılandırılmış veri işlenebilir tablolara dönüştürüldü. Normalleştirme, toplulaştırma, biçim dönüştürme ve veritabanına yükleme ile veri anlamlı analize hazırlandı. Son olarak gerçek zamanlı veri toplamadaki gecikme, yineleme, tutarsızlık ve bütünleştirme sorunları ele alındı. Bu adımlar, her veri bilimi iş akışında verinin doğru, tutarlı ve derin analize hazır olmasını güvenceye alır. Bir sonraki bölüm veri temizleme tekniklerini ayrıntılı biçimde ele alır.</p>
+</div>
+</section>
+
+<section class="bolum" id="test" data-baslik="Kendinizi sınayın">
+<h2>Kendinizi sınayın</h2>
+<div class="blok" id="b-test" data-baslik="Çoktan seçmeli sorular (20 soru)">
+<div id="testAlani"></div>
+<p><button class="dugme" id="testKontrol">Yanıtlarımı kontrol et</button> <button class="dugme ikincil" id="testSifirla">Sıfırla</button><span id="puan"></span></p>
+</div>
+<div class="blok" id="b-sorular" data-baslik="Tartışma soruları">
+<h3>Tartışma soruları</h3>
+<ol class="sorular">
+<li>Veri biliminde kullanılan başlıca veri türleri nelerdir? Her birine İK'dan örnek verin.</li>
+<li>Yapılandırılmış, yarı yapılandırılmış ve yapılandırılmamış veriyi birbirinden ayırın.</li>
+<li>Veri seti nedir? Açık veri setleri kurumsal veri setlerinden nasıl ayrılır?</li>
+<li>Bir veri işleme hattında veri ayrıştırmanın amacını açıklayın.</li>
+<li>JSON ve CSV verisini ayrıştırmak için kullanılan yaygın araçlar ve kütüphaneler nelerdir?</li>
+<li>Veri dönüştürmeyi tanımlayın. Veri ön işlemede neden önemlidir?</li>
+<li>Yaygın üç veri dönüştürme tekniğini sayıp kısaca açıklayın.</li>
+<li>Birden çok kaynaktan gerçek zamanlı veri toplanırken hangi zorluklar ortaya çıkabilir?</li>
+<li>Veri tutarsızlıkları gerçek zamanlı analitiğin doğruluğunu nasıl etkileyebilir?</li>
+<li>Gerçek zamanlı sistemlerde eksik ya da geciken veriyi ele almak için hangi stratejiler kullanılabilir?</li>
+<li>Farklı şubelerden farklı biçimlerde günlük CSV dosyaları alıyorsunuz. Bunları ayrıştırıp standartlaştıran bir sistemi nasıl tasarlarsınız?</li>
+<li>Normalleştirme ve kodlama makine öğrenmesi hatlarında nasıl kullanılır? Örnek verin.</li>
+<li>Kartlı geçiş ya da iş güvenliği sensör verisiyle gerçek zamanlı çalışıyorsunuz. Hangi veri kalitesi sorunlarıyla karşılaşabilirsiniz, bunları nasıl giderirsiniz?</li>
+<li>Gerçek zamanlı veri dönüştürmenin kritik olduğu gerçek bir senaryoyu tartışın (ör. iş kazası erken uyarısı, dolandırıcılık tespiti).</li>
+</ol>
+</div>
+<div class="blok" id="b-alistirma" data-baslik="Programlama alıştırmaları">
+<h3>Programlama alıştırmaları</h3>
+<p>Kendi dosyalarınızı <b>⬆ Veri yükle</b> ile yükleyip hücrelerde kullanabilirsiniz.</p>
+<ol class="alistirma">
+<li>Bir CSV dosyası yükleyip her sütunun veri türünü yazdırın. <i>(→ Veri türleri hücresi)</i></li>
+<li>Bir JSON dosyası okuyup belirli alanları çıkarın. <i>(→ JSON hücresi)</i></li>
+<li>Örnek bir HTML sayfasından iş ilanı adlarını ve ücretlerini çıkarın. <i>(→ HTML hücresi)</i></li>
+<li>Sahte bir veri seti üretip sayısal sütunları 0–1 aralığına normalleştirin. <i>(→ Normalleştirme hücresi)</i></li>
+<li>Bir sözlük listesini (ör. bir API'den gelen) DataFrame'e çevirin. <i>(→ Ayrıştırıcılar ve JSON hücreleri)</i></li>
+<li>Veri setini özetleyen bir betik yazın. <i>(→ Toplulaştırma hücresi)</i></li>
+<li>Kayıtları geldikçe temizleyen bir işlev yazın. <i>(→ Gerçek zamanlı akış hücresi)</i></li>
+</ol>
+</div>
+</section>
+
+<nav class="bolum-gezinti"><a href="bolum3_pandas.html"><small>← Önceki bölüm</small>Bölüm 3 · Pandas</a><a class="sonraki" href="bolum5_veri_temizleme.html"><small>Sonraki bölüm →</small>Bölüm 5 · Veri Temizleme</a></nav>
+<footer>Kaynak: “Data Collection and Data Preprocessing” bölümünün kodlarından İK verisine uyarlanmış Türkçe etkileşimli sürüm · Python tarayıcıda <a href="https://pyodide.org" target="_blank" rel="noopener">Pyodide</a> ile çalışır.</footer>
+
+</main>
+</div>
+
+<script type="text/plain" id="yardimciKod"># ik_yardimci.py — mlxtend yüklenemediğinde kullanılan saf-Python yedek
+# (TransactionEncoder, apriori, fpgrowth, association_rules için küçük eşdeğerler)
+from itertools import combinations
+import pandas as pd
+
+
+class TransactionEncoder:
+    def fit(self, transactions):
+        self.columns_ = sorted({i for t in transactions for i in t})
+        return self
+
+    def transform(self, transactions):
+        import numpy as np
+        idx = {c: k for k, c in enumerate(self.columns_)}
+        arr = np.zeros((len(transactions), len(self.columns_)), dtype=bool)
+        for r, t in enumerate(transactions):
+            for i in t:
+                arr[r, idx[i]] = True
+        return arr
+
+
+def apriori(df, min_support=0.5, use_colnames=True, max_len=None):
+    n = len(df)
+    cols = list(df.columns)
+    sets = [set(df.index[df[c]]) for c in cols]
+    names = cols if use_colnames else list(range(len(cols)))
+    sonuc = []
+    seviye = []
+    for k, s in enumerate(sets):
+        sup = len(s) / n
+        if sup >= min_support:
+            seviye.append(((k,), s))
+            sonuc.append((sup, frozenset([names[k]])))
+    boy = 1
+    while seviye and (max_len is None or boy < max_len):
+        yeni = {}
+        for a in range(len(seviye)):
+            for b in range(a + 1, len(seviye)):
+                ia, sa = seviye[a]
+                ib, sb = seviye[b]
+                if ia[:-1] != ib[:-1]:
+                    continue
+                aday = tuple(sorted(set(ia) | set(ib)))
+                if aday in yeni:
+                    continue
+                ortak = sa & sb
+                sup = len(ortak) / n
+                if sup >= min_support:
+                    yeni[aday] = ortak
+        seviye = sorted(yeni.items())
+        for aday, s in seviye:
+            sonuc.append((len(s) / n, frozenset(names[i] for i in aday)))
+        boy += 1
+    return pd.DataFrame(sonuc, columns=["support", "itemsets"])
+
+
+def fpgrowth(df, min_support=0.5, use_colnames=True, max_len=None):
+    # Sonuç kümesi Apriori ile aynıdır; yalnızca arama stratejisi farklıdır.
+    return apriori(df, min_support=min_support, use_colnames=use_colnames, max_len=max_len)
+
+
+def association_rules(frequent_itemsets, metric="confidence", min_threshold=0.8):
+    sup = {fs: s for s, fs in zip(frequent_itemsets["support"], frequent_itemsets["itemsets"])}
+    satirlar = []
+    for fs, s in sup.items():
+        if len(fs) < 2:
+            continue
+        for r in range(1, len(fs)):
+            for ant in combinations(sorted(fs), r):
+                ant = frozenset(ant)
+                con = fs - ant
+                sa, sc = sup.get(ant), sup.get(con)
+                if sa is None or sc is None:
+                    continue
+                conf = s / sa
+                lift = conf / sc
+                lev = s - sa * sc
+                conv = float("inf") if conf == 1 else (1 - sc) / (1 - conf)
+                satirlar.append(dict(antecedents=ant, consequents=con,
+                                     **{"antecedent support": sa, "consequent support": sc},
+                                     support=s, confidence=conf, lift=lift,
+                                     leverage=lev, conviction=conv))
+    out = pd.DataFrame(satirlar)
+    if out.empty:
+        return out
+    return out[out[metric] >= min_threshold].reset_index(drop=True)
+</script>
+<script type="text/plain" id="snsYedekKod"># sns_yedek.py — seaborn kurulamazsa kullanılan küçük matplotlib yedeği
+# (bu sayfadaki histplot, scatterplot, regplot, boxplot çağrılarını karşılar)
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+def _veri(x, data):
+    if data is not None and isinstance(x, str):
+        return np.asarray(data[x], dtype=float)
+    return np.asarray(x, dtype=float)
+
+
+def histplot(data=None, x=None, kde=False, color=None, label=None, alpha=0.6, bins='auto', ax=None, **k):
+    ax = ax or plt.gca()
+    v = _veri(x if x is not None else data, data if x is not None else None)
+    v = v[~np.isnan(v)]
+    n, kenar, _ = ax.hist(v, bins=bins, color=color, alpha=alpha, label=label, edgecolor='white')
+    if kde and len(v) > 1:
+        from scipy.stats import gaussian_kde
+        xs = np.linspace(v.min(), v.max(), 200)
+        ax.plot(xs, gaussian_kde(v)(xs) * len(v) * (kenar[1] - kenar[0]), color=color)
+    ax.set_ylabel('Count')
+    return ax
+
+
+def scatterplot(x=None, y=None, data=None, ax=None, **k):
+    ax = ax or plt.gca()
+    ax.scatter(_veri(x, data), _veri(y, data), **{kk: vv for kk, vv in k.items() if kk in ('color', 's', 'alpha', 'label')})
+    if isinstance(x, str): ax.set_xlabel(x)
+    if isinstance(y, str): ax.set_ylabel(y)
+    return ax
+
+
+def regplot(x=None, y=None, data=None, scatter=True, color=None, ax=None, **k):
+    ax = ax or plt.gca()
+    xv, yv = _veri(x, data), _veri(y, data)
+    if scatter:
+        ax.scatter(xv, yv, color=color)
+    b, a = np.polyfit(xv, yv, 1)
+    xs = np.linspace(xv.min(), xv.max(), 100)
+    ax.plot(xs, a + b * xs, color=color)
+    return ax
+
+
+def boxplot(x=None, y=None, data=None, ax=None, **k):
+    ax = ax or plt.gca()
+    gruplar = sorted(data[x].unique())
+    ax.boxplot([data.loc[data[x] == g, y] for g in gruplar], positions=range(len(gruplar)))
+    ax.set_xticks(range(len(gruplar)), [str(g) for g in gruplar])
+    ax.set_xlabel(x); ax.set_ylabel(y)
+    return ax
+</script>
+
+<script>
+/* ===================== 1. Kod hücreleri ===================== */
+const hucreler = [...document.querySelectorAll('.hucre')];
+hucreler.forEach(h => {
+  const ta = h.querySelector('textarea');
+  ta.dataset.ozgun = ta.value;
+  const boyutla = () => { ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight + 4, 640) + 'px'; };
+  boyutla(); ta.addEventListener('input', boyutla);
+  ta.addEventListener('keydown', e => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const s = ta.selectionStart, en = ta.selectionEnd;
+      ta.setRangeText('    ', s, en, 'end');
+    } else if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault(); calistir(h);
+    }
+  });
+  h.querySelector('.calis').addEventListener('click', () => calistir(h));
+  h.querySelector('.sifirla').addEventListener('click', () => { ta.value = ta.dataset.ozgun; boyutla(); });
+  h.querySelector('.kopyala').addEventListener('click', async e => {
+    try { await navigator.clipboard.writeText(ta.value); e.target.textContent = '✓ Kopyalandı'; }
+    catch { ta.select(); document.execCommand('copy'); e.target.textContent = '✓ Kopyalandı'; }
+    setTimeout(() => e.target.textContent = '⧉ Kopyala', 1400);
+  });
+});
+
+/* ===================== 2. Pyodide ===================== */
+let py = null, hazir = false, kuyruk = Promise.resolve();
+const nokta = document.getElementById('nokta'), durumYazi = document.getElementById('durumYazi');
+const tumunuBtn = document.getElementById('tumunu');
+function durum(yazi, sinif) { durumYazi.textContent = yazi; nokta.className = 'nokta ' + (sinif || ''); }
+
+const KURULUM = `
+import sys, io, os, base64, warnings
+warnings.filterwarnings('ignore')
+os.chdir('/home/pyodide')
+if '/home/pyodide' not in sys.path:
+    sys.path.insert(0, '/home/pyodide')
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+plt.rcParams.update({'figure.dpi': 100, 'axes.grid': False, 'font.size': 10})
+_SEKILLER = []
+def _goster(*a, **k):
+    for n in plt.get_fignums():
+        f = plt.figure(n)
+        b = io.BytesIO()
+        f.savefig(b, format='png', bbox_inches='tight')
+        _SEKILLER.append(base64.b64encode(b.getvalue()).decode())
+    plt.close('all')
+plt.show = _goster
+def _sekilleri_al():
+    _goster()
+    s = list(_SEKILLER)
+    _SEKILLER.clear()
+    return s
+_HTMLLER = []
+def html_goster(html, yukseklik=450):
+    """Bir HTML belgesini (folium haritası, plotly grafiği) hücre çıktısında gösterir."""
+    _HTMLLER.append((str(html), int(yukseklik)))
+def _htmlleri_al():
+    s = list(_HTMLLER)
+    _HTMLLER.clear()
+    return s
+def _dosyalar():
+    return sorted(f for f in os.listdir('.') if f.lower().endswith(('.csv', '.xlsx', '.txt', '.json', '.html')))
+`;
+
+async function baslat() {
+  try {
+    durum('Pyodide indiriliyor…');
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/pyodide/v0.27.7/full/pyodide.js';
+    await new Promise((ok, red) => { s.onload = ok; s.onerror = () => red(new Error('Pyodide betiği yüklenemedi')); document.head.appendChild(s); });
+    py = await loadPyodide();
+    durum('Temel paketler yükleniyor…');
+    await py.loadPackage(['numpy', 'pandas', 'matplotlib'], { messageCallback: () => {} });
+    py.FS.writeFile('/home/pyodide/ik_yardimci.py', document.getElementById('yardimciKod').textContent);
+    py.FS.writeFile('/home/pyodide/sns_yedek.py', document.getElementById('snsYedekKod').textContent);
+    await py.runPythonAsync(KURULUM);
+    durum('seaborn kuruluyor…');
+    await py.loadPackage('micropip', { messageCallback: () => {} });
+    try {
+      await py.runPythonAsync("import micropip\nawait micropip.install('seaborn')\nimport seaborn");
+    } catch (e) {
+      console.warn('seaborn kurulamadı, yedek kullanılacak', e);
+      py.runPython("import sys, sns_yedek\nsys.modules['seaborn'] = sns_yedek");
+    }
+    hazir = true; tumunuBtn.disabled = false;
+    durum('Python hazır', 'hazir');
+  } catch (e) {
+    console.error(e);
+    durum('Python yüklenemedi (internet bağlantısını kontrol edin)', 'hata');
+  }
+}
+
+function calistir(h) {
+  kuyruk = kuyruk.then(() => calistirIc(h));
+  return kuyruk;
+}
+
+async function calistirIc(h) {
+  const btn = h.querySelector('.calis'), cikti = h.querySelector('.cikti');
+  const kod = h.querySelector('textarea').value;
+  if (!hazir) {
+    cikti.className = 'cikti dolu';
+    cikti.innerHTML = '<pre>Python ortamı henüz hazır değil; lütfen üst çubuktaki gösterge yeşile dönene kadar bekleyin.</pre>';
+    return;
+  }
+  btn.disabled = true; btn.textContent = '⏳ Çalışıyor';
+  cikti.className = 'cikti dolu'; cikti.innerHTML = '<pre>Gerekli paketler yükleniyor…</pre>';
+  let metin = '';
+  const t0 = performance.now();
+  let hata = null;
+  try {
+    await py.loadPackagesFromImports(kod, { messageCallback: () => {}, errorCallback: m => console.warn(m) });
+    py.setStdout({ batched: s => { metin += s + '\n'; } });
+    py.setStderr({ batched: s => { metin += s + '\n'; } });
+    cikti.innerHTML = '<pre>Çalıştırılıyor…</pre>';
+    await py.runPythonAsync(kod);
+  } catch (e) {
+    hata = String(e.message || e);
+    const i = hata.lastIndexOf('File "<exec>"');
+    if (i > 0) hata = 'Traceback (son çağrılar):\n  ' + hata.slice(i);
+  }
+  let sekiller = [];
+  try { sekiller = py.runPython('_sekilleri_al()').toJs(); } catch (e) {}
+  cikti.innerHTML = '';
+  metin = metin.split('\n').filter(l => !/^(Loading|Loaded) [\w\-, .]+$|already loaded from default channel|^No new packages to load/.test(l)).join('\n');
+  if (metin.trim()) { const p = document.createElement('pre'); p.textContent = metin.replace(/\n+$/, ''); cikti.appendChild(p); }
+  if (hata) { const p = document.createElement('pre'); p.className = 'hatali'; p.textContent = hata; cikti.appendChild(p); }
+  sekiller.forEach((b, i) => { const img = new Image(); img.src = 'data:image/png;base64,' + b; img.alt = 'Grafik ' + (i + 1); cikti.appendChild(img); });
+  let htmller = [];
+  try { htmller = py.runPython('_htmlleri_al()').toJs(); } catch (e) {}
+  htmller.forEach(([icerik, yuk]) => {
+    const fr = document.createElement('iframe');
+    fr.setAttribute('sandbox', 'allow-scripts allow-popups');
+    fr.style.height = yuk + 'px'; fr.srcdoc = icerik; fr.loading = 'lazy';
+    cikti.appendChild(fr);
+  });
+  dosyaListesi(cikti);
+  const sure = document.createElement('div'); sure.className = 'sure';
+  sure.textContent = (hata ? '✗ Hata · ' : '✓ Tamamlandı · ') + ((performance.now() - t0) / 1000).toFixed(1) + ' sn';
+  cikti.appendChild(sure);
+  if (!cikti.childNodes.length) cikti.className = 'cikti';
+  btn.disabled = false; btn.textContent = '▶ Çalıştır';
+}
+
+function dosyaListesi(cikti) {
+  let liste = [];
+  try { liste = py.runPython('_dosyalar()').toJs(); } catch (e) { return; }
+  if (!liste.length) return;
+  const d = document.createElement('div'); d.className = 'dosyalar';
+  d.append('Çalışma klasöründeki dosyalar: ');
+  liste.forEach(ad => {
+    const b = document.createElement('button'); b.textContent = '⬇ ' + ad; b.title = ad + ' dosyasını indir';
+    b.onclick = () => {
+      const veri = py.FS.readFile('/home/pyodide/' + ad);
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([veri])); a.download = ad; a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    };
+    d.appendChild(b);
+  });
+  cikti.appendChild(d);
+}
+
+tumunuBtn.addEventListener('click', async () => {
+  tumunuBtn.disabled = true;
+  for (const h of hucreler) await calistir(h);
+  tumunuBtn.disabled = false;
+});
+
+document.getElementById('yukle').addEventListener('change', async e => {
+  if (!hazir) { alert('Python ortamı henüz hazır değil.'); e.target.value = ''; return; }
+  const adlar = [];
+  for (const f of e.target.files) {
+    py.FS.writeFile('/home/pyodide/' + f.name, new Uint8Array(await f.arrayBuffer()));
+    adlar.push(f.name);
+  }
+  e.target.value = '';
+  durum('Yüklendi: ' + adlar.join(', '), 'hazir');
+  setTimeout(() => durum('Python hazır', 'hazir'), 4000);
+});
+
+baslat();
+
+/* ===================== 3. İçindekiler ===================== */
+const toc = document.getElementById('toc');
+document.querySelectorAll('section.bolum').forEach(sec => {
+  const a = document.createElement('a'); a.href = '#' + sec.id; a.textContent = sec.dataset.baslik; a.dataset.hedef = sec.id; toc.appendChild(a);
+  sec.querySelectorAll('.blok h3').forEach(h3 => {
+    const blok = h3.closest('.blok');
+    const b = document.createElement('a'); b.href = '#' + blok.id; b.className = 'alt'; b.textContent = h3.textContent; b.dataset.hedef = blok.id; toc.appendChild(b);
+  });
+});
+const tocLinkler = [...toc.querySelectorAll('a')];
+const gozlem = new IntersectionObserver(girdiler => {
+  girdiler.forEach(g => {
+    if (g.isIntersecting) {
+      tocLinkler.forEach(a => a.classList.toggle('aktif', a.dataset.hedef === g.target.id));
+    }
+  });
+}, { rootMargin: '-90px 0px -70% 0px' });
+document.querySelectorAll('section.bolum, .blok').forEach(el => gozlem.observe(el));
+
+/* ===================== 4. Arama motoru ===================== */
+// Türkçe duyarlı, aksan-toleranslı normalleştirme (karakter sayısı korunur → vurgulama konumları tutar)
+const HARF = { 'ı': 'i', 'ş': 's', 'ğ': 'g', 'ü': 'u', 'ö': 'o', 'ç': 'c', 'â': 'a', 'î': 'i', 'û': 'u' };
+function norm(s) {
+  return [...s].map(c => { const k = c.toLocaleLowerCase('tr'); return k.length === 1 ? (HARF[k] || k) : c.toLowerCase(); }).join('');
+}
+// Dizin: her blok için başlık, bölüm adı, metin ve kod
+const dizin = [...document.querySelectorAll('.blok')].map(blok => {
+  const kopya = blok.cloneNode(true);
+  kopya.querySelectorAll('.hucre, .cikti, script').forEach(x => x.remove());
+  kopya.querySelectorAll('td, th, li, p, h3, h4').forEach(x => x.append(' '));
+  const metin = kopya.textContent.replace(/\s+/g, ' ').trim();
+  const kod = [...blok.querySelectorAll('textarea')].map(t => t.value).join('\n');
+  const bolum = blok.closest('section').dataset.baslik;
+  return { blok, id: blok.id, baslik: blok.dataset.baslik, bolum, metin, kod,
+           nBaslik: norm(blok.dataset.baslik), nMetin: norm(metin), nKod: norm(kod) };
+});
+
+const araKutu = document.getElementById('ara'), sonucKutu = document.getElementById('sonuclar');
+let filtre = 'tumu', secili = -1, sonGorunen = [];
+
+function escapeHtml(s) { return s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+
+function ozetle(kaynak, nKaynak, terimler) {
+  // ilk eşleşmenin çevresinden ~160 karakterlik parça, terimler vurgulu
+  let ilk = -1;
+  for (const t of terimler) { const i = nKaynak.indexOf(t); if (i >= 0 && (ilk < 0 || i < ilk)) ilk = i; }
+  if (ilk < 0) ilk = 0;
+  const bas = Math.max(0, ilk - 60), son = Math.min(kaynak.length, ilk + 120);
+  const parca = kaynak.slice(bas, son), nParca = nKaynak.slice(bas, son);
+  const isaret = new Array(parca.length).fill(false);
+  terimler.forEach(t => { let i = nParca.indexOf(t); while (i >= 0) { for (let k = i; k < i + t.length; k++) isaret[k] = true; i = nParca.indexOf(t, i + 1); } });
+  let html = '', acik = false;
+  for (let i = 0; i < parca.length; i++) {
+    if (isaret[i] && !acik) { html += '<mark>'; acik = true; }
+    if (!isaret[i] && acik) { html += '</mark>'; acik = false; }
+    html += escapeHtml(parca[i]);
+  }
+  if (acik) html += '</mark>';
+  return (bas > 0 ? '… ' : '') + html.replace(/\n/g, ' ') + (son < kaynak.length ? ' …' : '');
+}
+
+function ara(sorgu) {
+  const terimler = norm(sorgu).split(/\s+/).filter(t => t.length > 1 || /\d/.test(t));
+  if (!terimler.length) return [];
+  const sonuc = [];
+  for (const d of dizin) {
+    let puan = 0, metinde = true, kodda = true;
+    for (const t of terimler) {
+      const b = d.nBaslik.includes(t), m = d.nMetin.includes(t), k = d.nKod.includes(t);
+      if (!b && !m && !k) { puan = -1; break; }
+      if (b) puan += 10;
+      if (m) puan += 3 + Math.min(5, d.nMetin.split(t).length - 1);
+      if (k) puan += 2 + Math.min(3, d.nKod.split(t).length - 1);
+      metinde = metinde && (b || m); kodda = kodda && k;
+    }
+    if (puan < 0) continue;
+    if (filtre === 'metin' && !metinde) continue;
+    if (filtre === 'kod' && !kodda) continue;
+    const kodaGore = filtre === 'kod' || (!metinde && kodda);
+    sonuc.push({ d, puan, kodaGore, ozet: kodaGore ? ozetle(d.kod, d.nKod, terimler) : ozetle(d.metin, d.nMetin, terimler) });
+  }
+  return sonuc.sort((a, b) => b.puan - a.puan);
+}
+
+function sonuclariGoster() {
+  const q = araKutu.value.trim();
+  if (!q) { sonucKutu.classList.remove('acik'); temizleVurgu(); return; }
+  sonGorunen = ara(q); secili = sonGorunen.length ? 0 : -1;
+  let html = `<div class="sonuc-ust"><span>${sonGorunen.length} sonuç · “${escapeHtml(q)}”</span>
+    <span class="filtre">${['tumu:Tümü', 'metin:Metin', 'kod:Kod'].map(x => { const [k, e] = x.split(':'); return `<button data-f="${k}" class="${filtre === k ? 'aktif' : ''}">${e}</button>`; }).join('')}</span></div>`;
+  if (!sonGorunen.length) html += '<div class="sonuc"><span class="ozet">Eşleşme bulunamadı. Farklı ya da daha kısa bir terim deneyin (ör. “json”, “gunluk”, “bicim”).</span></div>';
+  sonGorunen.forEach((s, i) => {
+    html += `<div class="sonuc${i === secili ? ' secili' : ''}" data-i="${i}" role="option">
+      <span class="yol">${escapeHtml(s.d.bolum)}</span>
+      <b>${escapeHtml(s.d.baslik)}${s.kodaGore ? '<span class="etiket">kod</span>' : ''}</b>
+      <span class="ozet">${s.ozet}</span></div>`;
+  });
+  sonucKutu.innerHTML = html; sonucKutu.classList.add('acik');
+}
+
+function temizleVurgu() {
+  document.querySelectorAll('mark.ara').forEach(m => { const p = m.parentNode; p.replaceChild(document.createTextNode(m.textContent), m); p.normalize(); });
+}
+function vurgula(kok, terimler) {
+  const yuruyucu = document.createTreeWalker(kok, NodeFilter.SHOW_TEXT, {
+    acceptNode: n => n.parentElement.closest('textarea, script, .cikti, mark') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
+  const dugumler = []; while (yuruyucu.nextNode()) dugumler.push(yuruyucu.currentNode);
+  let ilk = null;
+  dugumler.forEach(n => {
+    const s = n.nodeValue, ns = norm(s);
+    const araliklar = [];
+    terimler.forEach(t => { let i = ns.indexOf(t); while (i >= 0) { araliklar.push([i, i + t.length]); i = ns.indexOf(t, i + t.length); } });
+    if (!araliklar.length) return;
+    araliklar.sort((a, b) => a[0] - b[0]);
+    const birlesik = [];
+    araliklar.forEach(r => { const son = birlesik[birlesik.length - 1]; if (son && r[0] <= son[1]) son[1] = Math.max(son[1], r[1]); else birlesik.push([...r]); });
+    const frag = document.createDocumentFragment(); let k = 0;
+    birlesik.forEach(([a, b]) => {
+      if (a > k) frag.appendChild(document.createTextNode(s.slice(k, a)));
+      const m = document.createElement('mark'); m.className = 'ara'; m.textContent = s.slice(a, b); frag.appendChild(m);
+      if (!ilk) ilk = m; k = b;
+    });
+    if (k < s.length) frag.appendChild(document.createTextNode(s.slice(k)));
+    n.parentNode.replaceChild(frag, n);
+  });
+  return ilk;
+}
+
+function git(i) {
+  const s = sonGorunen[i]; if (!s) return;
+  const terimler = norm(araKutu.value.trim()).split(/\s+/).filter(t => t.length > 1 || /\d/.test(t));
+  temizleVurgu();
+  const ilk = vurgula(s.d.blok, terimler);
+  const hedef = s.kodaGore ? (s.d.blok.querySelector('.hucre') || s.d.blok) : (ilk || s.d.blok);
+  hedef.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  const parlat = s.kodaGore ? hedef : s.d.blok;
+  parlat.classList.remove('flas'); void parlat.offsetWidth; parlat.classList.add('flas');
+  sonucKutu.classList.remove('acik');
+  history.replaceState(null, '', '#' + s.d.id);
+}
+
+let zamanlayici;
+araKutu.addEventListener('input', () => { clearTimeout(zamanlayici); zamanlayici = setTimeout(sonuclariGoster, 120); });
+araKutu.addEventListener('focus', () => { if (araKutu.value.trim()) sonuclariGoster(); });
+araKutu.addEventListener('keydown', e => {
+  const ogeler = sonucKutu.querySelectorAll('.sonuc[data-i]');
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault(); if (!ogeler.length) return;
+    secili = (secili + (e.key === 'ArrowDown' ? 1 : -1) + ogeler.length) % ogeler.length;
+    ogeler.forEach((o, i) => o.classList.toggle('secili', i === secili));
+    ogeler[secili].scrollIntoView({ block: 'nearest' });
+  } else if (e.key === 'Enter') { e.preventDefault(); git(Math.max(0, secili)); }
+  else if (e.key === 'Escape') { araKutu.value = ''; sonucKutu.classList.remove('acik'); temizleVurgu(); araKutu.blur(); }
+});
+sonucKutu.addEventListener('mousedown', e => {
+  const f = e.target.closest('button[data-f]');
+  if (f) { e.preventDefault(); filtre = f.dataset.f; sonuclariGoster(); return; }
+  const o = e.target.closest('.sonuc[data-i]'); if (o) { e.preventDefault(); git(+o.dataset.i); }
+});
+document.addEventListener('click', e => { if (!e.target.closest('.arama')) sonucKutu.classList.remove('acik'); });
+document.addEventListener('keydown', e => {
+  if (e.key === '/' && !e.target.closest('input, textarea')) { e.preventDefault(); araKutu.focus(); araKutu.select(); }
+});
+
+/* ===================== 5. Test ===================== */
+const SORULAR = [["Hangisi yapılandırılmış veriye örnektir?", ["Taranmış bir görüntü", "Bir JSON dosyası", "İlişkisel veritabanındaki bir tablo", "Bir video dosyası"], 2, "Satır–sütun düzeni ve sabit şema."], ["Yarı yapılandırılmış veri en iyi hangisiyle temsil edilir?", ["MP4 dosyaları", "XML ya da JSON biçimleri", "Düz metin belgeleri", "SQL tabloları"], 1, "Etiket ve anahtarlar vardır ama şema esnektir."], ["Hangisi bir veri seti örneği DEĞİLDİR?", ["CSV dosyasındaki hava durumu kayıtları", "Çalışan maaşları tablosu", "Bir romandaki tek paragraf", "Etiketli görsellerden oluşan koleksiyon"], 2, "Tek bir paragraf düzenli bir gözlem topluluğu değildir."], ["Yapılandırılmamış veri tipik olarak neleri içerir?", ["Veritabanı tabloları", "Elektronik tablolar", "CSV biçimindeki sensör kayıtları", "Sosyal medya gönderileri"], 3, "Ör. çalışan yorumları, çıkış mülakatı notları."], ["Veri ayrıştırmanın temel amacı nedir?", ["Veriyi bulutta saklamak", "Ham veriyi kullanılabilir bir yapıya çevirmek", "Veriyi görselleştirmek", "Veriyi şifrelemek"], 1, "Ör. PDKS günlüğünü tabloya çevirmek."], ["Python’da JSON ayrıştırmak için yaygın kullanılan modül hangisidir?", ["xml", "json", "csv", "sql"], 1, "json.load / json.loads"], ["Veri dönüştürme ne için kullanılır?", ["Dosyaları sıkıştırmak", "Veri biçimlerini ve değerlerini dönüştürmek", "Grafik üretmek", "Yedek almak"], 1, "Biçim, yapı ya da değer sistemini değiştirir."], ["Hangisi bir veri dönüştürme tekniğidir?", ["Normalleştirme", "Sıkıştırma", "Derleme", "Şifreleme"], 0, "Değerleri ortak bir aralığa taşır."], ["Yapılandırılmış tablo verisini saklamak için en uygun dosya biçimi hangisidir?", [".mp3", ".csv", ".png", ".json"], 1, "CSV düz metin tablodur."], ["Gerçek zamanlı veri toplamada en sık karşılaşılan sorun hangisidir?", ["Derleme hatası", "Yüksek gecikme ve eksik değerler", "Yüksek işlemci kullanımı", "Şifreleme hatası"], 1, "Ör. geç ulaşan kartlı geçiş olayları."], ["Hangisi gerçek zamanlı veriye örnektir?", ["Taranmış bir gazete", "Sosyal medya akışı güncellemeleri", "Arşivlenmiş bir hava durumu raporu", "Kaydedilmiş bir PDF raporu"], 1, "Üretildiği anda gelir."], ["Python’da HTML ayrıştırmak için yaygın kullanılan araç hangisidir?", ["pandas", "numpy", "BeautifulSoup", "matplotlib"], 2, "İş ilanı sayfasını ayrıştırma hücresinde kullanıldı."], ["Birden çok kategoride etiketli görsellerden oluşan bir veri seti neye örnektir?", ["Yapılandırılmamış veri", "Yarı yapılandırılmış veri", "Yapılandırılmış veri", "Durağan veri"], 0, "Görsellerin kendisi yapılandırılmamıştır."], ["Veri dönüştürme sırasında sık karşılaşılan sorun hangisidir?", ["İnternet hızının artması", "Hatalı eşleme nedeniyle veri kaybı", "Pil tükenmesi", "Yazılım lisansı"], 1, "Ör. yanlış eşlenen sütunlar ya da metne dönüşen tarihler."], ["Sayısal veriyi 0–1 gibi sabit bir aralığa ölçekleyen yöntem hangisidir?", ["Veri ayrıştırma", "Normalleştirme", "Belirteçleme", "Serileştirme"], 1, "Min-Max ölçekleme."], ["Model sınamak için kullanılan veri setine genellikle ne denir?", ["Eğitim verisi", "Üretim verisi", "Test verisi", "Ham veri"], 2, "Model bu veriyi eğitim sırasında görmez."], ["Bir metin dosyasındaki alanları ya da belirteçleri belirlemek hangi sürecin parçasıdır?", ["Veri modelleme", "Veri görselleştirme", "Veri ayrıştırma", "Veri saklama"], 2, "Sözcüksel çözümleme adımı."], ["Gerçek zamanlı sistemlerde veri tutarsızlığının nedeni hangisidir?", ["Düzenli güncellemeler", "Birden çok kaynaktan eş zamanlı veri girişi", "Veri şifreleme", "Veri sıkıştırma"], 1, "Kaynaklar arası zaman uyumsuzluğu çelişki yaratır."], ["Bir API veriyi tipik olarak hangi biçimde döndürür?", ["DOCX", "PDF", "JSON", "Yalnızca CSV"], 2, "XML de yaygındır."], ["Gerçek zamanlı veri ne anlama gelir?", ["Yedekte saklanan veri", "Yalnızca benzetimden gelen veri", "Anında toplanıp işlenen veri", "Tarihsel arşivlerden toplanan veri"], 2, "Üretildiği anda işlenir."]];
+const testAlani = document.getElementById('testAlani');
+SORULAR.forEach(([s, sec, dogru, aciklama], i) => {
+  const d = document.createElement('div'); d.className = 'soru'; d.dataset.dogru = dogru;
+  d.innerHTML = `<p>${i + 1}. ${s}</p>` + sec.map((x, j) =>
+    `<label><input type="radio" name="s${i}" value="${j}"> ${'abcd'[j]}) ${x}</label>`).join('') +
+    `<div class="aciklama">Doğru yanıt: <b>${'abcd'[dogru]}) ${sec[dogru]}</b> — ${aciklama}</div>`;
+  testAlani.appendChild(d);
+});
+document.getElementById('testKontrol').onclick = () => {
+  let p = 0;
+  testAlani.querySelectorAll('.soru').forEach((d, i) => {
+    const s = d.querySelector('input:checked');
+    const ok = s && +s.value === +d.dataset.dogru;
+    d.classList.toggle('dogru', !!ok); d.classList.toggle('yanlis', !ok);
+    if (ok) p++;
+  });
+  document.getElementById('puan').textContent = `Puanınız: ${p} / ${SORULAR.length}`;
+};
+document.getElementById('testSifirla').onclick = () => {
+  testAlani.querySelectorAll('.soru').forEach(d => d.classList.remove('dogru', 'yanlis'));
+  testAlani.querySelectorAll('input').forEach(x => x.checked = false);
+  document.getElementById('puan').textContent = '';
+};
+</script>
+</body>
+</html>

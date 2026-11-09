@@ -1,0 +1,1538 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bölüm 7 · Veri Görselleştirme — İK Verisiyle Etkileşimli Python</title>
+<style>
+:root{
+  --bg:#f6f7fb; --kart:#ffffff; --yazi:#1d2433; --soluk:#5b6476; --cizgi:#e3e6ee;
+  --ana:#1f5fbf; --ana2:#e8f0fc; --vurgu:#d9480f; --yesil:#2b8a3e; --kod:#0f1729; --kodyazi:#e6edf7;
+  --isaret:#ffe066;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:84px}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--yazi);line-height:1.65;font-size:16px}
+a{color:var(--ana)}
+/* Üst çubuk */
+header.ust{position:sticky;top:0;z-index:50;background:#14213d;color:#fff;box-shadow:0 2px 10px rgba(0,0,0,.15)}
+.ust-ic{max-width:1320px;margin:0 auto;padding:10px 18px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.logo{font-weight:700;font-size:15px;white-space:nowrap}
+.logo small{display:block;font-weight:400;opacity:.7;font-size:12px}
+.arama{position:relative;flex:1;min-width:240px;max-width:560px}
+.arama input{width:100%;padding:9px 12px 9px 36px;border-radius:8px;border:1px solid #3a4a6b;background:#1e2d50;color:#fff;font-size:15px;outline:none}
+.arama input:not(:placeholder-shown)~.kbd{display:none}
+.arama input:focus{border-color:#8fb3ff;background:#22355f}
+.arama input::placeholder{color:#a9b6d3}
+.arama svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);opacity:.75}
+.kbd{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;border:1px solid #5a6a8b;border-radius:4px;padding:0 5px;color:#c4cee4}
+#sonuclar{position:absolute;top:calc(100% + 6px);left:0;right:0;background:#fff;color:var(--yazi);border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,.25);max-height:70vh;overflow:auto;display:none}
+#sonuclar.acik{display:block}
+.sonuc-ust{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid var(--cizgi);font-size:13px;color:var(--soluk);gap:8px;flex-wrap:wrap}
+.filtre button{border:1px solid var(--cizgi);background:#fff;border-radius:999px;padding:2px 10px;font-size:12px;cursor:pointer;margin-left:4px}
+.filtre button.aktif{background:var(--ana);color:#fff;border-color:var(--ana)}
+.sonuc{padding:9px 12px;border-bottom:1px solid #f0f2f6;cursor:pointer}
+.sonuc:hover,.sonuc.secili{background:var(--ana2)}
+.sonuc b{display:block;font-size:14px}
+.sonuc .yol{font-size:11px;color:var(--soluk);text-transform:uppercase;letter-spacing:.03em}
+.sonuc .ozet{font-size:13px;color:var(--soluk)}
+.sonuc .etiket{font-size:10px;background:#eef1f7;border-radius:4px;padding:1px 6px;margin-left:6px;color:#44506a;vertical-align:middle}
+.sonuc mark,.icerik mark.ara{background:var(--isaret);color:inherit;padding:0 1px;border-radius:2px}
+.durum{display:flex;align-items:center;gap:8px;font-size:13px;white-space:nowrap}
+.nokta{width:10px;height:10px;border-radius:50%;background:#f0ad4e;box-shadow:0 0 0 3px rgba(240,173,78,.25)}
+.nokta.hazir{background:#40c057;box-shadow:0 0 0 3px rgba(64,192,87,.25)}
+.nokta.hata{background:#fa5252}
+.dugme{border:0;border-radius:8px;padding:8px 13px;font-size:14px;cursor:pointer;background:var(--ana);color:#fff;font-weight:600}
+.dugme:hover{filter:brightness(1.08)}
+.dugme:disabled{opacity:.5;cursor:not-allowed}
+.dugme.ikincil{background:#e9edf5;color:#22304d}
+.ust .dugme.ikincil{background:#2b3c63;color:#fff}
+label.dugme input{display:none}
+/* Yerleşim */
+.duzen{max-width:1320px;margin:0 auto;display:grid;grid-template-columns:270px 1fr;gap:26px;padding:22px 18px 80px}
+nav.icindekiler{position:sticky;top:84px;align-self:start;max-height:calc(100vh - 100px);overflow:auto;font-size:14px;background:var(--kart);border:1px solid var(--cizgi);border-radius:12px;padding:14px 10px}
+nav.icindekiler h4{margin:0 8px 8px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--soluk)}
+nav.icindekiler a{display:block;padding:4px 8px;border-radius:6px;text-decoration:none;color:var(--yazi)}
+nav.icindekiler a.alt{padding-left:22px;font-size:13px;color:var(--soluk)}
+nav.icindekiler a:hover,nav.icindekiler a.aktif{background:var(--ana2);color:var(--ana)}
+main.icerik{min-width:0}
+.kapak{background:linear-gradient(135deg,#14213d,#1f5fbf);color:#fff;border-radius:16px;padding:30px 30px 26px;margin-bottom:22px}
+.kapak h1{margin:0 0 6px;font-size:30px;line-height:1.25}
+.kapak p{margin:6px 0 0;opacity:.92;max-width:820px}
+.rozetler{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.rozet{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);padding:3px 10px;border-radius:999px;font-size:12.5px}
+section.bolum{background:var(--kart);border:1px solid var(--cizgi);border-radius:14px;padding:22px 28px;margin-bottom:22px}
+section.bolum>h2{margin:0 0 10px;font-size:24px;color:#14213d;border-bottom:2px solid var(--ana2);padding-bottom:8px}
+.blok h3{font-size:19px;margin:24px 0 8px;color:#1b3a73}
+.blok h4{font-size:16px;margin:16px 0 6px}
+.blok.flas{animation:flas 1.6s ease}
+@keyframes flas{0%{box-shadow:0 0 0 4px rgba(255,224,102,.95);background:#fffbe6}100%{box-shadow:0 0 0 0 rgba(255,224,102,0);background:transparent}}
+.not{background:#f1f6ff;border-left:4px solid var(--ana);padding:10px 14px;border-radius:0 8px 8px 0;margin:12px 0;font-size:15px}
+.not.uyari{background:#fff6ec;border-color:var(--vurgu)}
+.not.ipucu{background:#effaf1;border-color:var(--yesil)}
+table.tablo{border-collapse:collapse;width:100%;margin:12px 0;font-size:14.5px}
+table.tablo th,table.tablo td{border:1px solid var(--cizgi);padding:7px 10px;text-align:left;vertical-align:top}
+table.tablo th{background:#f3f5fa}
+.formul{font-family:"Cambria Math","Times New Roman",serif;background:#fafbfe;border:1px dashed var(--cizgi);padding:6px 12px;border-radius:6px;display:inline-block;margin:4px 0}
+/* Kod hücresi */
+.hucre{border:1px solid #c9d3e6;border-radius:12px;overflow:hidden;margin:16px 0 10px;background:var(--kod)}
+.hucre.flas{animation:flas 1.6s ease}
+.hucre-ust{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#1b2540;color:#c8d3ea;font-size:13px;flex-wrap:wrap}
+.hucre-ust .ad{font-weight:600;margin-right:auto}
+.hucre-ust .ad span{opacity:.6;font-weight:400;margin-left:6px}
+.hucre-ust button{border:0;border-radius:6px;padding:5px 10px;font-size:12.5px;cursor:pointer;background:#2e3c62;color:#e6ecf8}
+.hucre-ust button.calis{background:#2f9e44;color:#fff;font-weight:600}
+.hucre-ust button:disabled{opacity:.5;cursor:wait}
+textarea.kod{display:block;width:100%;border:0;resize:vertical;background:var(--kod);color:var(--kodyazi);font:13.5px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;padding:12px 14px;outline:none;tab-size:4;white-space:pre;overflow:auto;min-height:120px}
+.cikti{background:#fff;border-top:1px solid #c9d3e6;display:none}
+.cikti.dolu{display:block}
+.cikti pre{margin:0;padding:12px 14px;font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;white-space:pre;overflow:auto;max-height:520px;color:#1d2433}
+.cikti pre.hatali{color:#c92a2a;background:#fff5f5}
+.cikti iframe{display:block;width:calc(100% - 16px);margin:8px auto;border:1px solid var(--cizgi);border-radius:6px;background:#fff}
+.cikti img{display:block;max-width:100%;margin:8px auto;border:1px solid var(--cizgi);border-radius:6px}
+.cikti .sure{font-size:11.5px;color:var(--soluk);padding:4px 14px 8px}
+.dosyalar{padding:4px 14px 10px;font-size:12.5px;color:var(--soluk)}
+.dosyalar button{border:1px solid var(--cizgi);background:#f6f8fc;border-radius:6px;padding:2px 8px;margin:2px;font-size:12px;cursor:pointer}
+.dene{font-size:14px;color:var(--soluk);margin:4px 0 14px}
+.dene b{color:var(--yazi)}
+/* Test */
+.soru{border:1px solid var(--cizgi);border-radius:10px;padding:12px 16px;margin:10px 0}
+.soru p{margin:0 0 6px;font-weight:600}
+.soru label{display:block;padding:3px 6px;border-radius:6px;cursor:pointer;font-size:15px}
+.soru label:hover{background:#f4f6fa}
+.soru.dogru{border-color:#8ce99a;background:#f4fcf5}
+.soru.yanlis{border-color:#ffa8a8;background:#fff6f6}
+.soru .aciklama{display:none;font-size:14px;color:var(--soluk);margin-top:6px}
+.soru.dogru .aciklama,.soru.yanlis .aciklama{display:block}
+#puan{font-weight:700;margin-left:10px}
+ol.sorular li,ol.alistirma li{margin:4px 0}
+footer{text-align:center;color:var(--soluk);font-size:13px;padding:20px}
+@media (max-width:960px){.duzen{grid-template-columns:1fr}nav.icindekiler{position:static;max-height:none}.kbd{display:none}}
+
+.ust-nav{color:#c9d6f2;text-decoration:none;font-size:13px;border:1px solid #3a4a6b;border-radius:8px;padding:6px 10px;white-space:nowrap}
+.ust-nav:hover{background:#22355f;color:#fff}
+.bolum-gezinti{display:flex;justify-content:space-between;gap:12px;margin:0 0 22px;flex-wrap:wrap}
+.bolum-gezinti a{flex:1;min-width:220px;background:#fff;border:1px solid #e3e6ee;border-radius:12px;padding:12px 16px;text-decoration:none;color:#1d2433}
+.bolum-gezinti a:hover{border-color:#1f5fbf;background:#f4f8ff}
+.bolum-gezinti small{display:block;color:#5b6476;font-size:12px}
+.bolum-gezinti .sonraki{text-align:right}
+</style>
+</head>
+<body>
+
+<header class="ust">
+  <div class="ust-ic">
+    <a class="ust-nav" href="index.html" title="Tüm bölümler">⌂ Tüm bölümler</a>
+    <div class="logo">Bölüm 7 · Veri Görselleştirme<small>İK verisiyle etkileşimli Python (Pyodide)</small></div>
+    <div class="arama">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="ara" type="search" autocomplete="off" placeholder="Bölümde ara: ARIMA, ısı haritası, folium, merkezilik, treemap…" aria-label="Bölüm içinde ara">
+      <span class="kbd">/</span>
+      <div id="sonuclar" role="listbox"></div>
+    </div>
+    <div class="durum"><span id="nokta" class="nokta"></span><span id="durumYazi">Python yükleniyor…</span></div>
+    <button id="tumunu" class="dugme" disabled>▶ Tümünü çalıştır</button>
+    <label class="dugme ikincil" title="Kendi CSV/XLSX dosyanızı Python çalışma klasörüne yükleyin">⬆ Veri yükle<input id="yukle" type="file" multiple accept=".csv,.xlsx,.txt,.json"></label>
+  </div>
+</header>
+
+<div class="duzen">
+<nav class="icindekiler" id="toc"><h4>İçindekiler</h4></nav>
+
+<main class="icerik" id="icerik">
+<div class="kapak">
+  <h1>Veri Görselleştirme</h1>
+  <p>Ham İK verisini; çubuk, çizgi, ısı haritası, harita, ağ ve ağaç grafikleriyle karar vericilerin hızla anlayabileceği görsellere dönüştürmek. Kitaptaki tüm örnekler başvuru sayıları, şube devir oranları, çalışan ilişkileri, organizasyon şeması ve işten ayrılma verilerine uyarlanmıştır.</p>
+  <div class="rozetler">
+    <span class="rozet">12 çalıştırılabilir kod hücresi</span>
+    <span class="rozet">matplotlib · seaborn · statsmodels · folium · networkx · plotly</span>
+    <span class="rozet">Kurulum gerektirmez — tarayıcıda çalışır</span>
+  </div>
+</div>
+
+<section class="bolum" id="giris" data-baslik="Giriş">
+<h2>Giriş</h2>
+<div class="blok" id="b-gv" data-baslik="Veri görselleştirme nedir, neden önemlidir?">
+<p><b>Veri görselleştirme</b>, ham veriyi grafik, harita ve panolar gibi yorumlanabilir biçimlere dönüştürme sürecidir. Sayı tablolarında gözden kaçabilecek eğilimleri, ilişkileri ve aykırı değerleri görünür kılar; istatistik bilgisi sınırlı paydaşların da içgörüye erişmesini sağlar.</p>
+<p>Görselleştirmenin üç temel yararı vardır: <b>karmaşıklığı sadeleştirmek</b> (binlerce satırlık İKBS kaydını tek bakışta okunur kılmak), <b>karar almayı hızlandırmak</b> (örneğin artan işten ayrılmaya erken müdahale etmek) ve <b>iletişimi güçlendirmek</b> (yönetim kuruluna, sendikaya ya da çalışanlara bulguları anlaşılır biçimde sunmak). İyi tasarlanmış bir görsel, veriye dayalı bir hikâye anlatır.</p>
+</div>
+<div class="blok" id="b-yapi" data-baslik="Bölümün yapısı ve amaçları">
+<h3>Bölümün yapısı ve amaçları</h3>
+<p>Bölüm; <a href="#ilkeler">görselleştirme ilkeleri</a>, <a href="#ozellik">özellik seçimi</a>, <a href="#zaman">zaman serisi analizi</a>, <a href="#cografi">coğrafi veri analizi</a>, <a href="#korelasyon">korelasyonlar ve bağlantılar</a>, <a href="#ag">ağlar ve hiyerarşiler</a> ile <a href="#etkilesim">etkileşim</a> başlıklarından oluşur. Bölüm sonunda farklı veri türlerine uygun görseli seçebilir, etkileşimli grafikler kurabilir ve analiz sonuçlarını görsel hikâyeleştirmeyle aktarabilirsiniz.</p>
+<div class="not ipucu"><b>Nasıl kullanılır?</b> Sağ üstteki gösterge yeşile döndüğünde hücreleri <b>▶ Çalıştır</b> ya da <b>Ctrl/⌘ + Enter</b> ile çalıştırın. Zaman serisi hücreleri birbirinin devamıdır; sırayla çalıştırın. Harita ve Plotly grafikleri ilk çalıştırmada internetten ek paket indirir. Arama kutusuna <b>/</b> tuşuyla geçebilirsiniz.</div>
+<div class="not uyari"><b>Veri hakkında:</b> Tüm İK verileri öğretim amaçlı, sabit tohumla üretilmiş sentetik verilerdir; kişi adları uydurmadır. Şube koordinatları il merkezlerinin yaklaşık konumlarıdır.</div>
+</div>
+</section>
+
+<section class="bolum" id="ilkeler" data-baslik="1. Görselleştirme ilkeleri">
+<h2>1. Veri görselleştirmenin ilkeleri</h2>
+<div class="blok" id="b-ilke" data-baslik="Beş temel ilke: açıklık, doğruluk, ilgililik, tutarlılık, etkileşim">
+<ul>
+<li><b>Açıklık:</b> Görsel sade ve sezgisel olmalı; izleyici ana mesajı kafa karışıklığı yaşamadan kavramalıdır. Fazla renk, etiket ya da süsleme içgörüyü gölgeler.</li>
+<li><b>Doğruluk:</b> Yanıltıcı görseller gerçeği çarpıtır. Uygun ölçek ve grafik türü kullanılmalı; eksen aralığıyla oynamak ya da tutarsız aralıklar eğilimleri olduğundan büyük veya küçük gösterir.</li>
+<li><b>İlgililik:</b> Yalnızca mesaj için gerekli veri gösterilmeli; ilgisiz metrikler görsel kalabalık yaratır.</li>
+<li><b>Tutarlılık:</b> Renkler, yazı tipleri, açıklamalar ve semboller tüm grafiklerde aynı kalmalıdır (ör. BT departmanı her grafikte yeşil). Böylece izleyici her grafikte yeniden yön bulmak zorunda kalmaz.</li>
+<li><b>Etkileşim:</b> Süzgeç, ipucu kutusu (tooltip), ayrıntıya inme (drill-down) gibi özellikler kullanıcının veriyi kendi sorusuna göre keşfetmesini sağlar.</li>
+</ul>
+</div>
+<div class="blok" id="b-turler" data-baslik="Görselleştirme türleri: temel grafikler, ileri görseller, panolar">
+<h3>Görselleştirme türleri</h3>
+<table class="tablo">
+<tr><th>Tür</th><th>Ne zaman?</th><th>İK örneği</th></tr>
+<tr><td>Çubuk grafik</td><td>Kategorileri karşılaştırmak</td><td>Departman başına çalışan sayısı</td></tr>
+<tr><td>Çizgi grafik</td><td>Zaman içindeki eğilim</td><td>Aylık işten ayrılma oranı</td></tr>
+<tr><td>Pasta grafik</td><td>Az sayıda, belirgin farklı paylar</td><td>Beyaz yaka / mavi yaka oranı</td></tr>
+<tr><td>Saçılım grafiği</td><td>İki sürekli değişken arasındaki ilişki</td><td>Kıdem – maaş</td></tr>
+<tr><td>Koroplet harita</td><td>Bölgelere göre renk yoğunluğu</td><td>İllere göre devir oranı</td></tr>
+<tr><td>Kutu grafiği</td><td>Dağılım ve aykırı değerler</td><td>Departmanlara göre maaş dağılımı</td></tr>
+<tr><td>Isı haritası</td><td>Matris biçiminde değer yoğunluğu</td><td>Korelasyon matrisi; gün × saat devamsızlık</td></tr>
+<tr><td>Ağ grafiği</td><td>Varlıklar arası ilişkiler</td><td>Çalışanlar arası iletişim ağı</td></tr>
+<tr><td>Etkileşimli pano</td><td>Kullanıcı odaklı keşif</td><td>Power BI / Tableau / Plotly Dash İK panosu</td></tr>
+</table>
+</div>
+<div class="blok" id="b-araclar" data-baslik="Görselleştirme araçları: Python kütüphaneleri, BI, coğrafi ve web araçları">
+<h3>Görselleştirme araçları</h3>
+<ul>
+<li><b>Python kütüphaneleri:</b> <i>Matplotlib</i> (temel ve tam denetimli çizim), <i>Seaborn</i> (Matplotlib üzerine istatistiksel grafikler: ısı haritası, keman, pairplot), <i>Plotly</i> (üzerine gelme, yakınlaştırma destekli web tabanlı etkileşimli grafikler, 3B ve haritalar), <i>Bokeh</i> (büyük ve akan verilerle etkileşimli web grafikleri).</li>
+<li><b>İş zekâsı (BI) araçları:</b> <i>Tableau</i> (kod yazmadan sürükle-bırak panolar, tahmin ve eğilim analizi), <i>Power BI</i> (Excel ve SQL Server ile bütünleşik, kurumsal ortamlarda yaygın).</li>
+<li><b>Coğrafi araçlar:</b> <i>GeoPandas</i> (pandas'a geometri ve koordinat sistemi desteği), <i>Folium</i> (Leaflet.js tabanlı etkileşimli haritalar, işaretçiler ve koroplet), <i>Google Maps API</i> (geokodlama, rota, uzaklık).</li>
+<li><b>Web çerçeveleri:</b> <i>D3.js</i> (HTML/SVG/CSS ile her ögeyi denetleyen özgün görseller; JavaScript bilgisi gerektirir), <i>Highcharts</i> (kolay bütünleşen, erişilebilirlik destekli ticari grafik kütüphanesi).</li>
+</ul>
+</div>
+<div class="blok" id="b-kod-ilke" data-baslik="Kod: İlkeleri uygulamak — yanıltıcı eksen ve pasta mı çubuk mu?">
+<h3>Uygulama: İlkeleri uygulamak</h3>
+<p>İlk çift grafik <b>doğruluk</b> ilkesini gösterir: İki şubenin memnuniyet ortalamaları arasındaki 0,16 puanlık fark, eksen 3,9'dan başlatılınca dev bir uçurum gibi görünür. İkinci çift, aynı departman dağılımını pasta ve sıralı çubuk grafikle karşılaştırır (bölüm sonu alıştırması 1). Renk sözlüğü (<code>RENK</code>) <b>tutarlılık</b> ilkesini uygular.</p>
+<div class="hucre" id="h-ilkeler">
+<div class="hucre-ust"><span class="ad">🐍 Görselleştirme ilkeleri: doğru ve yanıltıcı grafikler<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="40" aria-label="Görselleştirme ilkeleri: doğru ve yanıltıcı grafikler kodu">import numpy as np
+import matplotlib.pyplot as plt
+
+# Tutarlılık ilkesi: her departman tüm grafiklerde aynı renkte
+RENK = {'Satış': '#4C72B0', 'Üretim': '#DD8452', 'BT': '#55A868',
+        'Finans': '#C44E52', 'İK': '#8172B3'}
+
+# --- 1) Doğruluk ilkesi: kesik eksen farkı abartır ---
+subeler = ['İstanbul', 'Ankara']
+memnuniyet = [3.92, 4.08]          # 5'li ölçek ortalamaları
+fig, eksen = plt.subplots(1, 2, figsize=(10, 4))
+eksen[0].bar(subeler, memnuniyet, color=['#4C72B0', '#DD8452'])
+eksen[0].set_ylim(3.9, 4.1)
+eksen[0].set_title('YANILTICI: eksen 3,9\'dan başlıyor')
+eksen[1].bar(subeler, memnuniyet, color=['#4C72B0', '#DD8452'])
+eksen[1].set_ylim(0, 5)
+eksen[1].set_title('DOĞRU: eksen sıfırdan başlıyor')
+for e in eksen:
+    e.set_ylabel('Memnuniyet (1–5)')
+plt.suptitle('Aynı veri, iki farklı izlenim')
+plt.tight_layout()
+plt.show()
+
+# --- 2) Açıklık ilkesi: çubuk grafik mi, pasta grafik mi? ---
+departman = list(RENK)
+kisi = [118, 104, 96, 41, 22]
+fig, eksen = plt.subplots(1, 2, figsize=(11, 4.5))
+eksen[0].pie(kisi, labels=departman, colors=[RENK[d] for d in departman],
+             autopct='%1.0f%%', startangle=90)
+eksen[0].set_title('Pasta: yakın dilimleri ayırt etmek zor')
+sira = np.argsort(kisi)
+eksen[1].barh([departman[i] for i in sira], [kisi[i] for i in sira],
+              color=[RENK[departman[i]] for i in sira])
+for i, k in enumerate(sorted(kisi)):
+    eksen[1].text(k + 2, i, str(k), va='center')
+eksen[1].set_title('Çubuk: sıralama ve fark hemen okunuyor')
+eksen[1].set_xlabel('Çalışan sayısı')
+for kenar in ['top', 'right']:          # gereksiz süslemeyi kaldır (ilgililik)
+    eksen[1].spines[kenar].set_visible(False)
+plt.tight_layout()
+plt.show()
+
+print("Toplam çalışan:", sum(kisi))
+print("Satış ile Üretim arasındaki fark:", kisi[0] - kisi[1], "kişi — pasta grafikte bu fark neredeyse görünmez.")
+</textarea>
+<div class="cikti"></div>
+</div>
+</div>
+</section>
+
+<section class="bolum" id="ozellik" data-baslik="2. Özellik seçimi">
+<h2>2. Özellik seçimi</h2>
+<div class="blok" id="b-oz" data-baslik="Özellik (değişken) seçimi nedir?">
+<p><b>Özellik seçimi</b>, bir veri setindeki değişkenlerden tahmin modelinin başarısına en çok katkı yapanları belirleyip seçme tekniğidir. Boyutu azaltarak hesaplama maliyetini düşürür, gürültülü ya da gereksiz değişkenleri ayıklayarak aşırı öğrenme (overfitting) riskini azaltır ve modeli yorumlanabilir kılar.</p>
+<ul>
+<li><b>Filtre yöntemleri:</b> Değişkenleri modelden bağımsız bir ölçüte göre sıralar (ör. korelasyon, ki-kare).</li>
+<li><b>Sarmalayıcı (wrapper) yöntemler:</b> Değişken alt kümelerini modeli tekrar tekrar eğiterek dener (ör. özyinelemeli değişken eleme, RFE).</li>
+<li><b>Gömülü (embedded) yöntemler:</b> Seçim, model eğitimi sırasında gerçekleşir (ör. regresyon katsayıları, ağaç tabanlı önem değerleri).</li>
+</ul>
+</div>
+<div class="blok" id="b-kod-oz" data-baslik="Kod: Rastgele orman ve SelectFromModel ile işten ayrılmanın belirleyicileri">
+<h3>Uygulama: İşten ayrılmanın belirleyicileri</h3>
+<p>Kitaptaki Iris veri seti yerine 600 çalışanlık bir işten ayrılma veri seti kullanılıyor. Sekiz aday değişkenden yalnızca dördü (memnuniyet, fazla mesai, ücretin piyasaya oranı, kıdem) ayrılmayı gerçekten etkileyecek biçimde üretildi; yaş, eğitim saati, işe uzaklık ve çocuk sayısı gürültüdür. <code>RandomForestClassifier</code> değişken önemlerini hesaplar; <code>SelectFromModel(threshold='median')</code> önemi medyanın üzerindeki değişkenleri tutar. Son satırlar, seçimin model başarısını (AUC) ne kadar etkilediğini çapraz doğrulamayla gösterir.</p>
+<div class="hucre" id="h-ozellik">
+<div class="hucre-ust"><span class="ad">🐍 Özellik seçimi: işten ayrılma modeli<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="40" aria-label="Özellik seçimi: işten ayrılma modeli kodu">import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.feature_selection import SelectFromModel
+from sklearn.model_selection import cross_val_score
+
+# 600 çalışanlık sentetik işten ayrılma (attrition) veri seti
+np.random.seed(42)
+n = 600
+X = pd.DataFrame({
+    'Memnuniyet':     np.random.normal(3.4, 0.8, n).clip(1, 5).round(1),
+    'Fazla_Mesai':    np.random.gamma(2, 6, n).round(),          # aylık saat
+    'Ucret_Orani':    np.random.normal(1.0, 0.12, n).round(2),   # maaş / piyasa medyanı (compa-ratio)
+    'Kidem':          np.random.exponential(5, n).round(1),       # yıl
+    'Yas':            np.random.randint(22, 60, n),
+    'Egitim_Saati':   np.random.randint(0, 80, n),
+    'Uzaklik_km':     np.random.gamma(2, 8, n).round(1),
+    'Cocuk_Sayisi':   np.random.poisson(1.1, n),
+})
+logit = (-1.0 - 1.3 * (X.Memnuniyet - 3.4) + 0.08 * (X.Fazla_Mesai - 12)
+         - 6 * (X.Ucret_Orani - 1) - 0.12 * (X.Kidem - 5))
+y = np.random.binomial(1, 1 / (1 + np.exp(-logit)))
+print(f"Çalışan sayısı: {n} | Ayrılma oranı: %{100 * y.mean():.1f}")
+
+# Rastgele orman modeli
+model = RandomForestClassifier(n_estimators=100, random_state=42)
+model.fit(X, y)
+
+onem = pd.Series(model.feature_importances_, index=X.columns).sort_values()
+plt.figure(figsize=(8, 5))
+plt.barh(onem.index, onem.values, color='skyblue')
+plt.title('Seçimden Önce Değişken Önemleri')
+plt.xlabel('Önem (ortalama safsızlık azalışı)')
+plt.show()
+
+# SelectFromModel: önemi medyanın üstünde olanları tut
+secici = SelectFromModel(model, threshold='median', prefit=True)
+X_secili = secici.transform(X.values)
+secilenler = X.columns[secici.get_support()]
+print("Seçilen değişkenler:", list(secilenler))
+
+secili_onem = onem[secilenler].sort_values()
+plt.figure(figsize=(6, 4))
+plt.barh(secili_onem.index, secili_onem.values, color='lightgreen')
+plt.title('Seçilen Değişkenlerin Önemleri')
+plt.xlabel('Önem')
+plt.show()
+
+# Seçim modeli kötüleştirdi mi? 5 katlı çapraz doğrulama ile karşılaştır
+tum = cross_val_score(RandomForestClassifier(n_estimators=100, random_state=42), X, y, cv=5, scoring='roc_auc')
+sec = cross_val_score(RandomForestClassifier(n_estimators=100, random_state=42), X[secilenler], y, cv=5, scoring='roc_auc')
+print(f"AUC — tüm değişkenler ({X.shape[1]}): {tum.mean():.3f}")
+print(f"AUC — seçilen değişkenler ({len(secilenler)}): {sec.mean():.3f}")
+</textarea>
+<div class="cikti"></div>
+</div>
+<div class="not"><b>Yorum:</b> Model, gerçek belirleyicileri doğru biçimde ayıklar; yarı sayıda değişkenle AUC neredeyse aynı kalır. Daha az değişkenli model, yöneticilere anlatılması ve veri toplaması daha kolay bir modeldir. Ağaç tabanlı önem değerlerinin çok kategorili ya da sürekli değişkenleri kayırabileceğini unutmayın; önemli kararlar öncesinde permütasyon önemi ile de doğrulayın.</div>
+</div>
+</section>
+
+<section class="bolum" id="zaman" data-baslik="3. Zaman serisi analizi">
+<h2>3. Zaman serisi analizi</h2>
+<div class="blok" id="b-zs" data-baslik="Zaman serisi nedir? Temel özellikler">
+<p><b>Zaman serisi</b>, ardışık ve eşit aralıklı zaman noktalarında toplanan veridir (saatlik, günlük, aylık, yıllık). Zaman serisi analizi; eğilimleri, örüntüleri ve mevsimsel etkileri belirlemek ve geleceği tahmin etmek için kullanılır. İK'da aylık başvuru sayısı, işten ayrılma oranı, fazla mesai saatleri ve devamsızlık günleri tipik zaman serileridir.</p>
+<ul>
+<li><b>Zamansal sıra:</b> Gözlemlerin kronolojik sırası önemlidir; satırların yeri değiştirilemez.</li>
+<li><b>Zamana bağımlılık:</b> Bugünkü değer çoğu zaman geçmiş değerlerden etkilenir.</li>
+<li><b>Durağanlık:</b> Ortalama, varyans ve otokorelasyonun zaman içinde sabit kalmasıdır. Pek çok model durağanlık varsayar; durağan olmayan seriler fark alma ya da eğilimden arındırma ile dönüştürülür.</li>
+</ul>
+</div>
+<div class="blok" id="b-bilesen" data-baslik="Zaman serisinin bileşenleri ve analiz adımları">
+<h3>Bileşenler ve analiz adımları</h3>
+<table class="tablo">
+<tr><th>Bileşen</th><th>Tanım</th><th>İK örneği</th></tr>
+<tr><td>Eğilim (trend)</td><td>Uzun dönemli artış ya da azalış</td><td>Şirket büyüdükçe başvuruların yıllar içinde artması</td></tr>
+<tr><td>Mevsimsellik</td><td>Sabit aralıkla tekrarlanan düzenli örüntü</td><td>Haziran–Temmuz mezuniyet zirvesi, Aralık düşüşü</td></tr>
+<tr><td>Döngüsel örüntü</td><td>Sabit sıklıkta olmayan uzun dalgalanmalar</td><td>Ekonomik kriz dönemlerinde işe alımın durması</td></tr>
+<tr><td>Düzensiz bileşen (gürültü)</td><td>Eğilim ve mevsimsellik çıkarıldıktan sonra kalan rastlantısal kısım</td><td>Tek seferlik bir ilan kampanyasının etkisi</td></tr>
+</table>
+<ol>
+<li><b>Görselleştirme:</b> Seriyi çizerek eğilim, mevsimsellik ve anomalileri görmek.</li>
+<li><b>Düzleştirme:</b> Hareketli ortalama ya da üstel düzleştirme ile gürültüyü azaltmak.</li>
+<li><b>Durağanlık testi:</b> Genişletilmiş Dickey-Fuller (ADF) testi.</li>
+<li><b>Ayrıştırma:</b> Toplamsal ya da çarpımsal modelle eğilim, mevsimsel ve artık bileşenlere ayırmak.</li>
+<li><b>Modelleme:</b> ARIMA (mevsimsel olmayan seriler), SARIMA (mevsimsel ARIMA), Holt-Winters üstel düzleştirme (eğilim + mevsimsellik), makine öğrenmesi modelleri (Random Forest, XGBoost, LSTM).</li>
+<li><b>Tahmin:</b> Doğrulanan modelle gelecek değerleri öngörmek.</li>
+</ol>
+</div>
+<div class="blok" id="b-kod-zs1" data-baslik="Kod: Aylık iş başvurusu serisi ve çarpımsal ayrıştırma">
+<h3>Uygulama 1: Veri, grafik ve ayrıştırma</h3>
+<p>Kitaptaki havayolu yolcu verisi yerine 2014–2025 arasındaki 144 aylık iş başvurusu sayısı kullanılıyor. Seri büyüyen bir eğilim ile mezuniyet dönemine bağlı güçlü bir mevsimsellik taşıyor. Mevsimsel dalgalanmanın genliği eğilimle birlikte büyüdüğü için <b>çarpımsal</b> ayrıştırma seçildi.</p>
+<div class="hucre" id="h-zs_veri">
+<div class="hucre-ust"><span class="ad">🐍 Zaman serisi: veri ve ayrıştırma<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="37" aria-label="Zaman serisi: veri ve ayrıştırma kodu">import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from statsmodels.tsa.seasonal import seasonal_decompose
+
+# 2014–2025 arası aylık iş başvurusu sayısı (144 ay)
+# Çarpımsal yapı: büyüyen eğilim × mevsimsellik (mezuniyet dönemi zirvesi) × gürültü
+np.random.seed(3)
+tarih = pd.date_range('2014-01-01', periods=144, freq='MS')
+t = np.arange(144)
+egilim = 220 * np.exp(0.009 * t)
+mevsim = np.array([0.95, 0.92, 0.98, 1.00, 1.05, 1.22, 1.30, 1.15, 1.02, 0.95, 0.80, 0.66])[tarih.month - 1]
+basvuru = (egilim * mevsim * np.random.lognormal(0, 0.04, 144)).round()
+df = pd.DataFrame({'Basvuru': basvuru}, index=tarih)
+df.index.name = 'Ay'
+df.to_csv('aylik_basvuru.csv')
+print(df.head())
+print("...")
+print(df.tail(3))
+
+# Özgün seriyi çiz
+plt.figure(figsize=(10, 4))
+plt.plot(df, label='Aylık başvuru')
+plt.title('Aylık İş Başvurusu Sayısı')
+plt.xlabel('Tarih')
+plt.ylabel('Başvuru sayısı')
+plt.legend()
+plt.show()
+
+# Seriyi bileşenlerine ayır (çarpımsal model)
+ayrisim = seasonal_decompose(df['Basvuru'], model='multiplicative')
+ayrisim.plot().set_size_inches(10, 7)
+plt.tight_layout()
+plt.show()
+print("Mevsimsel katsayılar (Ocak → Aralık):")
+print(ayrisim.seasonal[:12].round(3).values)
+</textarea>
+<div class="cikti"></div>
+</div>
+</div>
+<div class="blok" id="b-kod-zs2" data-baslik="Kod: ADF durağanlık testi, fark alma ve hareketli ortalama">
+<h3>Uygulama 2: Durağanlık testi ve fark alma</h3>
+<p><b>ADF istatistiği</b> büyük bir negatif değer aldığında ve <b>p &lt; 0,05</b> olduğunda seri durağandır. Durağan değilse <b>fark alma</b> (her değerden bir önceki değeri çıkarmak) seriyi zaman içinde dengeli hâle getirir. Hücre ayrıca 12 aylık hareketli ortalamayla eğilimi görünür kılar (bölüm sonu alıştırması 4).</p>
+<div class="hucre" id="h-zs_duragan">
+<div class="hucre-ust"><span class="ad">🐍 Zaman serisi: ADF testi ve fark alma<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="32" aria-label="Zaman serisi: ADF testi ve fark alma kodu">import matplotlib.pyplot as plt
+from statsmodels.tsa.stattools import adfuller
+
+if 'df' not in globals() or 'Basvuru' not in df:
+    raise NameError("Önce 'Zaman serisi: veri ve ayrıştırma' hücresini çalıştırın.")
+
+# Durağanlık testi (Genişletilmiş Dickey-Fuller)
+sonuc = adfuller(df['Basvuru'])
+print("ADF istatistiği:", round(sonuc[0], 4))
+print("p-değeri       :", round(sonuc[1], 4))
+print("Seri durağan." if sonuc[1] &lt; 0.05 else "Seri durağan DEĞİL.")
+
+# Gerekirse fark alma
+df_fark = df.diff().dropna()
+sonuc2 = adfuller(df_fark['Basvuru'])
+print(f"\nBirinci farktan sonra: ADF = {sonuc2[0]:.4f}, p = {sonuc2[1]:.4f}")
+
+plt.figure(figsize=(10, 4))
+plt.plot(df_fark, label='Farkı alınmış seri', color='tab:purple')
+plt.axhline(0, color='grey', lw=.8)
+plt.title('Farkı Alınmış Zaman Serisi')
+plt.legend()
+plt.show()
+
+# Hareketli ortalama ile düzleştirme (alıştırma 4)
+plt.figure(figsize=(10, 4))
+plt.plot(df['Basvuru'], alpha=.45, label='Özgün seri')
+plt.plot(df['Basvuru'].rolling(12, center=True).mean(), lw=2.5, label='12 aylık hareketli ortalama')
+plt.title('Hareketli Ortalama ile Eğilimin Görünür Kılınması')
+plt.legend()
+plt.show()
+</textarea>
+<div class="cikti"></div>
+</div>
+</div>
+<div class="blok" id="b-kod-zs3" data-baslik="Kod: ARIMA(1,1,1) modeli, tanılama ve 12 aylık tahmin">
+<h3>Uygulama 3: ARIMA modeli ve tahmin</h3>
+<p><b>ARIMA(p, d, q)</b> modelinde <i>p</i> otoregresif terim (serinin gecikmeleri), <i>d</i> fark alma sayısı, <i>q</i> gecikmeli tahmin hatası sayısıdır. Model özeti katsayıları ve bilgi ölçütlerini (AIC, BIC) verir; tanılama grafikleri artıkların normalliğini ve otokorelasyonunu gösterir.</p>
+<div class="hucre" id="h-zs_arima">
+<div class="hucre-ust"><span class="ad">🐍 Zaman serisi: ARIMA ve tahmin<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="27" aria-label="Zaman serisi: ARIMA ve tahmin kodu">import pandas as pd
+import matplotlib.pyplot as plt
+from statsmodels.tsa.arima.model import ARIMA
+
+if 'df' not in globals() or 'Basvuru' not in df:
+    raise NameError("Önce 'Zaman serisi: veri ve ayrıştırma' hücresini çalıştırın.")
+
+# ARIMA(p, d, q) modeli
+model = ARIMA(df['Basvuru'], order=(1, 1, 1))
+model_fit = model.fit()
+print(model_fit.summary())
+
+# Tanılama grafikleri: artıkların normalliği ve otokorelasyonu
+model_fit.plot_diagnostics(figsize=(10, 7))
+plt.tight_layout()
+plt.show()
+
+# Önümüzdeki 12 ay için tahmin
+tahmin = model_fit.forecast(steps=12)
+tahmin_index = pd.date_range(start=df.index[-1], periods=13, freq='MS')[1:]
+plt.figure(figsize=(10, 4))
+plt.plot(df['Basvuru'], label='Özgün seri')
+plt.plot(tahmin_index, tahmin, label='ARIMA(1,1,1) tahmini', color='red')
+plt.title('Önümüzdeki 12 Ay İçin Başvuru Tahmini')
+plt.legend()
+plt.show()
+</textarea>
+<div class="cikti"></div>
+</div>
+<div class="not uyari"><b>Dikkat:</b> ARIMA(1,1,1) mevsimselliği modellemez; bu yüzden tahmin düz bir çizgiye yakınsar. Mevsimsel İK serileri (başvuru, işe alım, işten ayrılma) için SARIMA ya da Holt-Winters gibi mevsimsel modeller gerekir — bir sonraki hücre bunu gösterir.</div>
+</div>
+<div class="blok" id="b-kod-zs4" data-baslik="Kod: Holt-Winters ile mevsimsel tahmin ve ARIMA karşılaştırması">
+<h3>Uygulama 4: Mevsimselliği yakalayan tahmin (ek)</h3>
+<p>Kitapta adı geçen <b>Holt-Winters üstel düzleştirme</b> eğilimi ve mevsimselliği birlikte modeller. Son 12 ay modelden saklanıp iki yöntemin ortalama mutlak yüzde hatası (MAPE) karşılaştırılıyor; ardından 2026 için aylık başvuru tahmini üretiliyor. Bu tahmin, işe alım ekibinin kapasite planlamasında kullanılabilir.</p>
+<div class="hucre" id="h-zs_sarima">
+<div class="hucre-ust"><span class="ad">🐍 Zaman serisi: Holt-Winters tahmini<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="29" aria-label="Zaman serisi: Holt-Winters tahmini kodu">import pandas as pd
+import matplotlib.pyplot as plt
+from statsmodels.tsa.holtwinters import ExponentialSmoothing
+
+if 'df' not in globals() or 'Basvuru' not in df:
+    raise NameError("Önce 'Zaman serisi: veri ve ayrıştırma' hücresini çalıştırın.")
+
+# Mevsimselliği hesaba katan Holt-Winters üstel düzleştirme
+hw = ExponentialSmoothing(df['Basvuru'], trend='add', seasonal='mul', seasonal_periods=12).fit()
+hw_tahmin = hw.forecast(12)
+
+# Son 12 ayı dışarıda bırakarak iki modelin hatasını karşılaştır
+egitim, test = df['Basvuru'][:-12], df['Basvuru'][-12:]
+from statsmodels.tsa.arima.model import ARIMA
+a = ARIMA(egitim, order=(1, 1, 1)).fit().forecast(12)
+h = ExponentialSmoothing(egitim, trend='add', seasonal='mul', seasonal_periods=12).fit().forecast(12)
+ortalama_mutlak_yuzde = lambda g, t: (abs(g - t) / g).mean() * 100
+print(f"Son 12 ay için MAPE — ARIMA(1,1,1): %{ortalama_mutlak_yuzde(test.values, a.values):.1f}")
+print(f"Son 12 ay için MAPE — Holt-Winters : %{ortalama_mutlak_yuzde(test.values, h.values):.1f}")
+
+plt.figure(figsize=(10, 4))
+plt.plot(df['Basvuru']['2021':], label='Özgün seri')
+plt.plot(hw_tahmin.index, hw_tahmin, color='green', label='Holt-Winters tahmini')
+plt.title('Mevsimselliği Yakalayan Tahmin (2026)')
+plt.legend()
+plt.show()
+print("\n2026 aylık başvuru tahmini:")
+print(hw_tahmin.round().astype(int).to_string())
+</textarea>
+<div class="cikti"></div>
+</div>
+</div>
+<div class="blok" id="b-zs-uyg" data-baslik="Zaman serisi analizinin uygulama alanları">
+<h3>Uygulama alanları</h3>
+<p>Finans (hisse fiyatı, faiz), sağlık (yaşamsal bulguların izlenmesi), hava ve iklim tahmini, satış ve pazarlama (talep tahmini), operasyon yönetimi (stok, kapasite planlama). İK'da ise işgücü planlama, işe alım talebi tahmini, işten ayrılma erken uyarısı, fazla mesai ve devamsızlık eğilimlerinin izlenmesi öne çıkar.</p>
+</div>
+</section>
+
+<section class="bolum" id="cografi" data-baslik="4. Coğrafi veri analizi">
+<h2>4. Coğrafi (konuma dayalı) veri analizi</h2>
+<div class="blok" id="b-geo" data-baslik="Coğrafi analiz nedir? Temel kavramlar ve araçlar">
+<p><b>Coğrafi analiz</b> (mekânsal ya da konuma dayalı analiz), coğrafi bileşeni olan veriyi toplama, analiz etme ve yorumlama sürecidir. Veriyi yeryüzündeki konumlara eşleyerek dağılımdaki örüntüleri inceler ve karar almaya “nerede?” boyutunu ekler.</p>
+<ul>
+<li><b>Konum belirleme (geolocation):</b> GPS koordinatı (enlem, boylam), IP, Wi-Fi ya da mobil ağ verisiyle fiziksel konumu belirlemek.</li>
+<li><b>Mekânsal veri:</b> <i>Nokta</i> (şube, fabrika), <i>çizgi</i> (servis güzergâhı), <i>çokgen</i> (il, ilçe sınırı).</li>
+<li><b>Coğrafi bilgi sistemi (CBS/GIS):</b> Mekânsal veriyi toplayan, saklayan, işleyen ve sunan sistem.</li>
+<li><b>Araçlar:</b> GeoPandas, Folium, Shapely, PyProj, Plotly; Google Maps API, OpenStreetMap; QGIS (açık kaynak), ArcGIS (ticari).</li>
+</ul>
+<p><b>Adımlar:</b> (1) konum verisini toplamak, (2) temizlemek ve adresleri koordinata çevirmek (geokodlama), (3) haritalamak (koroplet, ısı haritası), (4) mekânsal analiz (yakınlık, kümeleme, tampon bölge, rota), (5) karar: yeni şube yeri, hizmet verilemeyen bölgeler.</p>
+</div>
+<div class="blok" id="b-kod-geo" data-baslik="Kod: Folium ile şube haritası — çalışan sayısı ve devir oranı">
+<h3>Uygulama: Şubelere göre devir oranı haritası</h3>
+<p>Kitaptaki deprem verisi yerine 16 ildeki şubenin çalışan sayısı ve yıllık işgücü devir oranı haritalanıyor. Daire büyüklüğü çalışan sayısını, renk devir oranını gösterir: <span style="color:#2b8a3e">●</span> %12'nin altı, <span style="color:#f08c00">●</span> %12–20, <span style="color:#c92a2a">●</span> %20 ve üstü. Dairelere tıklayınca açılır pencere ayrıntıları gösterir; harita yakınlaştırılabilir.</p>
+<div class="hucre" id="h-harita">
+<div class="hucre-ust"><span class="ad">🐍 Folium: şube haritası<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="40" aria-label="Folium: şube haritası kodu">import pandas as pd
+try:
+    import micropip
+    await micropip.install('folium')
+    import folium
+except Exception:
+    folium = None
+
+# Şubelere göre çalışan sayısı ve yıllık işgücü devir oranı (%)
+subeler = pd.DataFrame({
+    'Sube': ['İstanbul', 'Ankara', 'İzmir', 'Bursa', 'Kocaeli', 'Sakarya', 'Antalya', 'Konya',
+             'Kayseri', 'Gaziantep', 'Adana', 'Samsun', 'Trabzon', 'Erzurum', 'Diyarbakır', 'Eskişehir'],
+    'Enlem':  [41.01, 39.93, 38.42, 40.19, 40.77, 40.78, 36.89, 37.87, 38.73, 37.07, 37.00, 41.29, 41.00, 39.90, 37.91, 39.78],
+    'Boylam': [28.98, 32.86, 27.14, 29.06, 29.94, 30.40, 30.71, 32.48, 35.49, 37.38, 35.32, 36.33, 39.72, 41.27, 40.24, 30.52],
+    'Calisan': [820, 410, 365, 290, 240, 175, 160, 150, 120, 140, 130, 85, 70, 55, 65, 95],
+    'Devir_Orani': [18.5, 12.1, 14.3, 21.7, 24.2, 19.8, 27.5, 10.4, 9.8, 16.2, 15.1, 11.0, 8.7, 13.5, 12.9, 10.2],
+})
+print(subeler[['Sube', 'Enlem', 'Boylam', 'Calisan', 'Devir_Orani']].head())
+
+def renk(oran):
+    return '#2b8a3e' if oran &lt; 12 else ('#f08c00' if oran &lt; 20 else '#c92a2a')
+
+if folium is not None:
+    # Altlık: Esri World Street Map. OpenStreetMap'in kendi karo sunucusu, kaynak adresi
+    # göndermeyen gömülü ya da yerel (file://) sayfalardan gelen istekleri engellediği için
+    # anahtar gerektirmeyen Esri karoları kullanılıyor.
+    m = folium.Map(location=[39.0, 35.0], zoom_start=6,
+                   tiles='https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+                   attr='Tiles &amp;copy; Esri — Kaynak: Esri, HERE, Garmin, OpenStreetMap katkıcıları')
+    for _, s in subeler.iterrows():
+        folium.CircleMarker(
+            location=[s['Enlem'], s['Boylam']],
+            radius=(s['Calisan'] ** 0.5) / 1.4,            # çalışan sayısı → daire büyüklüğü
+            popup=f"&lt;b&gt;{s['Sube']}&lt;/b&gt;&lt;br&gt;Çalışan: {s['Calisan']}&lt;br&gt;Devir oranı: %{s['Devir_Orani']}",
+            tooltip=s['Sube'],
+            color=renk(s['Devir_Orani']), fill=True, fill_opacity=0.65,
+        ).add_to(m)
+    m.save('sube_haritasi.html')
+    print("Harita 'sube_haritasi.html' olarak kaydedildi (aşağıda etkileşimli olarak gösteriliyor).")
+    html_goster(m.get_root().render(), yukseklik=480)
+else:
+    import matplotlib.pyplot as plt
+    print("folium yüklenemedi; harita yerine koordinat grafiği çiziliyor.")
+    plt.figure(figsize=(9, 5))
+    plt.scatter(subeler.Boylam, subeler.Enlem, s=subeler.Calisan, c=subeler.Devir_Orani.map(renk), alpha=.65)
+    for _, s in subeler.iterrows():
+        plt.annotate(s.Sube, (s.Boylam, s.Enlem), fontsize=8, ha='center', va='bottom')
+    plt.xlabel('Boylam'); plt.ylabel('Enlem'); plt.title('Şubeler: büyüklük = çalışan, renk = devir oranı')
+    plt.show()
+
+agirlikli = (subeler.Calisan * subeler.Devir_Orani).sum() / subeler.Calisan.sum()
+print(f"\nŞirket geneli (çalışan ağırlıklı) devir oranı: %{agirlikli:.1f}")
+print("Devir oranı %20'nin üstündeki şubeler:", ', '.join(subeler.loc[subeler.Devir_Orani &gt;= 20, 'Sube']))
+</textarea>
+<div class="cikti"></div>
+</div>
+<div class="not"><b>Yorum:</b> Sanayi yoğun Marmara illeri (Bursa, Kocaeli) ve turizm ağırlıklı Antalya'daki yüksek devir oranı, bölgesel işgücü piyasası rekabeti ve mevsimsel istihdamla açıklanabilir. Harita, bölgesel ücret politikasına ya da elde tutma programlarına öncelik vermek için başlangıç noktasıdır.</div>
+</div>
+<div class="blok" id="b-geo-uyg" data-baslik="Coğrafi analizin uygulama alanları">
+<h3>Uygulama alanları</h3>
+<p>Kentsel planlama, sağlık (salgın sıcak noktaları), perakende (konuma göre mağaza performansı), lojistik (rota optimizasyonu), çevre izleme ve acil durum yönetimi. İK'da: aday havuzunun bölgesel dağılımı, yeni tesis için işgücü erişilebilirliği, servis güzergâhı planlama, bölgesel ücret farklılaştırması ve uzaktan çalışanların coğrafi dağılımı.</p>
+</div>
+</section>
+
+<section class="bolum" id="korelasyon" data-baslik="5. Korelasyonlar ve bağlantılar">
+<h2>5. Korelasyonlar ve bağlantılar</h2>
+<div class="blok" id="b-kor" data-baslik="Korelasyon türleri ve önemi">
+<p><b>Korelasyon</b>, iki değişken arasındaki istatistiksel ilişkiyi ölçer; korelasyon katsayısı −1 ile +1 arasında değişir (+1 kusursuz pozitif, 0 doğrusal ilişki yok, −1 kusursuz negatif). En yaygın ölçü <b>Pearson</b>'dır; sıralamaya dayalı <b>Spearman</b> ve <b>Kendall tau</b> aykırı değerlere ve doğrusal olmayan tekdüze ilişkilere karşı daha dayanıklıdır.</p>
+<table class="tablo">
+<tr><th>Tür</th><th>Açıklama</th><th>İK örneği</th></tr>
+<tr><td>Pozitif</td><td>İki değişken aynı yönde hareket eder</td><td>Kıdem ↑, maaş ↑</td></tr>
+<tr><td>Negatif</td><td>Biri artarken diğeri azalır</td><td>Memnuniyet ↑, devamsızlık ↓</td></tr>
+<tr><td>Sıfır</td><td>Doğrusal ilişki yok</td><td>Ayakkabı numarası ve performans</td></tr>
+<tr><td>Doğrusal olmayan (eğrisel)</td><td>İlişki yön değiştirir</td><td>İş yükü ve performans (ters U: orta düzeyde en yüksek)</td></tr>
+</table>
+<p><b>Neden önemli?</b> Anlamlı ilişkileri ortaya koyar; makine öğrenmesinde birbirine çok bağlı değişkenlerden biri çıkarılabilir; regresyon ve tahmine temel oluşturur; beklenmedik korelasyonlar veri hatasına ya da yeni bir içgörüye işaret edebilir.</p>
+</div>
+<div class="blok" id="b-kod-kor" data-baslik="Kod: Saçılım matrisi, korelasyon ısı haritası ve çizgi grafik">
+<h3>Uygulama: Saçılım matrisi, ısı haritası ve çizgi grafik</h3>
+<p><code>sns.pairplot()</code> tüm değişken çiftlerinin saçılım grafiklerini, köşegende ise dağılımları gösterir. <code>df.corr()</code> Pearson korelasyon matrisini hesaplar; <code>sns.heatmap(annot=True, cmap='coolwarm')</code> değerleri hücrelere yazar ve maviden kırmızıya yön ve gücü renklendirir. Kitaptaki çizgi grafikte yaş, gelir ve harcama aynı eksene çizildiği için yaş çizgisi görünmez hâldeydi; burada değişkenler 0–1 aralığına ölçeklenerek <b>doğruluk</b> ilkesi uygulandı.</p>
+<div class="hucre" id="h-korelasyon">
+<div class="hucre-ust"><span class="ad">🐍 Korelasyon: pairplot, ısı haritası, çizgi grafik<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="40" aria-label="Korelasyon: pairplot, ısı haritası, çizgi grafik kodu">import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# 40 çalışanlık örnek veri
+np.random.seed(11)
+n = 40
+yas = np.random.randint(22, 60, n)
+kidem = np.clip(yas - 22 - np.random.randint(0, 12, n), 0, None)
+maas = (28000 + 1700 * kidem + np.random.normal(0, 6000, n)).round(-2)
+memnuniyet = np.clip(3.2 + 0.02 * kidem + np.random.normal(0, 0.6, n), 1, 5).round(1)
+devamsizlik = np.clip(9 - 1.6 * memnuniyet + np.random.normal(0, 1.5, n), 0, None).round()
+df_k = pd.DataFrame({'Yas': yas, 'Kidem': kidem, 'Maas': maas,
+                     'Memnuniyet': memnuniyet, 'Devamsizlik': devamsizlik})
+
+# ----- 1. Saçılım grafiği matrisi -----
+sns.pairplot(df_k, height=1.8, plot_kws={'s': 18})
+plt.suptitle("Saçılım Grafiği Matrisi", y=1.02)
+plt.show()
+
+# ----- 2. Korelasyon ısı haritası -----
+korelasyon = df_k.corr()
+plt.figure(figsize=(6.5, 5))
+sns.heatmap(korelasyon, annot=True, fmt='.2f', cmap='coolwarm', vmin=-1, vmax=1)
+plt.title("Korelasyon Isı Haritası (Pearson)")
+plt.show()
+
+# ----- 3. Değişkenlerin seyri (yaşa göre sıralı, 0–1 aralığına ölçeklenmiş) -----
+sirali = df_k.sort_values('Yas').reset_index(drop=True)
+olcekli = (sirali - sirali.min()) / (sirali.max() - sirali.min())   # farklı birimleri karşılaştırılabilir yap
+plt.figure(figsize=(9, 4.5))
+for sutun, isaret in zip(['Kidem', 'Maas', 'Memnuniyet', 'Devamsizlik'], 'os^*'):
+    plt.plot(olcekli.index, olcekli[sutun], marker=isaret, ms=4, label=sutun)
+plt.title("Yaşa Göre Sıralı Çalışanlarda Değişkenlerin Seyri (0–1 ölçekli)")
+plt.xlabel("Çalışan (yaşa göre sıralı)")
+plt.ylabel("Ölçeklenmiş değer")
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+# Üç korelasyon ölçüsünün karşılaştırması
+print(pd.DataFrame({y: [df_k['Kidem'].corr(df_k['Maas'], method=y),
+                        df_k['Memnuniyet'].corr(df_k['Devamsizlik'], method=y)]
+                    for y in ['pearson', 'spearman', 'kendall']},
+                   index=['Kıdem–Maaş', 'Memnuniyet–Devamsızlık']).round(3))
+</textarea>
+<div class="cikti"></div>
+</div>
+</div>
+<div class="blok" id="b-baglanti" data-baslik="Bağlantılar: nedensel, ağ, birliktelik ve hiyerarşik ilişkiler">
+<h3>Bağlantılar</h3>
+<p>Korelasyon doğrusal ilişkiyi gösterirken <b>bağlantılar</b> daha geniş ve karmaşık ilişkileri kapsar:</p>
+<ul>
+<li><b>Nedensel bağlantılar:</b> Esnek çalışma uygulaması → devamsızlıkta azalma.</li>
+<li><b>Ağ bağlantıları:</b> Çalışanlar arası iletişim ve işbirliği örüntüleri.</li>
+<li><b>Birliktelik kuralları:</b> “Liderlik eğitimi alanlar İletişim eğitimini de alıyor.”</li>
+<li><b>Hiyerarşik ya da mekânsal bağlantılar:</b> Ekip → birim → direktörlük; ilçe → il → bölge.</li>
+</ul>
+<p>Bu ilişkiler çizge kuramı, kümeleme/birliktelik madenciliği ya da Granger nedenselliği ve yapısal eşitlik modellemesi (YEM/SEM) gibi nedensel çıkarım teknikleri gerektirir.</p>
+<div class="not uyari"><b>Önemli notlar:</b> Korelasyon ≠ nedensellik — birlikte hareket eden iki değişkenden biri diğerine neden olmayabilir. Aykırı değerler korelasyonu çarpıtabilir. Doğrusal olmayan ilişkiler başka yöntemler gerektirir.</div>
+</div>
+</section>
+
+<section class="bolum" id="ag" data-baslik="6. Ağlar ve hiyerarşiler">
+<h2>6. Ağlar ve hiyerarşiler</h2>
+<div class="blok" id="b-ag" data-baslik="Ağ nedir? Temel ağ özellikleri ve araçlar">
+<p><b>Ağ</b>, birbirine bağlı varlıklardan oluşan bir sistemdir: varlıklar <b>düğüm</b>, ilişkiler <b>kenar</b> olarak gösterilir. Sosyal ağlar, internet, biyolojik etkileşim ağları ve atıf ağları tipik örneklerdir. İK'da <b>örgütsel ağ analizi (ONA)</b>, resmî organizasyon şemasının görmediği gerçek işbirliği ve bilgi akışını ortaya çıkarır.</p>
+<ul>
+<li><b>Yönlü / yönsüz:</b> İlişki tek yönlü mü (mentor → mentee) iki yönlü mü (birlikte proje)?</li>
+<li><b>Ağırlıklı kenarlar:</b> Bazı ilişkiler daha güçlüdür (aylık 12 toplantı vs. 2 toplantı).</li>
+<li><b>Derece merkeziliği:</b> Bir düğümün bağlantı sayısı.</li>
+<li><b>Arasındalık merkeziliği:</b> Bir düğümün diğerleri arasındaki en kısa yollar üzerinde ne sıklıkla bulunduğu — “köprü” kişileri gösterir.</li>
+<li><b>Kümelenme / topluluklar:</b> Birbirine sıkı bağlı alt gruplar.</li>
+<li><b>Yol uzunluğu:</b> Bir düğümden diğerine kaç adımda ulaşılır.</li>
+</ul>
+<p><b>Araçlar:</b> NetworkX (Python), Gephi (görsel arayüzlü ağ görselleştirme), Neo4j (çizge veritabanı). Ağlar; salgın yayılımı, tedarik zinciri, sosyal etki, siber güvenlik ve yapay zekâ gibi alanlarda merkezi etkileyicileri, darboğazları ve sıkı toplulukları görmeyi sağlar.</p>
+</div>
+<div class="blok" id="b-kod-ag" data-baslik="Kod: NetworkX ile örgütsel iletişim ağı (ONA), merkezilik ve topluluklar">
+<h3>Uygulama: Örgütsel iletişim ağı</h3>
+<p>20 çalışan ve aralarındaki aylık ortak toplantı/yazışma sayıları bir ağ olarak modelleniyor (bölüm sonu alıştırması 9). Hücre derece ve arasındalık merkeziliğini hesaplar, toplulukları bulur, iki çalışan arasındaki en kısa yolu gösterir ve ağı departman renkleriyle çizer.</p>
+<div class="hucre" id="h-ag">
+<div class="hucre-ust"><span class="ad">🐍 NetworkX: örgütsel ağ analizi<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="40" aria-label="NetworkX: örgütsel ağ analizi kodu">import networkx as nx
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Örgütsel ağ analizi (ONA): kim kiminle düzenli çalışıyor?
+# Kenar ağırlığı = aylık ortak toplantı / yazışma sayısı
+calisanlar = {
+    'Ayşe': 'Satış', 'Mehmet': 'Satış', 'Zeynep': 'Satış', 'Can': 'Satış', 'Elif': 'Satış',
+    'Burak': 'BT', 'Selin': 'BT', 'Emre': 'BT', 'Deniz': 'BT', 'Gizem': 'BT',
+    'Okan': 'Finans', 'Seda': 'Finans', 'Kerem': 'Finans', 'Ebru': 'Finans',
+    'Hakan': 'İK', 'Nur': 'İK', 'Tolga': 'Üretim', 'Pınar': 'Üretim', 'Serkan': 'Üretim', 'Derya': 'Üretim',
+}
+iliskiler = [
+    ('Ayşe', 'Mehmet', 12), ('Ayşe', 'Zeynep', 9), ('Mehmet', 'Can', 7), ('Zeynep', 'Elif', 8), ('Can', 'Elif', 5),
+    ('Burak', 'Selin', 14), ('Burak', 'Emre', 10), ('Selin', 'Deniz', 6), ('Emre', 'Gizem', 9), ('Deniz', 'Gizem', 7),
+    ('Okan', 'Seda', 11), ('Seda', 'Kerem', 8), ('Kerem', 'Ebru', 6), ('Okan', 'Ebru', 5),
+    ('Tolga', 'Pınar', 10), ('Pınar', 'Serkan', 8), ('Serkan', 'Derya', 9), ('Tolga', 'Derya', 4),
+    ('Hakan', 'Nur', 13),
+    # departmanlar arası köprüler
+    ('Hakan', 'Ayşe', 4), ('Hakan', 'Burak', 3), ('Hakan', 'Okan', 5), ('Hakan', 'Tolga', 4),
+    ('Nur', 'Seda', 2), ('Selin', 'Mehmet', 3), ('Kerem', 'Pınar', 2),
+]
+G = nx.Graph()
+for kisi, dep in calisanlar.items():
+    G.add_node(kisi, departman=dep)
+G.add_weighted_edges_from(iliskiler)
+
+print(f"Düğüm (çalışan): {G.number_of_nodes()} | Kenar (ilişki): {G.number_of_edges()} | Yoğunluk: {nx.density(G):.3f}")
+
+olcu = pd.DataFrame({
+    'Departman': nx.get_node_attributes(G, 'departman'),
+    'Derece': dict(G.degree()),
+    'Derece_Merkeziligi': nx.degree_centrality(G),
+    'Arasindalik': nx.betweenness_centrality(G),
+}).sort_values('Arasindalik', ascending=False).round(3)
+print("\nEn yüksek arasındalık merkeziliği (bilgi akışındaki köprüler):")
+print(olcu.head(6).to_string())
+
+topluluklar = nx.community.greedy_modularity_communities(G, weight='weight')
+print("\nBulunan topluluklar:")
+for i, t in enumerate(topluluklar, 1):
+    print(f"  Topluluk {i}: {', '.join(sorted(t))}")
+
+print("\nOkan → Derya en kısa yol:", ' → '.join(nx.shortest_path(G, 'Okan', 'Derya')))
+
+renkler = {'Satış': '#4C72B0', 'BT': '#55A868', 'Finans': '#C44E52', 'İK': '#8172B3', 'Üretim': '#DD8452'}
+konum = nx.spring_layout(G, seed=7, weight='weight')
+plt.figure(figsize=(10, 7))
+nx.draw_networkx_edges(G, konum, width=[G[u][v]['weight'] / 3 for u, v in G.edges()], alpha=.45)
+nx.draw_networkx_nodes(G, konum, node_color=[renkler[G.nodes[k]['departman']] for k in G],
+                       node_size=[300 + 4000 * olcu.loc[k, 'Arasindalik'] for k in G])
+nx.draw_networkx_labels(G, konum, font_size=9)
+for dep, r in renkler.items():
+    plt.scatter([], [], c=r, label=dep)
+plt.legend(title='Departman', loc='lower left')
+plt.title('Örgütsel İletişim Ağı (düğüm büyüklüğü = arasındalık merkeziliği)')
+plt.axis('off')
+plt.show()
+</textarea>
+<div class="cikti"></div>
+</div>
+<div class="not"><b>Yorum:</b> İK'dan Hakan, departmanları birbirine bağlayan tek köprüdür (arasındalık en yüksek). Bu kişinin ayrılması departmanlar arası bilgi akışını keser — bu bir <b>kilit kişi riski</b>dir. Çözüm: yedekleme planı ve departmanlar arası doğrudan bağları güçlendiren ortak projeler.</div>
+</div>
+<div class="blok" id="b-hiy" data-baslik="Hiyerarşi nedir? Özellikleri, araçları ve ağlarla farkı">
+<h3>Hiyerarşiler</h3>
+<p><b>Hiyerarşi</b>, varlıkların her biri bir üstündekine bağlı düzeyler hâlinde sıralandığı yapılandırılmış bir düzendir: organizasyon şeması (genel müdür → direktörler → müdürler → çalışanlar), canlıların sınıflandırması, dosya sistemi, karar ağaçları.</p>
+<ul>
+<li><b>Ağaç yapısı:</b> Tek kök, aşağı doğru dallanma.</li>
+<li><b>Ebeveyn–çocuk ilişkisi:</b> Kök dışındaki her düğümün tam olarak bir ebeveyni vardır (her çalışanın tek bir birinci amiri).</li>
+<li><b>Düzey / derinlik:</b> Katman sayısı — İK'da kademe sayısı.</li>
+<li><b>Yetki akışı:</b> Genellikle yukarıdan aşağıya.</li>
+</ul>
+<p><b>Gösterim araçları:</b> dendrogramlar (kümelemeden), karar ağaçları (scikit-learn), organizasyon şemaları (Graphviz, diagrams.net), ağaç haritaları (treemap).</p>
+<table class="tablo">
+<tr><th>Özellik</th><th>Hiyerarşiler</th><th>Ağlar</th></tr>
+<tr><td>Yapı</td><td>Ağaç biçimi (yukarıdan aşağı)</td><td>Ağ biçimi (birbirine bağlı)</td></tr>
+<tr><td>İlişkiler</td><td>Ebeveyn–çocuk</td><td>Çoktan çoğa</td></tr>
+<tr><td>Yön</td><td>Katı, aşağı doğru</td><td>Esnek, çift yönlü</td></tr>
+<tr><td>Örnek</td><td>Organizasyon şeması</td><td>Çalışanlar arası iletişim ağı</td></tr>
+</table>
+</div>
+<div class="blok" id="b-kod-hiy" data-baslik="Kod: Organizasyon şeması ve kontrol alanı (span of control)">
+<h3>Uygulama: Organizasyon şeması ve kontrol alanı</h3>
+<p>Organizasyon şeması yönlü bir ağaç (DiGraph) olarak kuruluyor ve Graphviz gerektirmeyen küçük bir yerleşim fonksiyonuyla çiziliyor (bölüm sonu alıştırması 10). Hücre, kademe sayısını ve her yöneticinin <b>kontrol alanını</b> (doğrudan bağlı çalışan sayısı) raporlar — organizasyon tasarımının temel göstergelerinden biri.</p>
+<div class="hucre" id="h-hiyerarsi">
+<div class="hucre-ust"><span class="ad">🐍 Hiyerarşi: organizasyon şeması<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="40" aria-label="Hiyerarşi: organizasyon şeması kodu">import networkx as nx
+import matplotlib.pyplot as plt
+
+# Organizasyon şeması: her düğümün tek bir üstü (ebeveyni) vardır
+sema = {
+    'Genel Müdür': ['İK Direktörü', 'Finans Direktörü', 'Operasyon Direktörü'],
+    'İK Direktörü': ['İşe Alım Md.', 'Ücret ve Yan Haklar Md.'],
+    'Finans Direktörü': ['Muhasebe Md.'],
+    'Operasyon Direktörü': ['Üretim Md.', 'Lojistik Md.', 'Kalite Md.'],
+    'İşe Alım Md.': ['Uzman 1', 'Uzman 2'],
+    'Ücret ve Yan Haklar Md.': ['Uzman 3'],
+    'Muhasebe Md.': ['Uzman 4', 'Uzman 5', 'Uzman 6'],
+    'Üretim Md.': ['Şef 1', 'Şef 2', 'Şef 3', 'Şef 4'],
+    'Lojistik Md.': ['Şef 5'],
+    'Kalite Md.': ['Uzman 7', 'Uzman 8'],
+}
+T = nx.DiGraph([(ust, ast) for ust, astlar in sema.items() for ast in astlar])
+kok = 'Genel Müdür'
+print("Ağaç mı?", nx.is_tree(T), "| Kök:", kok)
+derinlik = nx.shortest_path_length(T, kok)
+print("Kademe sayısı:", max(derinlik.values()) + 1)
+
+def agac_konumu(G, kok):
+    """Yaprakları eşit aralıkla dizip ebeveynleri çocuklarının ortasına yerleştirir."""
+    konum, sayac = {}, [0]
+    def yerlestir(dugum, d):
+        cocuklar = list(G.successors(dugum))
+        if not cocuklar:
+            konum[dugum] = (sayac[0], -d); sayac[0] += 1
+        else:
+            for c in cocuklar:
+                yerlestir(c, d + 1)
+            konum[dugum] = (sum(konum[c][0] for c in cocuklar) / len(cocuklar), -d)
+    yerlestir(kok, 0)
+    return konum
+
+konum = agac_konumu(T, kok)
+kademe_renk = ['#14213d', '#1f5fbf', '#74a9e8', '#d0e2fa']
+plt.figure(figsize=(14, 5.5))
+nx.draw_networkx_edges(T, konum, arrows=False, edge_color='#999')
+nx.draw_networkx_nodes(T, konum, node_size=900, node_shape='s',
+                       node_color=[kademe_renk[derinlik[d]] for d in T])
+nx.draw_networkx_labels(T, konum, labels={d: d.replace(' ', '\n') for d in T}, font_size=7,
+                        font_color='black')
+plt.title('Organizasyon Şeması (hiyerarşi)')
+plt.axis('off')
+plt.show()
+
+# Kontrol alanı (span of control): yöneticinin doğrudan bağlı çalışan sayısı
+print("Kontrol alanı (doğrudan bağlı çalışan):")
+for yon in sema:
+    print(f"  {yon:&lt;25} {T.out_degree(yon)}")
+print("Genel Müdür'e bağlı toplam çalışan:", len(nx.descendants(T, kok)))
+</textarea>
+<div class="cikti"></div>
+</div>
+</div>
+<div class="blok" id="b-kod-agac" data-baslik="Kod: Karar ağacı ile hiyerarşik karar yapısı">
+<h3>Uygulama: Karar ağacı</h3>
+<p>Karar ağaçları, kararların genelden özele doğru aktığı hiyerarşik yapılardır. Özellik seçimi bölümündeki işten ayrılma verisiyle (yoksa yeniden üretilir) en fazla üç düzeyli bir ağaç kurulur; her kutuda örnek oranı ve sınıf dağılımı görünür.</p>
+<div class="hucre" id="h-karar_agaci">
+<div class="hucre-ust"><span class="ad">🐍 Karar ağacı: kim ayrılıyor?<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="29" aria-label="Karar ağacı: kim ayrılıyor? kodu">import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.tree import DecisionTreeClassifier, plot_tree, export_text
+
+# Özellik seçimi hücresindeki veriyi kullan; yoksa yeniden üret
+if 'X' not in globals() or 'Memnuniyet' not in getattr(X, 'columns', []):
+    np.random.seed(42)
+    n = 600
+    X = pd.DataFrame({'Memnuniyet': np.random.normal(3.4, 0.8, n).clip(1, 5).round(1),
+                      'Fazla_Mesai': np.random.gamma(2, 6, n).round(),
+                      'Ucret_Orani': np.random.normal(1.0, 0.12, n).round(2),
+                      'Kidem': np.random.exponential(5, n).round(1)})
+    logit = (-1.0 - 1.3 * (X.Memnuniyet - 3.4) + 0.08 * (X.Fazla_Mesai - 12)
+             - 6 * (X.Ucret_Orani - 1) - 0.12 * (X.Kidem - 5))
+    y = np.random.binomial(1, 1 / (1 + np.exp(-logit)))
+
+degiskenler = ['Memnuniyet', 'Fazla_Mesai', 'Ucret_Orani', 'Kidem']
+agac = DecisionTreeClassifier(max_depth=3, min_samples_leaf=20, random_state=0)
+agac.fit(X[degiskenler], y)
+
+plt.figure(figsize=(15, 6.5))
+plot_tree(agac, feature_names=degiskenler, class_names=['Kaldı', 'Ayrıldı'],
+          filled=True, rounded=True, fontsize=8, impurity=False, proportion=True)
+plt.title('Karar Ağacı: Kim Ayrılıyor? (kökten yapraklara hiyerarşi)')
+plt.show()
+
+print(export_text(agac, feature_names=degiskenler, decimals=2))
+</textarea>
+<div class="cikti"></div>
+</div>
+</div>
+</section>
+
+<section class="bolum" id="etkilesim" data-baslik="7. Etkileşim">
+<h2>7. Etkileşim</h2>
+<div class="blok" id="b-etk" data-baslik="Etkileşim nedir? Temel yönleri, araçları ve yararları">
+<p><b>Etkileşim</b>, kullanıcıların görsellerle, modellerle ve panolarla yalnızca bakarak değil, onları yönlendirerek çalışabilmesidir. Analiz tek yönlü bir sunumdan iki yönlü bir keşfe dönüşür.</p>
+<ul>
+<li><b>Kullanıcı katılımı:</b> Açılır menü, kaydırıcı, onay kutusu, yakınlaştırma, süzme ve ipucu kutuları veriye farklı açılardan bakmayı sağlar.</li>
+<li><b>Anlık geri bildirim:</b> Bir bölge ya da metrik seçildiğinde grafikler hemen güncellenir; “ya şöyle olursa?” senaryoları kod yazmadan denenir.</li>
+<li><b>Keşifsel analiz:</b> Plotly, Dash, Tableau ve Power BI ile veri dilimlenerek statik grafiklerde kaçırılabilecek eğilimler bulunur.</li>
+</ul>
+<p><b>Araçlar:</b> Plotly, Bokeh, Dash; Jupyter'de ipywidgets; D3.js ve React; Tableau ve Power BI. <b>Yararları:</b> daha derin anlama, hızlı ve veriye dayalı karar, teknik olmayan paydaşlar için erişilebilirlik ve analizin kurumun sorularına göre özelleştirilmesi.</p>
+</div>
+<div class="blok" id="b-kod-etk" data-baslik="Kod: Plotly ile etkileşimli İK grafikleri — saçılım, kaydırıcı, ağaç haritası">
+<h3>Uygulama: Plotly ile etkileşimli İK grafikleri</h3>
+<p>Kitapta bu başlık için kod yoktu; burada üç etkileşimli grafik eklendi: (1) üzerine gelince çalışan bilgisi gösteren, açıklamaya tıklayarak departman süzülebilen saçılım grafiği; (2) yıllara göre departman büyüklüğünü kaydırıcı ve oynat düğmesiyle gösteren çubuk grafik; (3) departman → kıdem grubu hiyerarşisine tıklayarak inilebilen <b>ağaç haritası</b> (treemap).</p>
+<div class="hucre" id="h-etkilesim">
+<div class="hucre-ust"><span class="ad">🐍 Plotly: etkileşimli İK grafikleri<span>Python</span></span><button class="kopyala">⧉ Kopyala</button><button class="sifirla">↺ Sıfırla</button><button class="calis">▶ Çalıştır</button></div>
+<textarea class="kod" spellcheck="false" rows="40" aria-label="Plotly: etkileşimli İK grafikleri kodu">import numpy as np
+import pandas as pd
+try:
+    import micropip
+    await micropip.install('plotly')
+    import plotly.express as px
+except Exception as h:
+    px = None
+    print("plotly yüklenemedi:", h)
+
+np.random.seed(5)
+deps = ['Satış', 'Üretim', 'BT', 'Finans', 'İK']
+n = 250
+calisan = pd.DataFrame({
+    'Ad': [f'Çalışan {i}' for i in range(1, n + 1)],
+    'Departman': np.random.choice(deps, n, p=[.3, .3, .2, .12, .08]),
+    'Kidem': np.random.exponential(5, n).round(1),
+})
+calisan['Maas'] = (30000 + 1800 * calisan.Kidem + calisan.Departman.map(
+    {'Satış': 4000, 'Üretim': 0, 'BT': 15000, 'Finans': 9000, 'İK': 5000}) + np.random.normal(0, 5000, n)).round(-2)
+calisan['Performans'] = np.clip(60 + 1.2 * calisan.Kidem + np.random.normal(0, 10, n), 20, 100).round(1)
+
+yillik = pd.DataFrame([(yil, d, int(k * (1 + .06 * (yil - 2020)) * (1.12 if d == 'BT' else 1) ** (yil - 2020)))
+                       for yil in range(2020, 2027) for d, k in zip(deps, [70, 75, 40, 30, 15])],
+                      columns=['Yil', 'Departman', 'Calisan_Sayisi'])
+
+if px is not None:
+    RENK = {'Satış': '#4C72B0', 'Üretim': '#DD8452', 'BT': '#55A868', 'Finans': '#C44E52', 'İK': '#8172B3'}
+    # 1) Fareyle üzerine gelme, yakınlaştırma, açıklamaya tıklayarak filtreleme
+    f1 = px.scatter(calisan, x='Kidem', y='Maas', color='Departman', size='Performans',
+                    hover_name='Ad', hover_data={'Performans': True, 'Kidem': ':.1f'},
+                    color_discrete_map=RENK,
+                    title='Kıdem – Maaş (açıklamadaki departmanlara tıklayarak süzün)')
+    html_goster(f1.to_html(include_plotlyjs='cdn', full_html=True), yukseklik=480)
+
+    # 2) Kaydırıcı ile yıl seçme (animasyon karesi)
+    f2 = px.bar(yillik, x='Departman', y='Calisan_Sayisi', color='Departman', animation_frame='Yil',
+                range_y=[0, yillik.Calisan_Sayisi.max() * 1.1], color_discrete_map=RENK,
+                title='Yıllara Göre Departman Büyüklüğü (kaydırıcıyı sürükleyin ya da ▶ basın)')
+    html_goster(f2.to_html(include_plotlyjs='cdn', full_html=True), yukseklik=520)
+
+    # 3) Ağaç haritası (treemap): hiyerarşiye tıklayarak içine inme (drill-down)
+    calisan['Kademe'] = pd.cut(calisan.Kidem, [-1, 2, 5, 10, 100], labels=['0–2 yıl', '2–5 yıl', '5–10 yıl', '10+ yıl'])
+    agac = calisan.groupby(['Departman', 'Kademe'], observed=True).agg(Kisi=('Ad', 'size'), Ort_Maas=('Maas', 'mean')).reset_index()
+    f3 = px.treemap(agac, path=[px.Constant('Şirket'), 'Departman', 'Kademe'], values='Kisi',
+                    color='Ort_Maas', color_continuous_scale='Blues',
+                    title='Ağaç Haritası: Departman → Kıdem Grubu (kutulara tıklayın)')
+    html_goster(f3.to_html(include_plotlyjs='cdn', full_html=True), yukseklik=520)
+    print("Üç etkileşimli grafik oluşturuldu.")
+else:
+    print(calisan.groupby('Departman')[['Maas', 'Performans']].mean().round(1))
+</textarea>
+<div class="cikti"></div>
+</div>
+</div>
+</section>
+
+<section class="bolum" id="sonuc" data-baslik="Sonuç">
+<h2>Sonuç</h2>
+<div class="blok" id="b-sonuc" data-baslik="Bölüm özeti">
+<p>Bu bölümde görselleştirmenin içgörü üretme ve karar almadaki rolü İK verileriyle incelendi. Açıklık, doğruluk ve ilgililik ilkelerinin bir grafiğin mesajını nasıl değiştirdiği gösterildi; özellik seçimiyle işten ayrılmanın belirleyicileri ayıklandı. Zaman serisi analiziyle başvuru sayılarının eğilimi ve mevsimselliği ayrıştırılıp tahmin edildi; coğrafi analizle şubelerin devir oranları haritalandı. Saçılım matrisleri ve ısı haritalarıyla değişkenler arası ilişkiler, ağ ve hiyerarşi grafikleriyle örgütün gayriresmî ve resmî yapısı görselleştirildi. Son olarak etkileşimli grafiklerin kullanıcıya veriyi kendi sorusuna göre keşfetme olanağı verdiği gösterildi. Bir sonraki bölüm, veri hazırlama ve analizi gerçek projeler üzerinden ele alır.</p>
+</div>
+</section>
+
+<section class="bolum" id="test" data-baslik="Kendinizi sınayın">
+<h2>Kendinizi sınayın</h2>
+<div class="blok" id="b-test" data-baslik="Çoktan seçmeli sorular (30 soru)">
+<div id="testAlani"></div>
+<p><button class="dugme" id="testKontrol">Yanıtlarımı kontrol et</button> <button class="dugme ikincil" id="testSifirla">Sıfırla</button><span id="puan"></span></p>
+</div>
+<div class="blok" id="b-sorular" data-baslik="Tartışma soruları">
+<h3>Tartışma soruları</h3>
+<ol class="sorular">
+<li>Veri biliminde veri görselleştirmenin temel amacı nedir?</li>
+<li>Veri görselleştirme bağlamında açıklığı tanımlayın.</li>
+<li>Kategorik verileri karşılaştırmak için sık kullanılan iki grafik türünü adlandırın.</li>
+<li>Zaman serisi analizi nedir?</li>
+<li>Zaman serisi verisini görselleştirmek için kullanılan bir Python kütüphanesi söyleyin.</li>
+<li>Zaman serisinde mevsimsellik ne anlama gelir? İK'dan bir örnek verin.</li>
+<li>Coğrafi (konuma dayalı) veri nedir?</li>
+<li>Python'da coğrafi görselleştirme için kullanılan bir araç söyleyin.</li>
+<li>Korelasyon matrisini tanımlayın.</li>
+<li>İki sayısal değişken arasındaki korelasyonu göstermek için hangi grafik kullanılır?</li>
+<li>Ağ grafiğinde düğüm ve kenar nedir? Örgütsel ağ analizinde neye karşılık gelir?</li>
+<li>Hiyerarşik görselleştirmenin kullanıldığı bir örnek verin.</li>
+<li>Etkileşim bir İK panosuna nasıl katkı sağlar?</li>
+<li>Python'da kullanılan iki etkileşimli görselleştirme aracını söyleyin.</li>
+<li>Isı haritası veri görselleştirmede neyi temsil eder?</li>
+</ol>
+</div>
+<div class="blok" id="b-alistirma" data-baslik="Programlama alıştırmaları">
+<h3>Programlama alıştırmaları</h3>
+<p>Kendi verinizi üst çubuktaki <b>⬆ Veri yükle</b> düğmesiyle yükleyip <code>pd.read_csv('dosya_adi.csv')</code> ile okuyabilirsiniz. Bazı alıştırmalar yukarıdaki hücrelerde zaten çözülmüştür.</p>
+<ol class="alistirma">
+<li>Departmanlara göre çalışan sayısıyla bir çubuk ve bir pasta grafik çizin; hangisinin bilgiyi daha açık aktardığını karşılaştırın. <i>(→ İlkeler hücresi)</i></li>
+<li>Bir İK veri setinde açıklık, ilgililik ve tutarlılık ilkelerini uygulayan grafikler çizin; her tasarım kararını açıklayın.</li>
+<li>Bir zaman serisini (aylık işten ayrılma, devamsızlık) çizgi grafikle çizip mevsimsel örüntüleri belirleyin.</li>
+<li>Bir zaman serisine hareketli ortalama uygulayıp özgün seriyle birlikte çizin. <i>(→ ADF hücresi)</i></li>
+<li>Enlem–boylam içeren bir veri setini (şubeler, aday adresleri) Folium ile haritaya işleyin. <i>(→ Folium hücresi)</i></li>
+<li>İllere göre çalışan yoğunluğunu bir GeoJSON sınır dosyasıyla koroplet harita olarak gösterin.</li>
+<li>Çok değişkenli bir veri seti için korelasyon matrisi ısı haritası çizin. <i>(→ Korelasyon hücresi)</i></li>
+<li>Değişken çiftleri için saçılım grafikleri çizin; renk ya da boyutla üçüncü bir boyut ekleyin. <i>(→ Plotly hücresi)</i></li>
+<li>networkx ile düğüm ve kenarlardan oluşan basit bir sosyal ağ kurun, düğümleri etiketleyip çizin. <i>(→ Ağ hücresi)</i></li>
+<li>Bir ağaç hiyerarşisi kurun. <i>(→ Organizasyon şeması hücresi)</i></li>
+</ol>
+</div>
+</section>
+
+<nav class="bolum-gezinti"><a href="bolum6_kesifsel_veri_analizi.html"><small>← Önceki bölüm</small>Bölüm 6 · Keşifsel Veri Analizi</a><a class="sonraki" href="bolum8_projeler.html"><small>Sonraki bölüm →</small>Bölüm 8 · Projeler</a></nav>
+<footer>Kaynak: “Data Visualization” bölümünün kodlarından İK verisine uyarlanmış Türkçe etkileşimli sürüm · Python tarayıcıda <a href="https://pyodide.org" target="_blank" rel="noopener">Pyodide</a> ile çalışır.</footer>
+
+</main>
+</div>
+
+<script type="text/plain" id="yardimciKod"># ik_yardimci.py — mlxtend yüklenemediğinde kullanılan saf-Python yedek
+# (TransactionEncoder, apriori, fpgrowth, association_rules için küçük eşdeğerler)
+from itertools import combinations
+import pandas as pd
+
+
+class TransactionEncoder:
+    def fit(self, transactions):
+        self.columns_ = sorted({i for t in transactions for i in t})
+        return self
+
+    def transform(self, transactions):
+        import numpy as np
+        idx = {c: k for k, c in enumerate(self.columns_)}
+        arr = np.zeros((len(transactions), len(self.columns_)), dtype=bool)
+        for r, t in enumerate(transactions):
+            for i in t:
+                arr[r, idx[i]] = True
+        return arr
+
+
+def apriori(df, min_support=0.5, use_colnames=True, max_len=None):
+    n = len(df)
+    cols = list(df.columns)
+    sets = [set(df.index[df[c]]) for c in cols]
+    names = cols if use_colnames else list(range(len(cols)))
+    sonuc = []
+    seviye = []
+    for k, s in enumerate(sets):
+        sup = len(s) / n
+        if sup >= min_support:
+            seviye.append(((k,), s))
+            sonuc.append((sup, frozenset([names[k]])))
+    boy = 1
+    while seviye and (max_len is None or boy < max_len):
+        yeni = {}
+        for a in range(len(seviye)):
+            for b in range(a + 1, len(seviye)):
+                ia, sa = seviye[a]
+                ib, sb = seviye[b]
+                if ia[:-1] != ib[:-1]:
+                    continue
+                aday = tuple(sorted(set(ia) | set(ib)))
+                if aday in yeni:
+                    continue
+                ortak = sa & sb
+                sup = len(ortak) / n
+                if sup >= min_support:
+                    yeni[aday] = ortak
+        seviye = sorted(yeni.items())
+        for aday, s in seviye:
+            sonuc.append((len(s) / n, frozenset(names[i] for i in aday)))
+        boy += 1
+    return pd.DataFrame(sonuc, columns=["support", "itemsets"])
+
+
+def fpgrowth(df, min_support=0.5, use_colnames=True, max_len=None):
+    # Sonuç kümesi Apriori ile aynıdır; yalnızca arama stratejisi farklıdır.
+    return apriori(df, min_support=min_support, use_colnames=use_colnames, max_len=max_len)
+
+
+def association_rules(frequent_itemsets, metric="confidence", min_threshold=0.8):
+    sup = {fs: s for s, fs in zip(frequent_itemsets["support"], frequent_itemsets["itemsets"])}
+    satirlar = []
+    for fs, s in sup.items():
+        if len(fs) < 2:
+            continue
+        for r in range(1, len(fs)):
+            for ant in combinations(sorted(fs), r):
+                ant = frozenset(ant)
+                con = fs - ant
+                sa, sc = sup.get(ant), sup.get(con)
+                if sa is None or sc is None:
+                    continue
+                conf = s / sa
+                lift = conf / sc
+                lev = s - sa * sc
+                conv = float("inf") if conf == 1 else (1 - sc) / (1 - conf)
+                satirlar.append(dict(antecedents=ant, consequents=con,
+                                     **{"antecedent support": sa, "consequent support": sc},
+                                     support=s, confidence=conf, lift=lift,
+                                     leverage=lev, conviction=conv))
+    out = pd.DataFrame(satirlar)
+    if out.empty:
+        return out
+    return out[out[metric] >= min_threshold].reset_index(drop=True)
+</script>
+<script type="text/plain" id="snsYedekKod"># sns_yedek.py — seaborn kurulamazsa kullanılan küçük matplotlib yedeği
+# (bu sayfadaki histplot, scatterplot, regplot, boxplot çağrılarını karşılar)
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+def _veri(x, data):
+    if data is not None and isinstance(x, str):
+        return np.asarray(data[x], dtype=float)
+    return np.asarray(x, dtype=float)
+
+
+def histplot(data=None, x=None, kde=False, color=None, label=None, alpha=0.6, bins='auto', ax=None, **k):
+    ax = ax or plt.gca()
+    v = _veri(x if x is not None else data, data if x is not None else None)
+    v = v[~np.isnan(v)]
+    n, kenar, _ = ax.hist(v, bins=bins, color=color, alpha=alpha, label=label, edgecolor='white')
+    if kde and len(v) > 1:
+        from scipy.stats import gaussian_kde
+        xs = np.linspace(v.min(), v.max(), 200)
+        ax.plot(xs, gaussian_kde(v)(xs) * len(v) * (kenar[1] - kenar[0]), color=color)
+    ax.set_ylabel('Count')
+    return ax
+
+
+def scatterplot(x=None, y=None, data=None, ax=None, **k):
+    ax = ax or plt.gca()
+    ax.scatter(_veri(x, data), _veri(y, data), **{kk: vv for kk, vv in k.items() if kk in ('color', 's', 'alpha', 'label')})
+    if isinstance(x, str): ax.set_xlabel(x)
+    if isinstance(y, str): ax.set_ylabel(y)
+    return ax
+
+
+def regplot(x=None, y=None, data=None, scatter=True, color=None, ax=None, **k):
+    ax = ax or plt.gca()
+    xv, yv = _veri(x, data), _veri(y, data)
+    if scatter:
+        ax.scatter(xv, yv, color=color)
+    b, a = np.polyfit(xv, yv, 1)
+    xs = np.linspace(xv.min(), xv.max(), 100)
+    ax.plot(xs, a + b * xs, color=color)
+    return ax
+
+
+def boxplot(x=None, y=None, data=None, ax=None, **k):
+    ax = ax or plt.gca()
+    gruplar = sorted(data[x].unique())
+    ax.boxplot([data.loc[data[x] == g, y] for g in gruplar], positions=range(len(gruplar)))
+    ax.set_xticks(range(len(gruplar)), [str(g) for g in gruplar])
+    ax.set_xlabel(x); ax.set_ylabel(y)
+    return ax
+</script>
+
+<script>
+/* ===================== 1. Kod hücreleri ===================== */
+const hucreler = [...document.querySelectorAll('.hucre')];
+hucreler.forEach(h => {
+  const ta = h.querySelector('textarea');
+  ta.dataset.ozgun = ta.value;
+  const boyutla = () => { ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight + 4, 640) + 'px'; };
+  boyutla(); ta.addEventListener('input', boyutla);
+  ta.addEventListener('keydown', e => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const s = ta.selectionStart, en = ta.selectionEnd;
+      ta.setRangeText('    ', s, en, 'end');
+    } else if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault(); calistir(h);
+    }
+  });
+  h.querySelector('.calis').addEventListener('click', () => calistir(h));
+  h.querySelector('.sifirla').addEventListener('click', () => { ta.value = ta.dataset.ozgun; boyutla(); });
+  h.querySelector('.kopyala').addEventListener('click', async e => {
+    try { await navigator.clipboard.writeText(ta.value); e.target.textContent = '✓ Kopyalandı'; }
+    catch { ta.select(); document.execCommand('copy'); e.target.textContent = '✓ Kopyalandı'; }
+    setTimeout(() => e.target.textContent = '⧉ Kopyala', 1400);
+  });
+});
+
+/* ===================== 2. Pyodide ===================== */
+let py = null, hazir = false, kuyruk = Promise.resolve();
+const nokta = document.getElementById('nokta'), durumYazi = document.getElementById('durumYazi');
+const tumunuBtn = document.getElementById('tumunu');
+function durum(yazi, sinif) { durumYazi.textContent = yazi; nokta.className = 'nokta ' + (sinif || ''); }
+
+const KURULUM = `
+import sys, io, os, base64, warnings
+warnings.filterwarnings('ignore')
+os.chdir('/home/pyodide')
+if '/home/pyodide' not in sys.path:
+    sys.path.insert(0, '/home/pyodide')
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+plt.rcParams.update({'figure.dpi': 100, 'axes.grid': False, 'font.size': 10})
+_SEKILLER = []
+def _goster(*a, **k):
+    for n in plt.get_fignums():
+        f = plt.figure(n)
+        b = io.BytesIO()
+        f.savefig(b, format='png', bbox_inches='tight')
+        _SEKILLER.append(base64.b64encode(b.getvalue()).decode())
+    plt.close('all')
+plt.show = _goster
+def _sekilleri_al():
+    _goster()
+    s = list(_SEKILLER)
+    _SEKILLER.clear()
+    return s
+_HTMLLER = []
+def html_goster(html, yukseklik=450):
+    """Bir HTML belgesini (folium haritası, plotly grafiği) hücre çıktısında gösterir."""
+    _HTMLLER.append((str(html), int(yukseklik)))
+def _htmlleri_al():
+    s = list(_HTMLLER)
+    _HTMLLER.clear()
+    return s
+def _dosyalar():
+    return sorted(f for f in os.listdir('.') if f.lower().endswith(('.csv', '.xlsx', '.txt', '.json', '.html')))
+`;
+
+async function baslat() {
+  try {
+    durum('Pyodide indiriliyor…');
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/pyodide/v0.27.7/full/pyodide.js';
+    await new Promise((ok, red) => { s.onload = ok; s.onerror = () => red(new Error('Pyodide betiği yüklenemedi')); document.head.appendChild(s); });
+    py = await loadPyodide();
+    durum('Temel paketler yükleniyor…');
+    await py.loadPackage(['numpy', 'pandas', 'matplotlib'], { messageCallback: () => {} });
+    py.FS.writeFile('/home/pyodide/ik_yardimci.py', document.getElementById('yardimciKod').textContent);
+    py.FS.writeFile('/home/pyodide/sns_yedek.py', document.getElementById('snsYedekKod').textContent);
+    await py.runPythonAsync(KURULUM);
+    durum('seaborn kuruluyor…');
+    await py.loadPackage('micropip', { messageCallback: () => {} });
+    try {
+      await py.runPythonAsync("import micropip\nawait micropip.install('seaborn')\nimport seaborn");
+    } catch (e) {
+      console.warn('seaborn kurulamadı, yedek kullanılacak', e);
+      py.runPython("import sys, sns_yedek\nsys.modules['seaborn'] = sns_yedek");
+    }
+    hazir = true; tumunuBtn.disabled = false;
+    durum('Python hazır', 'hazir');
+  } catch (e) {
+    console.error(e);
+    durum('Python yüklenemedi (internet bağlantısını kontrol edin)', 'hata');
+  }
+}
+
+function calistir(h) {
+  kuyruk = kuyruk.then(() => calistirIc(h));
+  return kuyruk;
+}
+
+async function calistirIc(h) {
+  const btn = h.querySelector('.calis'), cikti = h.querySelector('.cikti');
+  const kod = h.querySelector('textarea').value;
+  if (!hazir) {
+    cikti.className = 'cikti dolu';
+    cikti.innerHTML = '<pre>Python ortamı henüz hazır değil; lütfen üst çubuktaki gösterge yeşile dönene kadar bekleyin.</pre>';
+    return;
+  }
+  btn.disabled = true; btn.textContent = '⏳ Çalışıyor';
+  cikti.className = 'cikti dolu'; cikti.innerHTML = '<pre>Gerekli paketler yükleniyor…</pre>';
+  let metin = '';
+  const t0 = performance.now();
+  let hata = null;
+  try {
+    await py.loadPackagesFromImports(kod, { messageCallback: () => {}, errorCallback: m => console.warn(m) });
+    py.setStdout({ batched: s => { metin += s + '\n'; } });
+    py.setStderr({ batched: s => { metin += s + '\n'; } });
+    cikti.innerHTML = '<pre>Çalıştırılıyor…</pre>';
+    await py.runPythonAsync(kod);
+  } catch (e) {
+    hata = String(e.message || e);
+    const i = hata.lastIndexOf('File "<exec>"');
+    if (i > 0) hata = 'Traceback (son çağrılar):\n  ' + hata.slice(i);
+  }
+  let sekiller = [];
+  try { sekiller = py.runPython('_sekilleri_al()').toJs(); } catch (e) {}
+  cikti.innerHTML = '';
+  metin = metin.split('\n').filter(l => !/^(Loading|Loaded) [\w\-, .]+$|already loaded from default channel|^No new packages to load/.test(l)).join('\n');
+  if (metin.trim()) { const p = document.createElement('pre'); p.textContent = metin.replace(/\n+$/, ''); cikti.appendChild(p); }
+  if (hata) { const p = document.createElement('pre'); p.className = 'hatali'; p.textContent = hata; cikti.appendChild(p); }
+  sekiller.forEach((b, i) => { const img = new Image(); img.src = 'data:image/png;base64,' + b; img.alt = 'Grafik ' + (i + 1); cikti.appendChild(img); });
+  let htmller = [];
+  try { htmller = py.runPython('_htmlleri_al()').toJs(); } catch (e) {}
+  htmller.forEach(([icerik, yuk]) => {
+    const fr = document.createElement('iframe');
+    fr.setAttribute('sandbox', 'allow-scripts allow-popups');
+    fr.style.height = yuk + 'px'; fr.srcdoc = icerik; fr.loading = 'lazy';
+    cikti.appendChild(fr);
+  });
+  dosyaListesi(cikti);
+  const sure = document.createElement('div'); sure.className = 'sure';
+  sure.textContent = (hata ? '✗ Hata · ' : '✓ Tamamlandı · ') + ((performance.now() - t0) / 1000).toFixed(1) + ' sn';
+  cikti.appendChild(sure);
+  if (!cikti.childNodes.length) cikti.className = 'cikti';
+  btn.disabled = false; btn.textContent = '▶ Çalıştır';
+}
+
+function dosyaListesi(cikti) {
+  let liste = [];
+  try { liste = py.runPython('_dosyalar()').toJs(); } catch (e) { return; }
+  if (!liste.length) return;
+  const d = document.createElement('div'); d.className = 'dosyalar';
+  d.append('Çalışma klasöründeki dosyalar: ');
+  liste.forEach(ad => {
+    const b = document.createElement('button'); b.textContent = '⬇ ' + ad; b.title = ad + ' dosyasını indir';
+    b.onclick = () => {
+      const veri = py.FS.readFile('/home/pyodide/' + ad);
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([veri])); a.download = ad; a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    };
+    d.appendChild(b);
+  });
+  cikti.appendChild(d);
+}
+
+tumunuBtn.addEventListener('click', async () => {
+  tumunuBtn.disabled = true;
+  for (const h of hucreler) await calistir(h);
+  tumunuBtn.disabled = false;
+});
+
+document.getElementById('yukle').addEventListener('change', async e => {
+  if (!hazir) { alert('Python ortamı henüz hazır değil.'); e.target.value = ''; return; }
+  const adlar = [];
+  for (const f of e.target.files) {
+    py.FS.writeFile('/home/pyodide/' + f.name, new Uint8Array(await f.arrayBuffer()));
+    adlar.push(f.name);
+  }
+  e.target.value = '';
+  durum('Yüklendi: ' + adlar.join(', '), 'hazir');
+  setTimeout(() => durum('Python hazır', 'hazir'), 4000);
+});
+
+baslat();
+
+/* ===================== 3. İçindekiler ===================== */
+const toc = document.getElementById('toc');
+document.querySelectorAll('section.bolum').forEach(sec => {
+  const a = document.createElement('a'); a.href = '#' + sec.id; a.textContent = sec.dataset.baslik; a.dataset.hedef = sec.id; toc.appendChild(a);
+  sec.querySelectorAll('.blok h3').forEach(h3 => {
+    const blok = h3.closest('.blok');
+    const b = document.createElement('a'); b.href = '#' + blok.id; b.className = 'alt'; b.textContent = h3.textContent; b.dataset.hedef = blok.id; toc.appendChild(b);
+  });
+});
+const tocLinkler = [...toc.querySelectorAll('a')];
+const gozlem = new IntersectionObserver(girdiler => {
+  girdiler.forEach(g => {
+    if (g.isIntersecting) {
+      tocLinkler.forEach(a => a.classList.toggle('aktif', a.dataset.hedef === g.target.id));
+    }
+  });
+}, { rootMargin: '-90px 0px -70% 0px' });
+document.querySelectorAll('section.bolum, .blok').forEach(el => gozlem.observe(el));
+
+/* ===================== 4. Arama motoru ===================== */
+// Türkçe duyarlı, aksan-toleranslı normalleştirme (karakter sayısı korunur → vurgulama konumları tutar)
+const HARF = { 'ı': 'i', 'ş': 's', 'ğ': 'g', 'ü': 'u', 'ö': 'o', 'ç': 'c', 'â': 'a', 'î': 'i', 'û': 'u' };
+function norm(s) {
+  return [...s].map(c => { const k = c.toLocaleLowerCase('tr'); return k.length === 1 ? (HARF[k] || k) : c.toLowerCase(); }).join('');
+}
+// Dizin: her blok için başlık, bölüm adı, metin ve kod
+const dizin = [...document.querySelectorAll('.blok')].map(blok => {
+  const kopya = blok.cloneNode(true);
+  kopya.querySelectorAll('.hucre, .cikti, script').forEach(x => x.remove());
+  kopya.querySelectorAll('td, th, li, p, h3, h4').forEach(x => x.append(' '));
+  const metin = kopya.textContent.replace(/\s+/g, ' ').trim();
+  const kod = [...blok.querySelectorAll('textarea')].map(t => t.value).join('\n');
+  const bolum = blok.closest('section').dataset.baslik;
+  return { blok, id: blok.id, baslik: blok.dataset.baslik, bolum, metin, kod,
+           nBaslik: norm(blok.dataset.baslik), nMetin: norm(metin), nKod: norm(kod) };
+});
+
+const araKutu = document.getElementById('ara'), sonucKutu = document.getElementById('sonuclar');
+let filtre = 'tumu', secili = -1, sonGorunen = [];
+
+function escapeHtml(s) { return s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+
+function ozetle(kaynak, nKaynak, terimler) {
+  // ilk eşleşmenin çevresinden ~160 karakterlik parça, terimler vurgulu
+  let ilk = -1;
+  for (const t of terimler) { const i = nKaynak.indexOf(t); if (i >= 0 && (ilk < 0 || i < ilk)) ilk = i; }
+  if (ilk < 0) ilk = 0;
+  const bas = Math.max(0, ilk - 60), son = Math.min(kaynak.length, ilk + 120);
+  const parca = kaynak.slice(bas, son), nParca = nKaynak.slice(bas, son);
+  const isaret = new Array(parca.length).fill(false);
+  terimler.forEach(t => { let i = nParca.indexOf(t); while (i >= 0) { for (let k = i; k < i + t.length; k++) isaret[k] = true; i = nParca.indexOf(t, i + 1); } });
+  let html = '', acik = false;
+  for (let i = 0; i < parca.length; i++) {
+    if (isaret[i] && !acik) { html += '<mark>'; acik = true; }
+    if (!isaret[i] && acik) { html += '</mark>'; acik = false; }
+    html += escapeHtml(parca[i]);
+  }
+  if (acik) html += '</mark>';
+  return (bas > 0 ? '… ' : '') + html.replace(/\n/g, ' ') + (son < kaynak.length ? ' …' : '');
+}
+
+function ara(sorgu) {
+  const terimler = norm(sorgu).split(/\s+/).filter(t => t.length > 1 || /\d/.test(t));
+  if (!terimler.length) return [];
+  const sonuc = [];
+  for (const d of dizin) {
+    let puan = 0, metinde = true, kodda = true;
+    for (const t of terimler) {
+      const b = d.nBaslik.includes(t), m = d.nMetin.includes(t), k = d.nKod.includes(t);
+      if (!b && !m && !k) { puan = -1; break; }
+      if (b) puan += 10;
+      if (m) puan += 3 + Math.min(5, d.nMetin.split(t).length - 1);
+      if (k) puan += 2 + Math.min(3, d.nKod.split(t).length - 1);
+      metinde = metinde && (b || m); kodda = kodda && k;
+    }
+    if (puan < 0) continue;
+    if (filtre === 'metin' && !metinde) continue;
+    if (filtre === 'kod' && !kodda) continue;
+    const kodaGore = filtre === 'kod' || (!metinde && kodda);
+    sonuc.push({ d, puan, kodaGore, ozet: kodaGore ? ozetle(d.kod, d.nKod, terimler) : ozetle(d.metin, d.nMetin, terimler) });
+  }
+  return sonuc.sort((a, b) => b.puan - a.puan);
+}
+
+function sonuclariGoster() {
+  const q = araKutu.value.trim();
+  if (!q) { sonucKutu.classList.remove('acik'); temizleVurgu(); return; }
+  sonGorunen = ara(q); secili = sonGorunen.length ? 0 : -1;
+  let html = `<div class="sonuc-ust"><span>${sonGorunen.length} sonuç · “${escapeHtml(q)}”</span>
+    <span class="filtre">${['tumu:Tümü', 'metin:Metin', 'kod:Kod'].map(x => { const [k, e] = x.split(':'); return `<button data-f="${k}" class="${filtre === k ? 'aktif' : ''}">${e}</button>`; }).join('')}</span></div>`;
+  if (!sonGorunen.length) html += '<div class="sonuc"><span class="ozet">Eşleşme bulunamadı. Farklı ya da daha kısa bir terim deneyin (ör. “mevsim”, “harita”, “ag”).</span></div>';
+  sonGorunen.forEach((s, i) => {
+    html += `<div class="sonuc${i === secili ? ' secili' : ''}" data-i="${i}" role="option">
+      <span class="yol">${escapeHtml(s.d.bolum)}</span>
+      <b>${escapeHtml(s.d.baslik)}${s.kodaGore ? '<span class="etiket">kod</span>' : ''}</b>
+      <span class="ozet">${s.ozet}</span></div>`;
+  });
+  sonucKutu.innerHTML = html; sonucKutu.classList.add('acik');
+}
+
+function temizleVurgu() {
+  document.querySelectorAll('mark.ara').forEach(m => { const p = m.parentNode; p.replaceChild(document.createTextNode(m.textContent), m); p.normalize(); });
+}
+function vurgula(kok, terimler) {
+  const yuruyucu = document.createTreeWalker(kok, NodeFilter.SHOW_TEXT, {
+    acceptNode: n => n.parentElement.closest('textarea, script, .cikti, mark') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
+  const dugumler = []; while (yuruyucu.nextNode()) dugumler.push(yuruyucu.currentNode);
+  let ilk = null;
+  dugumler.forEach(n => {
+    const s = n.nodeValue, ns = norm(s);
+    const araliklar = [];
+    terimler.forEach(t => { let i = ns.indexOf(t); while (i >= 0) { araliklar.push([i, i + t.length]); i = ns.indexOf(t, i + t.length); } });
+    if (!araliklar.length) return;
+    araliklar.sort((a, b) => a[0] - b[0]);
+    const birlesik = [];
+    araliklar.forEach(r => { const son = birlesik[birlesik.length - 1]; if (son && r[0] <= son[1]) son[1] = Math.max(son[1], r[1]); else birlesik.push([...r]); });
+    const frag = document.createDocumentFragment(); let k = 0;
+    birlesik.forEach(([a, b]) => {
+      if (a > k) frag.appendChild(document.createTextNode(s.slice(k, a)));
+      const m = document.createElement('mark'); m.className = 'ara'; m.textContent = s.slice(a, b); frag.appendChild(m);
+      if (!ilk) ilk = m; k = b;
+    });
+    if (k < s.length) frag.appendChild(document.createTextNode(s.slice(k)));
+    n.parentNode.replaceChild(frag, n);
+  });
+  return ilk;
+}
+
+function git(i) {
+  const s = sonGorunen[i]; if (!s) return;
+  const terimler = norm(araKutu.value.trim()).split(/\s+/).filter(t => t.length > 1 || /\d/.test(t));
+  temizleVurgu();
+  const ilk = vurgula(s.d.blok, terimler);
+  const hedef = s.kodaGore ? (s.d.blok.querySelector('.hucre') || s.d.blok) : (ilk || s.d.blok);
+  hedef.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  const parlat = s.kodaGore ? hedef : s.d.blok;
+  parlat.classList.remove('flas'); void parlat.offsetWidth; parlat.classList.add('flas');
+  sonucKutu.classList.remove('acik');
+  history.replaceState(null, '', '#' + s.d.id);
+}
+
+let zamanlayici;
+araKutu.addEventListener('input', () => { clearTimeout(zamanlayici); zamanlayici = setTimeout(sonuclariGoster, 120); });
+araKutu.addEventListener('focus', () => { if (araKutu.value.trim()) sonuclariGoster(); });
+araKutu.addEventListener('keydown', e => {
+  const ogeler = sonucKutu.querySelectorAll('.sonuc[data-i]');
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault(); if (!ogeler.length) return;
+    secili = (secili + (e.key === 'ArrowDown' ? 1 : -1) + ogeler.length) % ogeler.length;
+    ogeler.forEach((o, i) => o.classList.toggle('secili', i === secili));
+    ogeler[secili].scrollIntoView({ block: 'nearest' });
+  } else if (e.key === 'Enter') { e.preventDefault(); git(Math.max(0, secili)); }
+  else if (e.key === 'Escape') { araKutu.value = ''; sonucKutu.classList.remove('acik'); temizleVurgu(); araKutu.blur(); }
+});
+sonucKutu.addEventListener('mousedown', e => {
+  const f = e.target.closest('button[data-f]');
+  if (f) { e.preventDefault(); filtre = f.dataset.f; sonuclariGoster(); return; }
+  const o = e.target.closest('.sonuc[data-i]'); if (o) { e.preventDefault(); git(+o.dataset.i); }
+});
+document.addEventListener('click', e => { if (!e.target.closest('.arama')) sonucKutu.classList.remove('acik'); });
+document.addEventListener('keydown', e => {
+  if (e.key === '/' && !e.target.closest('input, textarea')) { e.preventDefault(); araKutu.focus(); araKutu.select(); }
+});
+
+/* ===================== 5. Test ===================== */
+const SORULAR = [["Etkili veri görselleştirme tasarımının temel amacı nedir?", ["Raporları süslemek", "Veri boyutunu artırmak", "İçgörüleri açık ve doğru aktarmak", "Karmaşık grafikler üretmek"], 2, "Görsel, mesajı açık ve doğru biçimde iletmek için vardır."], ["Hangisi iyi veri görselleştirmenin ilkelerinden biri DEĞİLDİR?", ["Açıklık", "İlgililik", "Karmaşıklık", "Doğruluk"], 2, "Karmaşıklık, açıklık ilkesine aykırıdır."], ["Görsel tasarımda tutarlılık neyi ifade eder?", ["Çok sayıda grafik türü kullanmayı", "Tek tip stil, yazı tipi ve renk kullanmayı", "İlgisiz veriyi eklemeyi", "Hiç renk kullanmamayı"], 1, "Ör. BT departmanının tüm grafiklerde aynı renkte olması."], ["Kategorileri karşılaştırmak için en uygun görsel hangisidir?", ["Çizgi grafik", "Saçılım grafiği", "Pasta grafik", "Çubuk grafik"], 3, "Departmanlara göre çalışan sayısı gibi karşılaştırmalar için çubuk grafik idealdir."], ["Görselleştirmede “kalabalıktan kaçınmak” ne demektir?", ["Çok renk kullanmak", "Tüm veriyi tek grafikte göstermek", "Yalnızca gerekli ögeleri göstermek", "3B efektleri en üst düzeyde kullanmak"], 2, "İlgililik ilkesi: gereksiz her öge mesajı zayıflatır."], ["Zaman serisi analizinde hangi veri türü kullanılır?", ["Mekânsal veri", "Kategorik veri", "Zaman içinde toplanmış veri", "Metin verisi"], 2, "Ör. aylık başvuru sayısı."], ["Zaman içindeki eğilimleri göstermek için en uygun grafik hangisidir?", ["Pasta grafik", "Isı haritası", "Çizgi grafik", "Kutu grafiği"], 2, "Çizgi grafik ardışık noktaları bağlayarak eğilimi gösterir."], ["Zaman serisi analizinin temel amacı nedir?", ["Kategorik değerleri sıralamak", "Geçmiş eğilimlere dayanarak gelecek değerleri tahmin etmek", "Görüntü verisini analiz etmek", "Kategorileri saymak"], 1, "Ör. gelecek yılın aylık başvuru tahmini."], ["Zaman serisinde mevsimsellik neyi ifade eder?", ["Verideki rastlantısal gürültüyü", "Uzun dönemli kaymaları", "Belirli aralıklarla tekrarlanan düzenli örüntüleri", "Hatalı veri noktalarını"], 2, "Ör. her yaz yaşanan mezuniyet dönemi başvuru zirvesi."], ["Zaman serisi çizmek için en yaygın Python kütüphanesi hangisidir?", ["seaborn", "matplotlib", "geopandas", "nltk"], 1, "pandas da arka planda matplotlib kullanır."], ["Coğrafi (konuma dayalı) veri ne içerir?", ["Dosya yolları", "Saat dilimleri", "Coğrafi koordinatlar", "Karakter dizileri"], 2, "Enlem ve boylam gibi."], ["Coğrafi veriyi haritalamak için yaygın kullanılan görsel hangisidir?", ["Saçılım grafiği", "Koroplet harita", "Kutu grafiği", "Çizgi grafik"], 1, "Bölgeleri değere göre renklendirir."], ["Python’da coğrafi analiz için yaygın kullanılan araç hangisidir?", ["pandas", "plotly", "geopandas", "sklearn"], 2, "GeoPandas pandas’a geometri desteği ekler."], ["Coğrafi analizin temel yararı nedir?", ["Zaman içindeki ilişkileri göstermek", "Arayüz tıklamalarını izlemek", "Mekânsal örüntüleri ve bölgesel eğilimleri ortaya koymak", "Büyük veri setlerini saklamak"], 2, "Ör. şubelere göre devir oranı farkları."], ["Konum verisindeki ısı haritaları genellikle neyi temsil eder?", ["Soğuk ve sıcak hava bölgelerini", "Bir değişkenin konumlara göre yoğunluğunu ya da sıklığını", "Haritadaki çizgi yollarını", "Pasta grafik eşdeğerlerini"], 1, "Ör. adaylarının ikamet yoğunluğu."], ["İki sürekli değişken arasındaki ilişkiyi göstermek için en iyi grafik hangisidir?", ["Pasta grafik", "Çizgi grafik", "Saçılım grafiği", "Histogram"], 2, "Ör. kıdem – maaş."], ["−1’e yakın bir korelasyon katsayısı neyi gösterir?", ["İlişki olmadığını", "Güçlü negatif ilişkiyi", "Güçlü pozitif ilişkiyi", "Doğrusal olmayan ilişkiyi"], 1, "Ör. memnuniyet arttıkça devamsızlık azalır."], ["Korelasyon matrisinin ısı haritası neyi gösterir?", ["Çubuk yüksekliklerini", "Kategori sıklıklarını", "Değişkenler arası ilişkilerin gücünü", "Mekânsal veriyi"], 2, "Renk yoğunluğu ilişkinin gücünü ve yönünü kodlar."], ["Korelasyon ısı haritaları için yaygın kullanılan Python kütüphanesi hangisidir?", ["NumPy", "seaborn", "TensorFlow", "OpenCV"], 1, "sns.heatmap()"], ["Hangisi korelasyon olmadığını gösterir?", ["0", "1", "−1", "0,8"], 0, "0, doğrusal ilişki olmadığını gösterir."], ["Bir ağ grafiği nelerden oluşur?", ["Düzeyler ve dallar", "Düğümler ve kenarlar", "Haritalar ve grafikler", "Tablolar ve sorgular"], 1, "ONA’da düğüm = çalışan, kenar = ilişki."], ["Python’da ağ görselleştirme için yaygın kullanılan araç hangisidir?", ["scikit-learn", "pandas", "networkx", "folium"], 2, "NetworkX çizge hesaplama ve çizimi sağlar."], ["Hiyerarşik yapılar en iyi nasıl görselleştirilir?", ["Saçılım grafikleriyle", "Çubuk grafiklerle", "Ağaç diyagramları ya da dendrogramlarla", "Çizgi grafiklerle"], 2, "Ağaç haritası (treemap) da bir seçenektir."], ["Bir hiyerarşide her çocuk düğümün genellikle…", ["Birden çok ebeveyni vardır", "Tek bir ebeveyni vardır", "Bağlantısızdır", "Tüm düğümlere bağlıdır"], 1, "Her çalışanın tek bir birinci amiri olması gibi."], ["Organizasyon şemaları neye örnektir?", ["Ağ grafiklerine", "Düz yapılara", "Hiyerarşilere", "Isı haritalarına"], 2, "Yukarıdan aşağı yetki akışı olan ağaç yapısı."], ["Görselleştirmede etkileşim neyi sağlar?", ["Yalnızca statik görünümleri", "Kullanıcı odaklı keşif ve süzmeyi", "Daha hızlı görüntü işlemeyi", "Veri setlerinin elle etiketlenmesini"], 1, "Kullanıcı veriyi kendi sorusuna göre keşfeder."], ["Etkileşimli panolar için web tabanlı Python kütüphanesi hangisidir?", ["Dash", "NumPy", "seaborn", "sklearn"], 0, "Dash, Plotly üzerine kurulu pano çatısıdır."], ["Etkileşim neyi geliştirir?", ["Veri kaybını", "Yalnızca işlem süresini", "Katılım ve anlamayı", "Dosya boyutunu"], 2, "Kullanıcı keşfettikçe daha derin anlar."], ["Hangisi bir etkileşim örneğidir?", ["CSV dışa aktarmak", "Pasta grafik kullanmak", "Panoda süzgeç uygulamak", "Değerleri saymak"], 2, "Süzgeç, kullanıcının görünümü değiştirmesini sağlar."], ["Hangi platform etkileşimli panolar için sürükle-bırak araçlar sunar?", ["Jupyter", "PyTorch", "Tableau", "VS Code"], 2, "Tableau ve Power BI kod gerektirmez."]];
+const testAlani = document.getElementById('testAlani');
+SORULAR.forEach(([s, sec, dogru, aciklama], i) => {
+  const d = document.createElement('div'); d.className = 'soru'; d.dataset.dogru = dogru;
+  d.innerHTML = `<p>${i + 1}. ${s}</p>` + sec.map((x, j) =>
+    `<label><input type="radio" name="s${i}" value="${j}"> ${'abcd'[j]}) ${x}</label>`).join('') +
+    `<div class="aciklama">Doğru yanıt: <b>${'abcd'[dogru]}) ${sec[dogru]}</b> — ${aciklama}</div>`;
+  testAlani.appendChild(d);
+});
+document.getElementById('testKontrol').onclick = () => {
+  let p = 0;
+  testAlani.querySelectorAll('.soru').forEach((d, i) => {
+    const s = d.querySelector('input:checked');
+    const ok = s && +s.value === +d.dataset.dogru;
+    d.classList.toggle('dogru', !!ok); d.classList.toggle('yanlis', !ok);
+    if (ok) p++;
+  });
+  document.getElementById('puan').textContent = `Puanınız: ${p} / ${SORULAR.length}`;
+};
+document.getElementById('testSifirla').onclick = () => {
+  testAlani.querySelectorAll('.soru').forEach(d => d.classList.remove('dogru', 'yanlis'));
+  testAlani.querySelectorAll('input').forEach(x => x.checked = false);
+  document.getElementById('puan').textContent = '';
+};
+</script>
+</body>
+</html>
